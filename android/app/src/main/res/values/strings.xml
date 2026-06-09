@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Learning-course-marketplace-system</string>
-    <string name="title_activity_main">Learning-course-marketplace-system</string>
+    <string name="app_name">A2SHI academy</string>
+    <string name="title_activity_main">A2SHI academy</string>
     <string name="package_name">com.a2shi.academy.myapp</string>
     <string name="custom_url_scheme">com.a2shi.academy.myapp</string>
 </resources>
