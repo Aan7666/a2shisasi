@@ -1,17 +1,6 @@
 <div class="login-wrapper">
 
-  <!-- SVG background curves -->
-  <div class="background-layer">
-    <div class="bg-waves">
-      <svg width="100%" height="100%" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="350" cy="180" r="280" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="40" />
-        <circle cx="350" cy="180" r="160" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="16" />
-        <path d="M-100,450 C80,350 180,550 500,350" fill="none" stroke="rgba(255, 255, 255, 0.06)" stroke-width="60" />
-        <path d="M-50,430 C130,330 230,530 550,330" fill="none" stroke="rgba(255, 255, 255, 0.03)" stroke-width="30" />
-        <circle cx="50" cy="650" r="140" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="12" />
-      </svg>
-    </div>
-  </div>
+  <div class="background-layer"></div>
 
   <div class="stars-container">
     <div *ngFor="let star of stars" class="star" [ngStyle]="{
@@ -24,20 +13,22 @@
     </div>
   </div>
 
-  <!-- Close Button -->
-  <button class="close-btn" (click)="prevStep()" aria-label="Back">
-    <span class="material-symbols-outlined">close</span>
-  </button>
-
-  <!-- Brand Area -->
-  <div class="brand-area">
-    <span class="brand-tagline">
-      Where Learning Meets Opportunity<br>
-      Learn, Grow, Succeed!
-    </span>
-  </div>
-
   <main class="main-content">
+
+    <!-- Brand Area (Identik dengan Login) -->
+    <div class="brand-area">
+      <img src="assets/logo/logo.svg" alt="Academy Logo" class="brand-logo" />
+      <div class="brand-text">
+        <span class="brand-subtitle sub-line-1">Where Learning Meets Opportunity</span>
+        <span class="brand-subtitle sub-line-2">Learn, Grow, Succeed!</span>
+      </div>
+    </div>
+
+    <!-- Tombol Back/Close mengikuti fungsi wizard step -->
+    <button class="close-btn" (click)="prevStep()" aria-label="Back">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+
     <div class="login-card animate-slide-up">
 
       <!-- STEP 1: Email Address -->
@@ -70,9 +61,7 @@
         </div>
 
         <button type="button" class="btn-social" (click)="registerWithGoogle()">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-            alt="Google" />
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
           <span>Google</span>
         </button>
       </ng-container>
@@ -81,9 +70,7 @@
       <ng-container *ngIf="step === 2">
         <div class="card-header">
           <h1>Sign Up</h1>
-          <p class="subtitle-text">
-            Enter the 6-digit code sent to your email.
-          </p>
+          <p>Enter the 6-digit code sent to your email.</p>
         </div>
 
         <h2 class="form-title">Check Your Email</h2>
@@ -109,27 +96,22 @@
       <ng-container *ngIf="step === 3">
         <div class="card-header">
           <h1>Sign Up</h1>
-          <p class="subtitle-text">
-            Enter your name and create a password to continue
-          </p>
+          <p>Enter your name and create a password to continue</p>
         </div>
 
         <h2 class="form-title">Complete Your Account</h2>
 
         <form class="login-form" (ngSubmit)="nextStep()">
-          <!-- Full Name -->
           <div class="input-group">
             <span class="material-symbols-outlined input-icon">person</span>
             <input type="text" [(ngModel)]="fullName" name="fullName" placeholder="Full Name" class="custom-input" required />
           </div>
 
-          <!-- Password -->
           <div class="input-group">
             <span class="material-symbols-outlined input-icon">password</span>
             <input type="password" [(ngModel)]="password" name="password" placeholder="Password" class="custom-input" required />
           </div>
 
-          <!-- Confirm Password -->
           <div class="input-group">
             <span class="material-symbols-outlined input-icon">password</span>
             <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm Password" class="custom-input" required />

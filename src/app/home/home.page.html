@@ -1,0 +1,150 @@
+<ion-content [fullscreen]="true">
+  <div class="red-header">
+    <div class="header-content">
+      <h1>Hallo, {{ userName }}!</h1>
+      <div class="cart-icon-container" (click)="goToCart()">
+        <ion-icon name="cart-outline"></ion-icon>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="hero-banner"></div>
+
+    <h2 class="section-title">Trending Courses</h2>
+    <div class="horizontal-scroll">
+
+      <div class="mini-course-card" [routerLink]="['/detail-course']" style="cursor: pointer;">
+        <div class="card-img-placeholder"></div>
+        <div class="card-body">
+          <h3 class="course-title">Web Development</h3>
+          <p class="course-instructor">Pedri Gonzalez</p>
+          <p class="course-price">Rp450.000</p>
+          <div class="card-meta-row">
+            <span class="meta-students">
+              <ion-icon name="people-outline"></ion-icon>
+              10
+            </span>
+            <span class="meta-rating">
+              <ion-icon name="star"></ion-icon>
+              4.7
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-course-card" (click)="goToDetail()" style="cursor: pointer;">
+        <div class="card-img-placeholder"></div>
+        <div class="card-body">
+          <h3 class="course-title">Mobile Development</h3>
+          <p class="course-instructor">Pedri Gonzalez</p>
+          <p class="course-price">Rp450.000</p>
+          <div class="card-meta-row">
+            <span class="meta-students">
+              <ion-icon name="people-outline"></ion-icon>
+              10
+            </span>
+            <span class="meta-rating">
+              <ion-icon name="star"></ion-icon>
+              4.7
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-course-card" (click)="goToDetail()" style="cursor: pointer;">
+        <div class="card-img-placeholder"></div>
+        <div class="card-body">
+          <h3 class="course-title">Cyber Security</h3>
+          <p class="course-instructor">Pedri Gonzalez</p>
+          <p class="course-price">Rp250.000</p>
+          <div class="card-meta-row">
+            <span class="meta-students">
+              <ion-icon name="people-outline"></ion-icon>
+              10
+            </span>
+            <span class="meta-rating">
+              <ion-icon name="star"></ion-icon>
+              4.7
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <h2 class="section-title">Top Courses in IT</h2>
+    <div class="horizontal-scroll">
+
+      <div class="mini-course-card" (click)="goToDetail()" style="cursor: pointer;">
+        <div class="card-img-placeholder"></div>
+        <div class="card-body">
+          <h3 class="course-title">Web Development</h3>
+          <p class="course-instructor">Pedri Gonzalez</p>
+          <p class="course-price">Rp150.000</p>
+          <div class="card-meta-row">
+            <span class="meta-students">
+              <ion-icon name="people-outline"></ion-icon>
+              10
+            </span>
+            <span class="meta-rating">
+              <ion-icon name="star"></ion-icon>
+              4.7
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-course-card" (click)="goToDetail()" style="cursor: pointer;">
+        <div class="card-img-placeholder"></div>
+        <div class="card-body">
+          <h3 class="course-title">Mobile Development</h3>
+          <p class="course-instructor">Pedri Gonzalez</p>
+          <p class="course-price">Rp150.000</p>
+          <div class="card-meta-row">
+            <span class="meta-students">
+              <ion-icon name="people-outline"></ion-icon>
+              10
+            </span>
+            <span class="meta-rating">
+              <ion-icon name="star"></ion-icon>
+              4.7
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mini-course-card" (click)="goToDetail()" style="cursor: pointer;">
+        <div class="card-img-placeholder"></div>
+        <div class="card-body">
+          <h3 class="course-title">Cyber Security</h3>
+          <p class="course-instructor">Pedri Gonzalez</p>
+          <p class="course-price">Rp350.000</p>
+          <div class="card-meta-row">
+            <span class="meta-students">
+              <ion-icon name="people-outline"></ion-icon>
+              10
+            </span>
+            <span class="meta-rating">
+              <ion-icon name="star"></ion-icon>
+              4.7
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <h2 class="section-title">Category</h2>
+    <div class="categories-wrap">
+      <div class="category-pill">word</div>
+      <div class="category-pill">excel</div>
+      <div class="category-pill">desain</div>
+      <div class="category-pill">musik</div>
+      <div class="category-pill">c#</div>
+    </div>
+
+    
+  </div>
+</ion-content>
+

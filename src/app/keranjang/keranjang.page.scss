@@ -1,45 +1,99 @@
 :host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  font-family: 'Lexend', sans-serif;
+  
+  /* OVERRIDE UTAMA: Memaksa background aplikasi & teks di halaman ini agar tidak hitam */
+  --ion-background-color: #f7f5f5;
+  --ion-text-color: #1a1a1a;
+
+  /* Variabel desain asli tetap dipertahankan */
   --header-bg:          #852920;
   --header-color:       #ffffff;
-  --header-font-size:   18px;
+  --header-font-size:   20px; 
   --header-font-weight: 700;
-  --header-height:      56px;
   --back-icon-color:    #ffffff;
   --back-icon-size:     24px;
 }
 
-ion-toolbar {
-  --background: var(--header-bg);
-  --color: var(--header-color);
-  --min-height: var(--header-height);
+/* Memastikan komponen ion-content mematuhi warna baru dari :host */
+ion-content {
+  --background: var(--ion-background-color);
 }
 
-ion-title {
-  font-size: var(--header-font-size);
-  font-weight: var(--header-font-weight);
-  color: var(--header-color);
-}
+/* ==========================================
+   RED HEADER SECTION (Terracotta Branding)
+   ========================================== */
+.red-header {
+  background-color: var(--header-bg); 
+  padding: 25px 24px 64px 24px; /* Dikembalikan ke 64px sesuai layout utama agar margin-top kontainer pas */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-sizing: border-box;
 
-// Fix warna icon back — override semua layer Ionic
-ion-back-button {
-  --color: var(--back-icon-color) !important;
-  --icon-font-size: var(--back-icon-size);
-  color: var(--back-icon-color) !important;
-
-  &::part(native) {
-    color: var(--back-icon-color) !important;
+  .header-title {
+    color: var(--header-color);
+    font-size: var(--header-font-size);
+    font-weight: var(--header-font-weight);
+    margin: 0;
+    letter-spacing: -0.2px;
+    text-align: center;
   }
 
-  &::part(icon) {
-    color: var(--back-icon-color) !important;
-    fill: var(--back-icon-color) !important;
+  /* Selector tombol back kustom (Bisa diganti nilai left-nya dengan bebas) */
+  .back-btn {
+    position: absolute;
+    left: 12px; 
+    top: 50%;
+    transform: translateY(-100%); /* Disesuaikan dengan padding 64px agar vertikalnya seimbang */
+    border: none;
+    border-radius: 9999px;
+    padding: 6px 14px;
+    color: var(--back-icon-color);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font-family: 'Lexend', sans-serif;
+    transition: all 0.2s ease;
+    outline: none;
+    background-color: transparent;
+
+    ion-icon {
+      font-size: var(--back-icon-size);
+      stroke-width: 48px;
+    }
+
+    &:active {
+      transform: translateY(-100%) scale(0.92); 
+      background-color: rgba(255, 255, 255, 0.15); 
+    }
   }
 }
 
-.cart-content {
-  --background: #f7f5f5;
+/* ==========================================
+   MAIN CONTAINER (Content Wrapper)
+   ========================================== */
+.main-container {
+  background-color: var(--ion-background-color);
+  margin-top: -36px;
+  position: relative;
+  z-index: 10;
+  height: calc(100vh - 130px);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+  //border-top-left-radius: 24px;  
+  //border-top-right-radius: 24px;
 }
 
+/* ==========================================
+   EMPTY CART COMPONENT
+   ========================================== */
 .empty-cart-container {
   display: flex;
   flex-direction: column;
@@ -68,7 +122,7 @@ ion-back-button {
   h2 {
     font-size: 20px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--ion-text-color); /* Otomatis mengikuti warna teks cerah murni */
     margin: 0 0 10px 0;
   }
 
@@ -82,15 +136,19 @@ ion-back-button {
   }
 }
 
+/* ==========================================
+   BOTTOM ACTION BUTTON SYSTEM
+   ========================================== */
 .bottom-action {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   padding: 16px;
-  background-color: #f7f5f5;
+  background-color: var(--ion-background-color);
   border-top: 1px solid #e0e0e0;
   box-sizing: border-box;
+  z-index: 20;
 
   .explore-btn {
     --background: #852920;
@@ -100,13 +158,12 @@ ion-back-button {
     font-weight: 700;
     width: 100%;
     margin: 0;
-    text-transform: none; // ← nonaktifkan kapital
-    letter-spacing: 0;    // ← hilangkan spasi antar huruf bawaan Ionic
+    text-transform: none; 
+    letter-spacing: 0;    
     font-size: 16px;
-    width: 700;
 
     &::part(native) {
-      text-transform: none; // ← override dari shadow DOM Ionic
+      text-transform: none; 
       letter-spacing: 0;
     }
   }

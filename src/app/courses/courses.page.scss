@@ -1,0 +1,366 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  font-family: 'Lexend', sans-serif;
+}
+
+ion-content {
+  --background: #f7f5f5;
+}
+
+/* ==========================================
+   RED HEADER SECTION (Terracotta Branding)
+   ========================================== */
+.red-header {
+  background-color: #852920;
+  padding: 25px 24px 64px 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-sizing: border-box;
+
+  .header-title {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.2px;
+    text-align: center;
+  }
+
+  /* Berlaku untuk tombol Back, Filter, ataupun Search kustom */
+  .header-button {
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-100%);
+    background-color: transparent;
+    /* Default tanpa background hitam */
+
+    ion-icon {
+      font-size: 24px;
+      /* Disesuaikan agar ikon back terlihat jelas */
+    }
+
+    &:active {
+      transform: translateY(-100%) scale(0.92);
+      background-color: rgba(255, 255, 255, 0.15);
+      /* Feedback transparan tipis saat diklik */
+    }
+
+    &.back-btn {
+      left: 12px;
+    }
+
+    /* Jarak presisi tombol back Anda dari kiri */
+    &.filter-btn {
+      left: 24px;
+    }
+
+    &.search-btn {
+      right: 24px;
+    }
+  }
+
+  // Wrapper search mode — full width, flex row
+  .search-mode-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+
+    .search-bar-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 6px 12px;
+      gap: 8px;
+
+      .search-bar-icon {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.8);
+        flex-shrink: 0;
+      }
+
+      .search-bar-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #ffffff;
+        font-family: 'Lexend', sans-serif;
+        font-size: 14px;
+
+        &::placeholder { color: rgba(255, 255, 255, 0.6); }
+      }
+
+      .search-bar-clear {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        flex-shrink: 0;
+
+        &:active { opacity: 0.6; }
+      }
+    }
+
+    .cancel-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      cursor: pointer;
+      flex-shrink: 0;
+
+      &:active { opacity: 0.7; }
+    }
+  }
+}
+
+/* ==========================================
+   MAIN CONTAINER (Content Wrapper)
+   ========================================== */
+.main-container {
+  background-color: #f7f5f5;
+  margin-top: -36px;
+  position: relative;
+  z-index: 10;
+  height: calc(100vh - 130px);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+  //border-top-left-radius: 24px;  /* Membuat lekukan halus di atas kontainer */
+  //border-top-right-radius: 24px;
+}
+
+/* ==========================================
+   EMPTY STATE & ILLUSTRATION SYSTEM
+   ========================================== */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px 60px;
+  text-align: center;
+}
+
+.illustration-container {
+  position: relative;
+  width: 220px;
+  height: 140px;
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.icon-wrapper {
+  position: absolute;
+  background-color: #ffffff;
+  border: 4px solid #852920;
+  /* PERBAIKAN: Mengganti warna border hitam (#1a1a1a) menjadi Terracotta */
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(133, 41, 32, 0.08);
+  /* Menyelaraskan shadow */
+
+  .empty-icon {
+    font-size: 32px;
+    color: #852920;
+  }
+
+  /* Ikon diubah agar tidak hitam pekat */
+}
+
+.desktop-wrapper {
+  width: 72px;
+  height: 64px;
+  left: 15px;
+  top: 15px;
+  transform: rotate(-12deg);
+  z-index: 1;
+
+  .empty-icon {
+    font-size: 30px;
+  }
+}
+
+.medal-wrapper {
+  width: 64px;
+  height: 64px;
+  bottom: 0;
+  left: 78px;
+  border-radius: 50%;
+  z-index: 3;
+
+  .empty-icon {
+    font-size: 34px;
+  }
+}
+
+.book-wrapper {
+  width: 60px;
+  height: 70px;
+  right: 15px;
+  top: 15px;
+  transform: rotate(12deg);
+  z-index: 2;
+  border-radius: 12px;
+
+  .empty-icon {
+    font-size: 30px;
+  }
+}
+
+.empty-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 10px;
+  letter-spacing: -0.2px;
+}
+
+.empty-subtitle {
+  font-size: 13px;
+  color: #7f8c8d;
+  font-weight: 500;
+  margin: 0;
+  max-width: 260px;
+  line-height: 1.5;
+}
+
+/* ==========================================
+   COURSES CARD LIST SYSTEM
+   ========================================== */
+.courses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  /* Diberi padding agar kartu tidak menempel ke pinggir layar */
+}
+
+.course-card {
+  background-color: #ffffff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  border: 1px solid #eaeaea;
+  display: flex;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  .card-img-placeholder {
+    width: 100px;
+    height: 100px;
+    background-color: #d9d9d9;
+    flex-shrink: 0;
+  }
+
+  .card-body {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+    .course-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 0 0 4px;
+    }
+
+    .course-instructor {
+      font-size: 11px;
+      color: #757575;
+      margin: 0 0 6px;
+    }
+
+    .course-price {
+      font-size: 13px;
+      font-weight: 700;
+      color: #852920;
+      margin: 0 0 6px;
+    }
+
+    .card-meta-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-top: auto;
+      font-size: 11px;
+      color: #757575;
+      font-weight: 600;
+
+      .meta-students,
+      .meta-rating {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        ion-icon {
+          font-size: 13px;
+        }
+      }
+
+      .meta-rating ion-icon {
+        color: #ffd700;
+      }
+    }
+  }
+}
+
+/* ==========================================
+   BOTTOM ACTION BUTTON SYSTEM (Sticky Area)
+   ========================================== */
+.bottom-action {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background-color: #f7f5f5;
+  border-top: 1px solid #e0e0e0;
+  box-sizing: border-box;
+  z-index: 20;
+
+  .explore-btn {
+    --background: #852920;
+    --color: #ffffff;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 12px rgba(133, 41, 32, 0.2);
+    font-weight: 700;
+    width: 100%;
+    margin: 0;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 16px;
+
+    &::part(native) {
+      text-transform: none;
+      letter-spacing: 0;
+    }
+  }
+}

@@ -46,6 +46,12 @@ export class RegisterPage implements OnInit {
     }));
   }
 
+    // Fungsi untuk kembali ke halaman utama / home
+  goHome() {
+    // Mengarahkan ke rute tabs yang membungkus folder before-login
+    this.router.navigate(['/tabs/home']);
+  }
+
   nextStep() {
     if (this.step === 1) {
       if (this.email.trim() && this.email.includes('@')) {

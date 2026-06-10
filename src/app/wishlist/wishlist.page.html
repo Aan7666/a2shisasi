@@ -1,0 +1,152 @@
+<ion-content [fullscreen]="true">
+
+  <!-- Red Header -->
+  <div class="red-header">
+
+    <!-- Placeholder kiri saat guest agar judul tetap tengah -->
+    <div class="header-button" *ngIf="!isLoggedIn && !isSearchMode" style="visibility: hidden;">
+      <ion-icon name="funnel-outline"></ion-icon>
+    </div>
+
+    <!-- Judul normal -->
+    <h1 class="header-title" *ngIf="!isSearchMode && !isSelectionMode">Wishlist</h1>
+
+    <!-- Search mode -->
+    <div class="search-mode-wrapper" *ngIf="isSearchMode">
+      <div class="search-bar-wrapper">
+        <ion-icon name="search-outline" class="search-bar-icon"></ion-icon>
+        <input class="search-bar-input" type="text" placeholder="Search wishlist..." [(ngModel)]="searchQuery"
+          (input)="onSearch()" />
+        <ion-icon name="close-circle" class="search-bar-clear" *ngIf="searchQuery" (click)="clearSearch()">
+        </ion-icon>
+      </div>
+      <span class="cancel-text" (click)="toggleSearch()">Cancel</span>
+    </div>
+
+    <!-- Icon search (hanya saat normal mode) -->
+    <div class="header-button search-btn" *ngIf="!isSelectionMode && !isSearchMode" (click)="toggleSearch()">
+      <ion-icon name="search-outline"></ion-icon>
+    </div>
+
+    <!-- Cancel btn (selection mode) -->
+    <div class="header-button cancel-btn" *ngIf="isSelectionMode" (click)="cancelSelection()">
+      Cancel
+    </div>
+  </div>
+
+  <!-- Popover Menu (hanya saat login) -->
+  <ion-popover *ngIf="isLoggedIn" trigger="more-menu-trigger" dismissOnSelect="true" class="custom-popover">
+    <ng-template>
+      <ion-content class="popover-content">
+        <ion-list class="popover-list" lines="none">
+          <ion-item button detail="false" (click)="onSelectItems()" class="popover-item">
+            <ion-icon name="checkbox-outline" slot="start" class="popover-icon"></ion-icon>
+            <ion-label class="popover-label">Select Items</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-content>
+    </ng-template>
+  </ion-popover>
+
+  <!-- Main Container -->
+  <div class="main-container">
+
+    <!-- Tampilan setelah login -->
+    <ng-container *ngIf="isLoggedIn">
+
+      <!-- Wishlist Items -->
+      <div class="wishlist-list" *ngIf="filteredItems.length > 0">
+        <div class="wishlist-card" *ngFor="let item of filteredItems" [class.in-selection]="isSelectionMode"
+          (click)="isSelectionMode ? toggleItemSelection(item) : goToDetail(item)">
+
+          <div class="selection-checkbox" *ngIf="isSelectionMode">
+            <div class="checkbox-circle" [class.checked]="item.selected">
+              <ion-icon name="checkmark" *ngIf="item.selected"></ion-icon>
+            </div>
+          </div>
+
+          <div class="card-img-placeholder">
+            <ion-icon name="heart" class="heart-icon"></ion-icon>
+          </div>
+
+          <div class="card-body">
+            <h3 class="course-title">{{ item.title }}</h3>
+            <p class="course-instructor">{{ item.instructor }}</p>
+            <p class="course-price">{{ item.price }}</p>
+            <div class="card-meta-row">
+              <span class="meta-students">
+                <ion-icon name="people-outline"></ion-icon>
+                {{ item.students }}
+              </span>
+              <span class="meta-rating">
+                <ion-icon name="star"></ion-icon>
+                {{ item.rating }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state saat login tapi wishlist kosong -->
+      <div class="empty-state" *ngIf="filteredItems.length === 0">
+        <div class="illustration-container">
+          <div class="icon-wrapper desktop-wrapper">
+            <ion-icon name="desktop-outline" class="empty-icon"></ion-icon>
+          </div>
+          <div class="icon-wrapper medal-wrapper">
+            <ion-icon name="medal-outline" class="empty-icon"></ion-icon>
+          </div>
+          <div class="icon-wrapper book-wrapper">
+            <ion-icon name="book-outline" class="empty-icon"></ion-icon>
+          </div>
+        </div>
+        <h2 class="empty-title">Save your wishes here!</h2>
+        <p class="empty-subtitle">Your wish list will be saved here.</p>
+      </div>
+
+    </ng-container>
+
+    <!-- Tampilan sebelum login -->
+    <ng-container *ngIf="!isLoggedIn">
+      <div class="empty-state">
+        <div class="illustration-container">
+          <div class="icon-wrapper desktop-wrapper">
+            <ion-icon name="desktop-outline" class="empty-icon"></ion-icon>
+          </div>
+          <div class="icon-wrapper medal-wrapper">
+            <ion-icon name="medal-outline" class="empty-icon"></ion-icon>
+          </div>
+          <div class="icon-wrapper book-wrapper">
+            <ion-icon name="book-outline" class="empty-icon"></ion-icon>
+          </div>
+        </div>
+        <h2 class="empty-title">Save your wishes here!</h2>
+        <p class="empty-subtitle">Your wish list will be saved here.</p>
+      </div>
+    </ng-container>
+
+  </div>
+
+  <!-- Action Sheet -->
+  <ion-action-sheet [isOpen]="isActionSheetOpen" header="Filter" cssClass="custom-filter-sheet"
+    [buttons]="actionSheetButtons" (didDismiss)="setActionSheetOpen(false)">
+  </ion-action-sheet>
+
+</ion-content>
+
+<!-- Footer selection bar (hanya saat login & selection mode) -->
+<ion-footer class="ion-no-border wishlist-footer" *ngIf="isLoggedIn && isSelectionMode">
+  <div class="selection-action-bar">
+    <div class="select-all-container" (click)="toggleSelectAll()">
+      <div class="checkbox-circle" [class.checked]="isAllSelected">
+        <ion-icon name="checkmark" *ngIf="isAllSelected"></ion-icon>
+      </div>
+      <span class="select-all-text">All</span>
+    </div>
+    <div class="right-actions">
+      <button class="delete-btn" (click)="deleteSelected()">
+        <ion-icon name="trash"></ion-icon>
+      </button>
+    </div>
+  </div>
+</ion-footer>

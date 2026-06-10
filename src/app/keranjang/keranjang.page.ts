@@ -18,4 +18,11 @@ export class KeranjangPage implements OnInit {
   ngOnInit() {
   }
 
+  goBack() {
+    // Navigate back to the previous page
+    window.history.back();
+  }
+
 }
+
+

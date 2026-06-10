@@ -1,11 +1,6 @@
 <div class="login-wrapper">
 
-  <div class="background-layer">
-    <div class="brand-area">
-      <span class="brand-title">Academy</span>
-      <span class="brand-subtitle">Sports & Outdoors</span>
-    </div>
-  </div>
+  <div class="background-layer"></div>
 
   <div class="stars-container">
     <div *ngFor="let star of stars" class="star" [ngStyle]="{
@@ -19,17 +14,30 @@
   </div>
 
   <main class="main-content">
+
+    <div class="brand-area">
+      <img src="assets/logo/logo.svg" alt="Academy Logo" class="brand-logo" />
+      <div class="brand-text">
+        <span class="brand-subtitle sub-line-1">Where Learning Meets Opportunity</span>
+        <span class="brand-subtitle sub-line-2">Learn, Grow, Succeed!</span>
+      </div>
+    </div>
+
+    <button class="close-btn" (click)="goHome()" aria-label="Back">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+
     <div class="login-card animate-slide-up">
 
       <div class="card-header">
-        <h1>Login</h1>
+        <h1>Sign In</h1>
         <p>
           Don't have an Account?
-          <a routerLink="/register" class="text-link">Register</a>
+          <a routerLink="/register" class="text-link">Sign Up</a>
         </p>
       </div>
 
-      <h2 class="form-title">Login to your Account</h2>
+      <h2 class="form-title">Sign In to your Account</h2>
 
       <form class="login-form" (ngSubmit)="onLogin()">
 
@@ -50,8 +58,9 @@
         </div>
 
         <button type="submit" class="btn-primary">
-          <span>Login</span>
+          <span>Sign In</span>
         </button>
+
       </form>
 
       <div class="divider">
@@ -61,20 +70,8 @@
       </div>
 
       <button type="button" class="btn-social" (click)="loginWithGoogle()">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-          alt="Google" />
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
         <span>Google</span>
-      </button>
-
-      <button type="button" class="btn-guest" routerLink="/tabs" style="margin-top: 12px;">
-        <span class="material-symbols-outlined">logout</span>
-        <span>Tampilan belum Login</span>
-      </button>
-
-      <button type="button" class="btn-guest" routerLink="/tabs-after-login" style="margin-top: 12px;">
-        <span class="material-symbols-outlined">login</span>
-        <span>Tampilkan setelah Login</span>
       </button>
 
     </div>

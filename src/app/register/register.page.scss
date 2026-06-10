@@ -1,65 +1,132 @@
-// ---- Brand & UI Variables ----
-$primary-gradient: linear-gradient(180deg, #E86F45 0%, #A93026 50%, #611116 100%);
-$button-color: #9A4035;
-$button-hover: #832e25;
-$card-bg: #F4F1EF;
-$input-bg: #E2DDDD;
-$text-dark: #000000;
-$text-muted: #56423f;
-$link-color: #D14F44;
-$icon-color: #706563;
+// ---- Variables ----
+$primary: #832e25;
+$primary-container: #a2453a;
+$surface: #fbf9f8;
+$on-surface: #1b1c1b;
+$on-surface-variant: #56423f;
+$outline-variant: #dcc0bc;
+$input-bg: #DBDBDB;
 
+// ---- Host / Global ----
 :host {
   display: block;
   height: 100%;
-  width: 100%;
 }
 
 ion-content {
   --background: transparent;
+  // PERBAIKAN 1: Memaksa Shadow DOM milik ion-content membuang semua sisa padding bawaan framework
+  --padding-top: 0px !important;
+  --padding-bottom: 0px !important;
+  --padding-start: 0px !important;
+  --padding-end: 0px !important;
 }
 
-// ---- Main Wrapper ----
+// ---- Wrapper ----
 .login-wrapper {
   position: relative;
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   font-family: 'Lexend', sans-serif;
-  background: $primary-gradient;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+  background: $primary;
 }
 
-// ---- Background Waves Layer ----
+// ---- Background Image Layer ----
 .background-layer {
   position: fixed;
   inset: 0;
+  background-image: url('../../assets/images/bg-splash.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   z-index: 0;
-  pointer-events: none;
-}
 
-.bg-waves {
-  width: 100%;
-  height: 100%;
-  opacity: 0.95;
-
-  svg {
-    width: 100%;
-    height: 100%;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    z-index: -1;
   }
 }
 
-// ---- Stars Ambient Layer ----
+// ---- Main Content ----
+.main-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;    
+  align-items: center;       
+  width: 100%; 
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 !important;
+  padding: env(safe-area-inset-top, 20px) 0 0 0; 
+  box-sizing: border-box;
+}
+
+// ---- Brand Area (PERBAIKAN: Selalu di tengah sisa layar atas) ----
+.brand-area {
+  display: flex;
+  flex-direction: column;    
+  align-items: center;
+  justify-content: center;
+  
+  // KUNCI UTAMA 1: Menggunakan flex-grow agar area logo dinamis menghabiskan sisa ruang vertikal atas
+  flex-grow: 1; 
+  
+  padding: 20px 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.brand-logo {
+  width: 120px;              
+  height: auto;
+  object-fit: contain;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: -4px;
+}
+
+.brand-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Lexend', sans-serif;
+  text-transform: uppercase;
+  text-align: center;
+  display: block;            
+  line-height: 1.4;          
+  
+  &.sub-line-1 {
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.1em;   
+    margin-top: 6px;         
+  }
+
+  &.sub-line-2 {
+    font-size: 9px;
+    font-weight: 500;        
+    letter-spacing: 0.15em;
+    margin-top: 2px;         
+  }
+}
+
+// ---- Stars Layer ----
 .stars-container {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.15;
+  opacity: 0.1;
   z-index: 1;
+  overflow: hidden;
 }
 
 .star {
@@ -71,7 +138,7 @@ ion-content {
 // ---- Close / Back Button ----
 .close-btn {
   position: absolute;
-  top: 28px;
+  top: 40px;
   left: 28px;
   width: 44px;
   height: 44px;
@@ -103,106 +170,65 @@ ion-content {
   }
 }
 
-// ---- Brand logo area ----
-.brand-area {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 100px;
-  margin-bottom: 36px;
-  padding: 0 24px;
-  text-align: center;
-}
-
-.brand-logo {
-  max-height: 90px;
-  max-width: 240px;
-  width: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
-  margin-bottom: 16px;
-}
-
-.brand-tagline {
-  color: rgba(255, 255, 255, 0.95);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1.5;
-  letter-spacing: 0.02em;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
-}
-
-// ---- Main content & Bottom Card ----
-.main-content {
-  position: relative;
-  z-index: 10;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  flex: 1;
-  width: 100%;
-}
-
+// ---- Register / Login Card (PERBAIKAN TOTAL UNTUK RESPONSIVE HP) ----
 @keyframes slideUp {
-  from {
-    transform: translateY(100%);
-  }
-
-  to {
-    transform: translateY(0);
-  }
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 .login-card {
-  background: $card-bg;
-  width: 100%;
-  max-width: 480px;
-  border-radius: 40px 40px 0 0;
-  padding: 36px 28px 48px;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.12);
+  background: #ffffff; 
+  
+  // KUNCI UTAMA 2: Paksa mengambil lebar penuh 100% tanpa batas di semua HP portrait
+  width: 100% !important;
+  max-width: 100% !important; 
+  margin: 0 !important;
+  
+  // KUNCI UTAMA 3: Sudut bawah diubah menjadi siku (0) agar tidak menggantung/bolong di Samsung S20+
+  border-radius: 40px 40px 0 0 !important; 
+  
+  // KUNCI UTAMA 4: Padding bawah dinamis digabung dengan safe area sistem bar navigasi OS HP modern
+  padding: 32px 24px calc(24px + env(safe-area-inset-bottom, 16px)) 24px !important;    
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-sizing: border-box;
+  
+  height: fit-content;        
+  min-height: 410px;          
+  max-height: 85vh;           
+  overflow-y: auto;           
+  box-sizing: border-box !important;
 
   &.animate-slide-up {
-    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 }
 
 // ---- Card Header ----
 .card-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   width: 100%;
 
   h1 {
-    font-size: 32px;
-    font-weight: 700;
-    color: $text-dark;
-    margin: 0 0 6px;
-    letter-spacing: -0.5px;
+    font-size: 24px;
+    font-weight: 600;
+    color: $on-surface;
+    margin: 0 0 2px;
+    line-height: 1.2;
   }
 
   p {
     font-size: 13px;
-    font-weight: 500;
-    color: $text-muted;
+    font-weight: 400;
+    color: $on-surface-variant;
     margin: 0;
-    line-height: 1.4;
-  }
-
-  .subtitle-text {
-    max-width: 280px;
-    margin: 0 auto;
   }
 }
 
 .text-link {
-  color: $link-color;
+  color: $primary;
   font-weight: 600;
   text-decoration: none;
 
@@ -211,27 +237,26 @@ ion-content {
   }
 }
 
-// ---- Section labels ----
+// ---- Form Title ----
 .form-title {
   width: 100%;
-  font-size: 13px;
-  font-weight: 600;
-  color: $text-muted;
-  margin: 0 0 16px;
-  text-align: left;
-  padding-left: 4px;
-  letter-spacing: 0.01em;
+  font-size: 15px;
+  font-weight: 500;
+  color: $on-surface;
+  margin: 0 0 12px;
+  line-height: 1.4;
+  text-align: left; // Menyelaraskan teks judul formulir ke kiri
 }
 
-// ---- Registration Forms ----
+// ---- Form Base ----
 .login-form {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
-// ---- Capsules / Input Groups ----
+// ---- Input Group ----
 .input-group {
   position: relative;
   display: flex;
@@ -240,70 +265,78 @@ ion-content {
 
   .input-icon {
     position: absolute;
-    left: 20px;
-    color: $icon-color;
-    font-size: 22px;
+    left: 18px;
+    color: $on-surface-variant;
+    font-size: 20px;
     pointer-events: none;
     transition: color 0.2s;
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
   }
 
   &:focus-within .input-icon {
-    color: $button-color;
+    color: $primary;
   }
 }
 
 .custom-input {
   width: 100%;
-  height: 56px;
+  height: 48px; 
   background-color: $input-bg;
   border: none;
-  border-radius: 9999px;
-  padding: 0 24px 0 58px;
+  border-radius: 12px; 
+  padding: 0 20px 0 52px;
   font-family: 'Lexend', sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: $text-dark;
+  color: $on-surface;
   outline: none;
-  transition: all 0.2s;
+  transition: box-shadow 0.2s, background-color 0.2s;
   box-sizing: border-box;
 
   &::placeholder {
-    color: rgba($text-muted, 0.6);
+    color: rgba($on-surface-variant, 0.6);
   }
 
   &:focus {
-    box-shadow: 0 0 0 2px rgba($button-color, 0.2);
-    background-color: darken($input-bg, 2%);
+    box-shadow: 0 0 0 2px $primary;
+    background-color: darken($input-bg, 3%);
   }
 }
 
-// ---- Action Buttons ----
+// ---- Resend Link Container ----
+.resend-container {
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 400;
+  color: $on-surface-variant;
+  text-align: center;
+}
+
+// ---- Primary Button ----
 .btn-primary {
   width: 100%;
-  height: 56px;
-  background-color: $button-color;
+  height: 48px;
+  background-color: $primary-container;
   color: #ffffff;
   font-family: 'Lexend', sans-serif;
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 600;
   border: none;
-  border-radius: 9999px;
-  box-shadow: 0 4px 16px rgba(154, 64, 53, 0.25);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(131, 46, 37, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  margin-top: 12px;
+  transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
 
   &:hover {
-    background-color: $button-hover;
-    box-shadow: 0 6px 20px rgba(154, 64, 53, 0.35);
+    background-color: $primary;
+    box-shadow: 0 6px 18px rgba(131, 46, 37, 0.35);
   }
 
   &:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
   }
 }
 
@@ -313,44 +346,40 @@ ion-content {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 24px 0;
+  margin: 18px 0;
 
   .line {
     flex: 1;
     height: 1px;
-    background-color: rgba($text-muted, 0.2);
+    background-color: $outline-variant;
   }
 
   span {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
-    color: rgba($text-muted, 0.7);
-    letter-spacing: 0.05em;
+    color: $on-surface-variant;
+    letter-spacing: 0.02em;
     white-space: nowrap;
-    text-transform: uppercase;
   }
 }
 
-// ---- Google Social button ----
+// ---- Social Button ----
 .btn-social {
-  width: 100%;
-  max-width: 160px;
+  width: 100%; 
   height: 48px;
   background-color: $input-bg;
-  color: rgba($text-dark, 0.85);
+  color: $on-surface-variant;
   font-family: 'Lexend', sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   border: none;
-  border-radius: 9999px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
-  transition: all 0.2s;
-  margin: 0 auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.2s, transform 0.1s;
 
   img {
     width: 20px;
@@ -359,7 +388,7 @@ ion-content {
   }
 
   &:hover {
-    background-color: darken($input-bg, 4%);
+    background-color: darken($input-bg, 5%);
   }
 
   &:active {
@@ -367,23 +396,13 @@ ion-content {
   }
 }
 
-// ---- OTP Resend link container ----
-.resend-container {
-  margin-top: 24px;
-  font-size: 13px;
-  font-weight: 500;
-  color: $text-muted;
-  text-align: center;
-}
-
-// ---- Responsive styling ----
-@media (min-width: 480px) {
+// ---- Responsive Tablet & Desktop Layout ----
+// Di sini pembatasan lebar dipasang agar ketika dibuka di device lebar, tampilan card tidak bengkak
+@media (min-width: 576px) {
   .login-card {
-    padding: 40px 40px 52px;
-    border-radius: 48px 48px 0 0;
-  }
-
-  .brand-area {
-    margin-top: 120px;
+    max-width: 440px !important;
+    border-radius: 40px !important; // Kembali melengkung di semua sisi jika di tablet/PC
+    margin: 0 auto 24px auto !important;
+    padding: 32px 40px !important;
   }
 }

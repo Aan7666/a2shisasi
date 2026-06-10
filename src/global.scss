@@ -183,3 +183,77 @@ app-tabs ion-toolbar,
   border: none !important;
   box-shadow: none !important;
 }
+
+// global.scss — tambahkan di bagian bawah
+
+.custom-filter-sheet {
+
+  // Melengkungkan sudut atas card
+  .action-sheet-wrapper {
+    border-radius: 20px 20px 0 0 !important;
+    overflow: hidden !important;
+  }
+
+  .action-sheet-container {
+    border-radius: 20px 20px 0 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+  }
+
+  // Background putih keseluruhan
+  .action-sheet-group {
+    background: #f6f6f6 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+
+  // Header "Filter"
+  .action-sheet-title {
+    font-family: 'Lexend', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #9e9e9e;
+    text-align: center !important;
+    padding: 16px !important;
+  }
+
+  // Semua tombol opsi — teks tengah
+  .action-sheet-button:not(.action-sheet-cancel) {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a1a1a !important;
+    text-align: center !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    --button-color: #1a1a1a;
+
+    .action-sheet-button-inner {
+      justify-content: center !important;
+    }
+  }
+
+  // Group khusus Cancel (group terpisah dari opsi)
+  .action-sheet-group-cancel {
+    background: #ffffff !important;
+    padding: 8px 16px 20px !important;
+  }
+
+  // Tombol Cancel — merah penuh, rounded
+  .action-sheet-cancel {
+    font-family: 'Lexend', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    background: #852920 !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    --button-color: #ffffff;
+    --background: #852920;
+    color: #ffffff !important;
+    margin: 0 !important;
+
+    .action-sheet-button-inner {
+      justify-content: center !important;
+      color: #ffffff !important;
+    }
+  }
+}

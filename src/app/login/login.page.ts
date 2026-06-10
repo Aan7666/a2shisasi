@@ -42,41 +42,47 @@ export class LoginPage implements OnInit {
     }));
   }
 
-  onLogin() {
-    if (!this.username.trim() || !this.password) {
-      alert('Please enter both email and password.');
-      return;
-    }
+  // Fungsi untuk kembali ke halaman utama / home
+ // Fungsi untuk kembali ke halaman utama / home
+goHome() {
+  this.router.navigate(['/tabs/home']); // <-- ganti dari '/home' ke '/tabs/home'
+}
 
-    this.authService.login(this.username, this.password).subscribe({
-      next: (result) => {
-        if (result.success) {
-          alert(result.message || 'Login successful!');
-          this.router.navigate(['/tabs-after-login']);
-        } else {
-          alert(result.message || 'Login failed.');
-        }
-      },
-      error: (err) => {
-        console.error(err);
-        const errMsg = err.error?.message || 'Email atau password salah!';
-        alert(errMsg);
+onLogin() {
+  if (!this.username.trim() || !this.password) {
+    alert('Please enter both email and password.');
+    return;
+  }
+
+  this.authService.login(this.username, this.password).subscribe({
+    next: (result) => {
+      if (result.success) {
+        alert(result.message || 'Login successful!');
+        this.router.navigate(['/tabs/home']); // <-- ganti dari '/tabs-after-login'
+      } else {
+        alert(result.message || 'Login failed.');
       }
-    });
-  }
+    },
+    error: (err) => {
+      console.error(err);
+      const errMsg = err.error?.message || 'Email atau password salah!';
+      alert(errMsg);
+    }
+  });
+}
 
-  loginWithGoogle() {
-    console.log('Login dengan Google...');
-    // Mock Google Login as a valid database session
-    const mockGoogleEmail = 'google.user@example.com';
-    // Register if doesn't exist, then login
-    this.authService.register({
-      email: mockGoogleEmail,
-      fullName: 'Google User',
-      password: 'google_password'
-    });
-    this.authService.loginLocal(mockGoogleEmail, 'google_password');
-    alert('Google Login successful!');
-    this.router.navigate(['/tabs-after-login']);
-  }
+loginWithGoogle() {
+  console.log('Login dengan Google...');
+  const mockGoogleEmail = 'google.user@example.com';
+  
+  this.authService.register({
+    email: mockGoogleEmail,
+    fullName: 'Google User',
+    password: 'google_password'
+  });
+  
+  this.authService.loginLocal(mockGoogleEmail, 'google_password');
+  alert('Google Login successful!');
+  this.router.navigate(['/tabs/home']); // <-- ganti dari '/tabs-after-login'
+}
 }

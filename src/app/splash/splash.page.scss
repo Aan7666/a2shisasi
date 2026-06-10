@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap');
+
+// ---- Variables ----
+$primary: #832e25;
 
 // ---- Host / Global ----
 :host {
@@ -11,42 +14,50 @@
 .splash-wrapper {
   position: relative;
   width: 100%;
-  height: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
-  font-family: 'Inter', sans-serif;
-  background: linear-gradient(180deg, #E86F45 0%, #A93026 50%, #611116 100%);
+  font-family: 'Lexend', sans-serif; // Menggunakan Lexend agar serasi dengan login/register
+  background: $primary; 
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-between; 
   color: #ffffff;
   box-sizing: border-box;
 }
 
-// ---- Ambient Waves Overlay ----
+// ---- FIX: Ganti Background Menggunakan Image Lokal ----
 .bg-waves {
   position: absolute;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,150 C300,300 400,0 800,150 L800,800 L0,800 Z' fill='rgba(255,255,255,0.03)'/%3E%3Cpath d='M0,300 C200,50 600,400 800,200 L800,800 L0,800 Z' fill='rgba(255,255,255,0.02)'/%3E%3Ccircle cx='700' cy='150' r='100' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='2'/%3E%3Ccircle cx='600' cy='600' r='150' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1'/%3E%3C/svg%3E");
+  // Memanggil asset gambar lokal sesuai direktori Anda
+  background-image: url('../../assets/images/bg-splash.png'); 
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   pointer-events: none;
-  z-index: 1;
-  opacity: 0.8;
+  z-index: 0;
   animation: pulseBg 12s ease-in-out infinite alternate;
+
+  // Overlay gelap 30% untuk menjaga kontras logo putih di atasnya
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    z-index: -1;
+  }
 }
 
 // ---- Animations ----
 @keyframes pulseBg {
   0% {
     transform: scale(1);
-    opacity: 0.6;
+    opacity: 0.8;
   }
   100% {
-    transform: scale(1.06);
-    opacity: 0.9;
+    transform: scale(1.05);
+    opacity: 1;
   }
 }
 
@@ -79,12 +90,8 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 // ---- Main Brand Content ----
@@ -100,78 +107,62 @@
   width: 100%;
 }
 
+// Wadah Logo (Ukurannya disesuaikan 100px agar seragam dengan login saat transisi)
 .logo-container {
-  width: 192px;
-  height: 192px;
+  width: 120px;
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   animation: logoEntrance 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-
-  @media (min-width: 768px) {
-    width: 224px;
-    height: 224px;
-  }
 }
 
 .brand-logo {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
 }
 
 .brand-text {
   text-align: center;
-  margin-top: -10px;
+  margin-top: -4px;
   animation: textEntrance 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.brand-title {
-  font-size: 38px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  margin: 0 0 6px 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  color: #ffffff;
-
-  @media (min-width: 768px) {
-    font-size: 48px;
-  }
-}
-
+// Gaya Subtitle disamakan dengan slogan uppercase di halaman Login Anda
 .brand-subtitle {
-  font-size: 14px;
-  font-weight: 300;
-  letter-spacing: 0.06em;
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
   margin: 0;
-  color: rgba(255, 255, 255, 0.95);
+  color: rgba(255, 255, 255, 0.9);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-
-  @media (min-width: 768px) {
-    font-size: 16px;
-  }
 }
 
 // ---- Footer Loading Indicator ----
 .footer-content {
-  position: absolute;
-  bottom: 40px;
-  left: 0;
-  right: 0;
+  position: relative; // Diubah dari absolute agar flex space-between bekerja sempurna
   z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  padding-bottom: 50px; // Jarak aman dari bawah layar
+  width: 100%;
   animation: fadeIn 1.8s ease-in-out forwards;
 }
 
 .loading-spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  width: 26px;
+  height: 26px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
   border-top-color: #ffffff;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;

@@ -1,0 +1,125 @@
+<ion-content [fullscreen]="true">
+  <div class="red-header">
+    <div class="search-bar-container">
+      
+      <div class="search-input-wrapper" [class.full-width]="!isFocused && !isSearched">
+        <ion-icon name="search-outline" class="search-icon"></ion-icon>
+        
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          placeholder="Search"
+          class="search-input"
+          (focus)="onFocus()"
+          (keyup.enter)="onSearchSubmit($event)"
+        />
+        
+        <ion-icon
+          name="close"
+          class="search-clear-icon"
+          *ngIf="isFocused && searchQuery"
+          (click)="clearSearch()">
+        </ion-icon>
+      </div>
+
+      <span class="cancel-text" *ngIf="isFocused" (click)="cancelSearch()">Cancel</span>
+
+      <button class="filter-btn" id="open-filter-modal" *ngIf="isSearched">
+        <ion-icon name="list-filter"></ion-icon>
+      </button>
+
+    </div>
+  </div>
+
+
+  <!-- Main Container -->
+  <div class="main-container">
+
+    <h2 class="section-title">Top Searches</h2>
+    <div class="top-searches-container">
+      <button class="search-pill" *ngFor="let term of topSearches" (click)="selectSearch(term)">
+        {{ term }}
+      </button>
+    </div>
+
+    <h2 class="section-title browse-title">Browse categories</h2>
+    <div class="categories-grid">
+      <div class="category-card"
+        *ngFor="let cat of categories"
+        [ngStyle]="{'background-color': cat.background}"
+        [routerLink]="['/detail-course']"
+        style="cursor: pointer;">
+        <div class="category-icon-wrapper" [ngStyle]="{'color': cat.color, 'border-color': cat.color}">
+          <ion-icon [name]="cat.icon"></ion-icon>
+        </div>
+        <span class="category-name">{{ cat.title }}</span>
+      </div>
+    </div>
+
+  </div>
+</ion-content>
+
+<ion-modal
+  #filterModal
+  trigger="open-filter-modal"
+  [initialBreakpoint]="0.65"
+  [breakpoints]="[0, 0.65, 0.9]"
+  handleBehavior="cycle"
+  class="filter-sheet-modal">
+  <ng-template>
+    <div class="filter-modal-header">
+      <button class="header-action-btn close-action" (click)="filterModal.dismiss()">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+      <h2 class="modal-title">Filters</h2>
+      <button class="header-action-btn reset-action" (click)="resetFilters()">Reset</button>
+    </div>
+
+    <ion-content class="filter-modal-content" scroll-y="true">
+      <div class="filter-section">
+        <h3 class="section-label">Sort by</h3>
+        <div class="dropdown-trigger" (click)="toggleSortDropdown()">
+          <span>{{ selectedSort }}</span>
+          <ion-icon name="chevron-down-outline" class="chevron-icon"></ion-icon>
+        </div>
+        <div class="sort-options-list" *ngIf="isSortDropdownOpen">
+          <div class="sort-option-item"
+            *ngFor="let option of sortOptions"
+            [class.active]="selectedSort === option"
+            (click)="selectSortOption(option)">
+            {{ option }}
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <h3 class="section-label">Price</h3>
+        <div class="pill-group">
+          <button class="pill-btn" [class.active]="selectedPrice === 'Paid'" (click)="selectPrice('Paid')">Paid</button>
+          <button class="pill-btn" [class.active]="selectedPrice === 'Free'" (click)="selectPrice('Free')">Free</button>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <h3 class="section-label">Rated</h3>
+        <div class="rating-checkbox-list">
+          <label class="checkbox-row"
+            *ngFor="let rate of ratingFilters"
+            (click)="$event.preventDefault(); toggleRatingFilter(rate)">
+            <span class="custom-checkbox" [class.checked]="rate.checked">
+              <ion-icon name="checkmark" *ngIf="rate.checked"></ion-icon>
+            </span>
+            <span class="checkbox-label">
+              {{ rate.label }}
+              <ion-icon name="star" class="star-icon"></ion-icon>
+            </span>
+          </label>
+        </div>
+      </div>
+    </ion-content>
+
+    <div class="filter-modal-footer">
+      <button class="apply-btn" (click)="applyFilters(); filterModal.dismiss()">Apply</button>
+    </div>
+  </ng-template>
+</ion-modal>

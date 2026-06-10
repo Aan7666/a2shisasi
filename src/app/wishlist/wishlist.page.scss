@@ -1,0 +1,383 @@
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+  font-family: 'Lexend', sans-serif;
+}
+
+ion-content {
+  --background: #f7f5f5;
+}
+
+.red-header {
+  background-color: #852920;
+  padding: 25px 24px 64px 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  box-sizing: border-box;
+
+  .header-title {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.2px;
+    text-align: center;
+  }
+
+  .header-button {
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-100%);
+
+    ion-icon { font-size: 24px; }
+
+    &:active {
+      transform: translateY(-100%) scale(0.92);
+      background-color: rgba(255, 255, 255, 0.25);
+    }
+
+    &.more-btn { left: 24px; }
+    &.search-btn { right: 24px; }
+
+    &.cancel-btn {
+      right: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      width: auto;
+      border-radius: 20px;
+      padding: 6px 14px;
+      background-color: rgba(255, 255, 255, 0.15);
+
+      &:active {
+        transform: translateY(-100%) scale(0.95);
+        background-color: rgba(255, 255, 255, 0.3);
+      }
+    }
+  }
+
+  // Wrapper search mode — full width, flex row
+  .search-mode-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+
+    .search-bar-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 6px 12px;
+      gap: 8px;
+
+      .search-bar-icon {
+        font-size: 16px;
+        color: rgba(255, 255, 255, 0.8);
+        flex-shrink: 0;
+      }
+
+      .search-bar-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #ffffff;
+        font-family: 'Lexend', sans-serif;
+        font-size: 14px;
+
+        &::placeholder { color: rgba(255, 255, 255, 0.6); }
+      }
+
+      .search-bar-clear {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        flex-shrink: 0;
+
+        &:active { opacity: 0.6; }
+      }
+    }
+
+    .cancel-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ffffff;
+      white-space: nowrap;
+      cursor: pointer;
+      flex-shrink: 0;
+
+      &:active { opacity: 0.7; }
+    }
+  }
+}
+
+/* ==========================================
+   MAIN CONTAINER & SYSTEM LAYOUT
+   ========================================== */
+.main-container {
+  background-color: #f7f5f5;
+  margin-top: -36px;
+  position: relative;
+  z-index: 10;
+  height: calc(100vh - 130px);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* ==========================================
+   EMPTY STATE & ILLUSTRATION SYSTEM (PERSIS CODE 1)
+   ========================================== */
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px 60px; // Padding disamakan dengan Code 1 (bawah 60px)
+  text-align: center;
+}
+
+.illustration-container {
+  position: relative;
+  width: 220px;  // Mengunci lebar area persis Code 1
+  height: 140px; // Mengunci tinggi area persis Code 1
+  margin-bottom: 32px;
+  // Menghilangkan flex-center biasa agar posisi absolute di bawahnya aktif sempurna
+}
+
+.icon-wrapper {
+  position: absolute;
+  background-color: #ffffff;
+  border: 4px solid #852920; // Tetap hitam sesuai identitas Code 2
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+
+  .empty-icon { 
+    font-size: 32px; 
+    color: #852920; 
+  }
+}
+
+/* --- Mengembalikan Struktur Posisi Bertumpuk Sesuai Code 1 --- */
+
+.desktop-wrapper {
+  width: 72px; 
+  height: 64px;
+  left: 15px; 
+  top: 15px;
+  transform: rotate(-12deg); 
+  z-index: 1;
+  
+  .empty-icon { 
+    font-size: 30px; 
+  }
+}
+
+.medal-wrapper {
+  width: 64px; 
+  height: 64px;
+  border-radius: 50%; 
+  z-index: 3;
+  
+  // KUNCI PERBAIKAN: Mengunci posisi medal selalu di tengah-tengah container 220px
+  bottom: 0; 
+  left: 50%;
+  transform: translateX(-50%); // Menjamin posisi lingkaran medal 100% di tengah global
+  
+  .empty-icon { 
+    font-size: 34px; 
+  }
+}
+
+.book-wrapper {
+  width: 60px; 
+  height: 70px;
+  right: 15px; 
+  top: 15px;
+  transform: rotate(12deg); 
+  z-index: 2;
+  border-radius: 12px;
+  
+  .empty-icon { 
+    font-size: 30px; 
+  }
+}
+
+/* ==========================================
+   TYPOGRAPHY
+   ========================================== */
+.empty-title {
+  font-size: 19px; 
+  font-weight: 700;
+  color: #1a1a1a; 
+  margin: 0 0 10px;
+  letter-spacing: -0.2px;
+}
+
+.empty-subtitle {
+  font-size: 13px; 
+  color: #7f8c8d;
+  font-weight: 500; 
+  margin: 0;
+  max-width: 260px; 
+  line-height: 1.5;
+}
+
+.custom-popover {
+  --background: #ffffff;
+  --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --border-radius: 12px;
+  --width: 180px;
+
+  .popover-list { background: transparent; padding: 6px 0; }
+
+  .popover-item {
+    --background: transparent;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --min-height: 48px;
+
+    .popover-icon { color: #852920; font-size: 18px; margin-right: 12px; }
+    .popover-label { font-size: 14px; color: #1a1a1a; font-weight: 600; }
+  }
+}
+
+.wishlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.wishlist-card {
+  background-color: #ffffff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  border: 1px solid #eaeaea;
+  display: flex;
+  position: relative;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:active { transform: scale(0.98); }
+  &.in-selection { padding-left: 12px; }
+
+  .selection-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-right: 8px;
+
+    .checkbox-circle {
+      width: 22px; height: 22px;
+      border: 2px solid #bdc3c7;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background-color: #ffffff;
+      transition: all 0.2s ease;
+
+      &.checked {
+        border-color: #852920;
+        background-color: #852920;
+        ion-icon { color: #ffffff; font-size: 14px; }
+      }
+    }
+  }
+
+  .card-img-placeholder {
+    width: 100px; height: 100px;
+    background-color: #fceceb;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    .heart-icon { color: #852920; font-size: 28px; }
+  }
+
+  .card-body {
+    padding: 12px 16px;
+    display: flex; flex-direction: column; flex-grow: 1;
+
+    .course-title { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px; }
+    .course-instructor { font-size: 11px; color: #757575; margin: 0 0 6px; }
+    .course-price { font-size: 13px; font-weight: 700; color: #852920; margin: 0 0 6px; }
+
+    .card-meta-row {
+      display: flex; gap: 16px; align-items: center;
+      margin-top: auto; font-size: 11px; color: #757575; font-weight: 600;
+
+      .meta-students, .meta-rating {
+        display: flex; align-items: center; gap: 4px;
+        ion-icon { font-size: 13px; }
+      }
+      .meta-rating ion-icon { color: #ffd700; }
+    }
+  }
+}
+
+.wishlist-footer {
+  --background: #ffffff;
+  padding: 12px 24px;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+  border-top: 1px solid #eef0f2;
+}
+
+.selection-action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 48px;
+
+  .select-all-container {
+    display: flex; align-items: center;
+    cursor: pointer; user-select: none;
+
+    .checkbox-circle {
+      width: 22px; height: 22px;
+      border: 2px solid #bdc3c7;
+      border-radius: 50%; margin-right: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background-color: #ffffff; transition: all 0.2s ease;
+
+      &.checked {
+        border-color: #852920; background-color: #852920;
+        ion-icon { color: #ffffff; font-size: 12px; }
+      }
+    }
+
+    .select-all-text { font-size: 16px; color: #2c3e50; font-weight: 500; }
+  }
+
+  .delete-btn {
+    width: 42px; height: 42px;
+    border-radius: 50%; background-color: #f8f9fa;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease;
+
+    ion-icon { color: #852920; font-size: 20px; }
+    &:active { transform: scale(0.92); }
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
