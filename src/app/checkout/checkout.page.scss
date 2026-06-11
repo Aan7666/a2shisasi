@@ -35,21 +35,20 @@ ion-content.checkout-content-pane {
     transform: translateY(-100%);
     background-color: rgba(255, 255, 255, 0.2);
     border: none;
-    border-radius: 20px;
-    padding: 6px 14px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    padding: 0;
     color: #ffffff;
     display: flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
     cursor: pointer;
-    font-family: 'Lexend', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
     transition: all 0.2s ease;
     outline: none;
 
     ion-icon {
-      font-size: 16px;
+      font-size: 18px;
       stroke-width: 48px;
     }
 

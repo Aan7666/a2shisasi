@@ -1,15 +1,25 @@
 <ion-content [fullscreen]="true">
   <!-- Red Header Section -->
   <div class="red-header">
-     <div class="header-button filter-btn" [style.display]="isSelectionMode ? 'none' : 'flex'">
-       <ion-icon name="funnel-outline"></ion-icon>
-     </div>
-    <h1 class="header-title">Wishlist</h1>
-    <div class="header-button more-btn" id="more-menu-trigger" [style.display]="isSelectionMode ? 'none' : 'flex'">
+    <!-- Standard Header -->
+    <div class="header-button search-btn" [style.display]="(isSelectionMode || isSearchBarOpen) ? 'none' : 'flex'" (click)="toggleSearchBar()">
+      <ion-icon name="search-outline"></ion-icon>
+    </div>
+    <h1 class="header-title" *ngIf="!isSearchBarOpen">Wishlist</h1>
+    <div class="header-button more-btn" id="more-menu-trigger" [style.display]="(isSelectionMode || isSearchBarOpen) ? 'none' : 'flex'">
       <ion-icon name="ellipsis-vertical"></ion-icon>
     </div>
-    <div class="header-button cancel-btn" *ngIf="isSelectionMode" (click)="cancelSelection()">
+    <div class="header-button cancel-btn" *ngIf="isSelectionMode && !isSearchBarOpen" (click)="cancelSelection()">
       Cancel
+    </div>
+
+    <!-- Search Bar Header -->
+    <div class="search-bar-container-header" *ngIf="isSearchBarOpen">
+      <ion-icon name="search-outline" class="search-icon-header"></ion-icon>
+      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="filterWishlistItems()" placeholder="Search wishlist..." class="search-input-header" autofocus />
+      <button class="clear-search-btn" (click)="toggleSearchBar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
     </div>
   </div>
 
@@ -31,10 +41,10 @@
   <div class="main-container">
     
     <!-- Wishlist Items List -->
-    <div class="wishlist-list" *ngIf="wishlistItems.length > 0">
+    <div class="wishlist-list" *ngIf="filteredWishlistItems.length > 0">
       <div 
         class="wishlist-card" 
-        *ngFor="let item of wishlistItems" 
+        *ngFor="let item of filteredWishlistItems" 
         [class.in-selection]="isSelectionMode"
         (click)="isSelectionMode ? toggleItemSelection(item) : null"
       >
@@ -87,8 +97,19 @@
         </div>
       </div>
 
-      <h2 class="empty-title">save your wishes here!</h2>
-      <p class="empty-subtitle">your wish list will be saved here.</p>
+      <h2 class="empty-title">Save your wishes here!</h2>
+      <p class="empty-subtitle">Your wishlist will be saved here.</p>
+    </div>
+
+    <!-- No Results State -->
+    <div class="empty-state" *ngIf="isSearchBarOpen && filteredWishlistItems.length === 0 && wishlistItems.length > 0">
+      <div class="illustration-container">
+        <div class="icon-wrapper medal-wrapper" style="left: 78px; bottom: 30px;">
+          <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+        </div>
+      </div>
+      <h2 class="empty-title">No matching results</h2>
+      <p class="empty-subtitle">We couldn't find anything matching your search.</p>
     </div>
 
 

@@ -21,6 +21,8 @@
 
     <!-- Tab tengah: kosong, hanya label -->
     <ion-tab-button (click)="selectTab('courses')" [class.tab-selected]="activeTab === 'courses'" class="tab-center">
+      <ion-icon name="book" class="center-icon"></ion-icon>
+      <ion-label>Courses</ion-label>
     </ion-tab-button>
 
     <ion-tab-button (click)="selectTab('search')" [class.tab-selected]="activeTab === 'search'">

@@ -52,7 +52,8 @@ ion-content {
       background-color: rgba(255, 255, 255, 0.25);
     }
 
-    &.filter-btn {
+    &.filter-btn,
+    &.search-btn {
       left: 24px;
     }
 
@@ -70,7 +71,7 @@ ion-content {
       background-color: rgba(255, 255, 255, 0.15);
       text-transform: capitalize;
       height: auto;
-      
+
       &:active {
         transform: scale(0.95);
         background-color: rgba(255, 255, 255, 0.3);
@@ -249,7 +250,7 @@ ion-content {
       &.checked {
         border-color: #852920;
         background-color: #852920;
-        
+
         ion-icon {
           color: #ffffff;
           font-size: 14px;
@@ -309,7 +310,8 @@ ion-content {
       color: #757575;
       font-weight: 600;
 
-      .meta-students, .meta-rating {
+      .meta-students,
+      .meta-rating {
         display: flex;
         align-items: center;
         gap: 4px;
@@ -345,7 +347,7 @@ ion-content {
     align-items: center;
     cursor: pointer;
     user-select: none;
-    
+
     .checkbox-circle {
       width: 22px;
       height: 22px;
@@ -361,7 +363,7 @@ ion-content {
       &.checked {
         border-color: #852920;
         background-color: #852920;
-        
+
         ion-icon {
           color: #ffffff;
           font-size: 12px;
@@ -407,6 +409,69 @@ ion-content {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateX(-10px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
+
+/* Header Inline Search Bar Styles */
+.search-bar-container-header {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 6px 14px;
+  width: 100%;
+  max-width: 320px;
+  box-sizing: border-box;
+  animation: fadeIn 0.2s ease-out;
+
+  .search-icon-header {
+    color: #ffffff;
+    font-size: 20px;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-input-header {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: 14px;
+    flex: 1;
+    width: 100%;
+    height: 24px;
+    line-height: 24px;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  .clear-search-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #ffffff;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-left: 8px;
+    transition: transform 0.2s ease;
+
+    &:active {
+      transform: scale(0.85);
+    }
+  }
+}

@@ -17,35 +17,11 @@ export class WishlistPage implements OnInit {
   isSelectionMode: boolean = false;
   isAllSelected: boolean = false;
 
-  wishlistItems = [
-    {
-      id: 1,
-      title: 'Web Development Masterclass',
-      instructor: 'Pedri Gonzalez',
-      price: 'Rp450.000',
-      rating: 4.7,
-      students: 10,
-      selected: false
-    },
-    {
-      id: 2,
-      title: 'Mobile Development with Ionic',
-      instructor: 'Pedri Gonzalez',
-      price: 'Rp450.000',
-      rating: 4.7,
-      students: 12,
-      selected: false
-    },
-    {
-      id: 3,
-      title: 'Cyber Security Essentials',
-      instructor: 'Pedri Gonzalez',
-      price: 'Rp250.000',
-      rating: 4.7,
-      students: 8,
-      selected: false
-    }
-  ];
+  filteredWishlistItems: any[] = [];
+  isSearchBarOpen: boolean = false;
+  searchQuery: string = '';
+
+  wishlistItems: any[] = [];
 
   constructor(
     private authService: AuthService,
@@ -55,6 +31,7 @@ export class WishlistPage implements OnInit {
 
   ngOnInit() {
     this.checkLoginStatus();
+    this.filteredWishlistItems = [...this.wishlistItems];
   }
 
   onSelectItems() {
@@ -93,6 +70,7 @@ export class WishlistPage implements OnInit {
     }
 
     this.wishlistItems = this.wishlistItems.filter(item => !item.selected);
+    this.filterWishlistItems();
     this.isAllSelected = false;
     this.isSelectionMode = false;
 
@@ -107,6 +85,7 @@ export class WishlistPage implements OnInit {
 
   ionViewWillEnter() {
     this.checkLoginStatus();
+    this.filteredWishlistItems = [...this.wishlistItems];
   }
 
   checkLoginStatus() {
@@ -115,5 +94,29 @@ export class WishlistPage implements OnInit {
 
   redirectToLogin() {
     this.router.navigate(['/login']);
+  }
+
+  goToSearch() {
+    this.router.navigate(['/tabs/search']);
+  }
+
+  toggleSearchBar() {
+    this.isSearchBarOpen = !this.isSearchBarOpen;
+    if (!this.isSearchBarOpen) {
+      this.searchQuery = '';
+      this.filterWishlistItems();
+    }
+  }
+
+  filterWishlistItems() {
+    const query = this.searchQuery.toLowerCase().trim();
+    if (!query) {
+      this.filteredWishlistItems = [...this.wishlistItems];
+    } else {
+      this.filteredWishlistItems = this.wishlistItems.filter(item => 
+        item.title.toLowerCase().includes(query) || 
+        item.instructor.toLowerCase().includes(query)
+      );
+    }
   }
 }

@@ -1,146 +1,146 @@
-<div class="login-wrapper">
+<ion-content [fullscreen]="true">
+  <div class="login-wrapper">
 
-  <!-- SVG background curves -->
-  <div class="background-layer">
-    <div class="bg-waves">
-      <svg width="100%" height="100%" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="350" cy="180" r="280" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="40" />
-        <circle cx="350" cy="180" r="160" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="16" />
-        <path d="M-100,450 C80,350 180,550 500,350" fill="none" stroke="rgba(255, 255, 255, 0.06)" stroke-width="60" />
-        <path d="M-50,430 C130,330 230,530 550,330" fill="none" stroke="rgba(255, 255, 255, 0.03)" stroke-width="30" />
-        <circle cx="50" cy="650" r="140" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="12" />
-      </svg>
+    <!-- SVG background curves -->
+    <div class="background-layer">
+      <div class="bg-waves">
+        <svg width="100%" height="100%" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="350" cy="180" r="280" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="40" />
+          <circle cx="350" cy="180" r="160" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="16" />
+          <path d="M-100,450 C80,350 180,550 500,350" fill="none" stroke="rgba(255, 255, 255, 0.06)" stroke-width="60" />
+          <path d="M-50,430 C130,330 230,530 550,330" fill="none" stroke="rgba(255, 255, 255, 0.03)" stroke-width="30" />
+          <circle cx="50" cy="650" r="140" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="12" />
+        </svg>
+      </div>
     </div>
-  </div>
 
-  <div class="stars-container">
-    <div *ngFor="let star of stars" class="star" [ngStyle]="{
-           'width.px': star.size,
-           'height.px': star.size,
-           'top.%': star.top,
-           'left.%': star.left,
-           'opacity': star.opacity
-         }">
+    <div class="stars-container">
+      <div *ngFor="let star of stars" class="star" [ngStyle]="{
+             'width.px': star.size,
+             'height.px': star.size,
+             'top.%': star.top,
+             'left.%': star.left,
+             'opacity': star.opacity
+           }">
+      </div>
     </div>
-  </div>
 
-  <!-- Close Button -->
-  <button class="close-btn" (click)="prevStep()" aria-label="Back">
-    <span class="material-symbols-outlined">close</span>
-  </button>
+    <!-- Close Button -->
+    <button class="close-btn" (click)="prevStep()" aria-label="Back">
+      <span class="material-symbols-outlined">close</span>
+    </button>
 
-  <!-- Brand Area -->
-  <div class="brand-area">
-    <span class="brand-tagline">
-      Where Learning Meets Opportunity<br>
-      Learn, Grow, Succeed!
-    </span>
-  </div>
-
-  <main class="main-content">
-    <div class="login-card animate-slide-up">
-
-      <!-- STEP 1: Email Address -->
-      <ng-container *ngIf="step === 1">
-        <div class="card-header">
-          <h1>Sign Up</h1>
-          <p>
-            Already Have an Account?
-            <a routerLink="/login" class="text-link">Sign In</a>
-          </p>
-        </div>
-
-        <h2 class="form-title">Create Your Account</h2>
-
-        <form class="login-form" (ngSubmit)="nextStep()">
-          <div class="input-group">
-            <span class="material-symbols-outlined input-icon">mail</span>
-            <input type="email" [(ngModel)]="email" name="email" placeholder="Email Address" class="custom-input" required />
-          </div>
-
-          <button type="submit" class="btn-primary">
-            <span>Continue</span>
-          </button>
-        </form>
-
-        <div class="divider">
-          <div class="line"></div>
-          <span>Or Continue with</span>
-          <div class="line"></div>
-        </div>
-
-        <button type="button" class="btn-social" (click)="registerWithGoogle()">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-            alt="Google" />
-          <span>Google</span>
-        </button>
-      </ng-container>
-
-      <!-- STEP 2: OTP Verification -->
-      <ng-container *ngIf="step === 2">
-        <div class="card-header">
-          <h1>Sign Up</h1>
-          <p class="subtitle-text">
-            Enter the 6-digit code sent to your email.
-          </p>
-        </div>
-
-        <h2 class="form-title">Check Your Email</h2>
-
-        <form class="login-form" (ngSubmit)="nextStep()">
-          <div class="input-group">
-            <span class="material-symbols-outlined input-icon">lock</span>
-            <input type="text" [(ngModel)]="otpCode" name="otpCode" placeholder="OTP Code" class="custom-input" maxlength="6" required />
-          </div>
-
-          <button type="submit" class="btn-primary">
-            <span>Continue</span>
-          </button>
-        </form>
-
-        <div class="resend-container">
-          Didn't get a code?
-          <a href="#" (click)="$event.preventDefault();" class="text-link">Send again</a>
-        </div>
-      </ng-container>
-
-      <!-- STEP 3: Account Details -->
-      <ng-container *ngIf="step === 3">
-        <div class="card-header">
-          <h1>Sign Up</h1>
-          <p class="subtitle-text">
-            Enter your name and create a password to continue
-          </p>
-        </div>
-
-        <h2 class="form-title">Complete Your Account</h2>
-
-        <form class="login-form" (ngSubmit)="nextStep()">
-          <!-- Full Name -->
-          <div class="input-group">
-            <span class="material-symbols-outlined input-icon">person</span>
-            <input type="text" [(ngModel)]="fullName" name="fullName" placeholder="Full Name" class="custom-input" required />
-          </div>
-
-          <!-- Password -->
-          <div class="input-group">
-            <span class="material-symbols-outlined input-icon">password</span>
-            <input type="password" [(ngModel)]="password" name="password" placeholder="Password" class="custom-input" required />
-          </div>
-
-          <!-- Confirm Password -->
-          <div class="input-group">
-            <span class="material-symbols-outlined input-icon">password</span>
-            <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm Password" class="custom-input" required />
-          </div>
-
-          <button type="submit" class="btn-primary">
-            <span>Continue</span>
-          </button>
-        </form>
-      </ng-container>
-
+    <!-- Brand Area -->
+    <div class="brand-area">
+      <img alt="EduFlow Logo" class="brand-logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDduszmxaEl8ehTb68Bvhe8yULBRwgeeaG669BbHpKupUnELcBT6vOwWL5HoK3ZSuqaNfvLg8YCYm662gDc6fQA4Q61GvvqfC9Qh0NsmPoLKeYHikYLXjauXUQsgNKCr4H-dJ_vizS-fE3hSozKOVH67TbU3G-xcx9M_5CpUiocdX8AuoGUzFU6dCNU6MS0Uw3yqPr5jo5ahXSgqdGbjVYLmw1uBjbnBe5Lq0UCOBjJF8FVesrDNFSTxcDfNcVvpA3e7jRIiTpZuO4" />
+      <span class="brand-tagline">Learn without limits.</span>
     </div>
-  </main>
-</div>
+
+    <main class="main-content">
+      <div class="login-card animate-slide-up">
+
+        <!-- STEP 1: Email Address -->
+        <ng-container *ngIf="step === 1">
+          <div class="card-header">
+            <h1>Register</h1>
+            <p>
+              Already Have an Account?
+              <a routerLink="/login" class="text-link">Login</a>
+            </p>
+          </div>
+
+          <h2 class="form-title">Create Your Account</h2>
+
+          <form class="login-form" (ngSubmit)="nextStep()">
+            <div class="input-group">
+              <span class="material-symbols-outlined input-icon">mail</span>
+              <input type="email" [(ngModel)]="email" name="email" placeholder="Email Address" class="custom-input" required />
+            </div>
+
+            <button type="submit" class="btn-primary">
+              <span>Continue</span>
+            </button>
+          </form>
+
+          <div class="divider">
+            <div class="line"></div>
+            <span>Or Continue with</span>
+            <div class="line"></div>
+          </div>
+
+          <button type="button" class="btn-social" (click)="registerWithGoogle()">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+              alt="Google" />
+            <span>Google</span>
+          </button>
+        </ng-container>
+
+        <!-- STEP 2: OTP Verification -->
+        <ng-container *ngIf="step === 2">
+          <div class="card-header">
+            <h1>Register</h1>
+            <p class="subtitle-text">
+              Enter the 6-digit code sent to your email.
+            </p>
+          </div>
+
+          <h2 class="form-title">Check Your Email</h2>
+
+          <form class="login-form" (ngSubmit)="nextStep()">
+            <div class="input-group">
+              <span class="material-symbols-outlined input-icon">lock</span>
+              <input type="text" [(ngModel)]="otpCode" name="otpCode" placeholder="OTP Code" class="custom-input" maxlength="6" required />
+            </div>
+
+            <button type="submit" class="btn-primary">
+              <span>Continue</span>
+            </button>
+          </form>
+
+          <div class="resend-container">
+            Didn't get a code?
+            <a href="#" (click)="$event.preventDefault();" class="text-link">Send again</a>
+          </div>
+        </ng-container>
+
+        <!-- STEP 3: Account Details -->
+        <ng-container *ngIf="step === 3">
+          <div class="card-header">
+            <h1>Register</h1>
+            <p class="subtitle-text">
+              Enter your name and create a password to continue
+            </p>
+          </div>
+
+          <h2 class="form-title">Complete Your Account</h2>
+
+          <form class="login-form" (ngSubmit)="nextStep()">
+            <!-- Full Name -->
+            <div class="input-group">
+              <span class="material-symbols-outlined input-icon">person</span>
+              <input type="text" [(ngModel)]="fullName" name="fullName" placeholder="Full Name" class="custom-input" required />
+            </div>
+
+            <!-- Password -->
+            <div class="input-group">
+              <span class="material-symbols-outlined input-icon">password</span>
+              <input type="password" [(ngModel)]="password" name="password" placeholder="Password" class="custom-input" required />
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="input-group">
+              <span class="material-symbols-outlined input-icon">password</span>
+              <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm Password" class="custom-input" required />
+            </div>
+
+            <button type="submit" class="btn-primary">
+              <span>Continue</span>
+            </button>
+          </form>
+        </ng-container>
+
+      </div>
+    </main>
+  </div>
+</ion-content>

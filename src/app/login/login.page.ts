@@ -95,4 +95,9 @@ export class LoginPage implements OnInit {
     alert('Google Login successful!');
     this.router.navigate(['/tabs-after-login']);
   }
+
+  loginDummyDirect() {
+    this.authService.loginLocal('user@gmail.com', 'user123');
+    this.router.navigate(['/tabs-after-login']);
+  }
 }

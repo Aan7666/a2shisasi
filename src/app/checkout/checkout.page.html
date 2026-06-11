@@ -4,9 +4,8 @@
   <ng-container *ngIf="currentStep === 1">
     <!-- Header Section -->
     <div class="red-header">
-      <button class="back-btn" (click)="goBack()">
+      <button class="back-btn" (click)="goBack()" aria-label="Back">
         <ion-icon name="chevron-back-outline"></ion-icon>
-        <span>Back</span>
       </button>
       <h1 class="header-title">Checkout</h1>
     </div>
@@ -133,9 +132,8 @@
   <ng-container *ngIf="currentStep === 2">
     <!-- Header Section -->
     <div class="red-header">
-      <button class="back-btn" (click)="goBack()">
+      <button class="back-btn" (click)="goBack()" aria-label="Back">
         <ion-icon name="chevron-back-outline"></ion-icon>
-        <span>Back</span>
       </button>
       <h1 class="header-title">Checkout</h1>
       <button class="help-btn">Help</button>

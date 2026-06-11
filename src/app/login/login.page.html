@@ -1,93 +1,90 @@
-<div class="login-wrapper">
+<ion-content [fullscreen]="true">
+  <div class="login-wrapper">
 
-  <div class="background-layer">
+    <!-- Close Button -->
+    <button class="close-btn" routerLink="/tabs" aria-label="Back">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+
+
+    <!-- Brand Area -->
     <div class="brand-area">
-      <span class="brand-title">Academy</span>
-      <span class="brand-subtitle">Sports & Outdoors</span>
+      <img alt="EduFlow Logo" class="brand-logo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDduszmxaEl8ehTb68Bvhe8yULBRwgeeaG669BbHpKupUnELcBT6vOwWL5HoK3ZSuqaNfvLg8YCYm662gDc6fQA4Q61GvvqfC9Qh0NsmPoLKeYHikYLXjauXUQsgNKCr4H-dJ_vizS-fE3hSozKOVH67TbU3G-xcx9M_5CpUiocdX8AuoGUzFU6dCNU6MS0Uw3yqPr5jo5ahXSgqdGbjVYLmw1uBjbnBe5Lq0UCOBjJF8FVesrDNFSTxcDfNcVvpA3e7jRIiTpZuO4" />
+      <span class="brand-tagline">Learn without limits.</span>
     </div>
-  </div>
 
-  <div class="stars-container">
-    <div *ngFor="let star of stars" class="star" [ngStyle]="{
-           'width.px': star.size,
-           'height.px': star.size,
-           'top.%': star.top,
-           'left.%': star.left,
-           'opacity': star.opacity
-         }">
-    </div>
-  </div>
 
-  <main class="main-content">
-    <div class="login-card animate-slide-up">
+    <main class="main-content">
+      <div class="login-card animate-slide-up">
 
-      <div class="card-header">
-        <h1>Login</h1>
-        <p>
-          Don't have an Account?
-          <a routerLink="/register" class="text-link">Register</a>
-        </p>
-      </div>
-
-      <h2 class="form-title">Login to your Account</h2>
-
-      <form class="login-form" (ngSubmit)="onLogin()">
-
-        <div class="input-group">
-          <span class="material-symbols-outlined input-icon">person</span>
-          <input type="text" [(ngModel)]="username" name="username" placeholder="Email or Username" class="custom-input"
-            required />
+        <div class="card-header">
+          <h1>Login</h1>
+          <p>
+            Don't have an Account?
+            <a routerLink="/register" class="text-link">Register</a>
+          </p>
         </div>
 
-        <div class="input-group">
-          <span class="material-symbols-outlined input-icon">password</span>
-          <input type="password" [(ngModel)]="password" name="password" placeholder="Password" class="custom-input"
-            required />
-        </div>
+        <h2 class="form-title">Login to your Account</h2>
 
-        <div class="forgot-password">
-          <a routerLink="/lupa-password" class="text-link-small">Forgot Password?</a>
-        </div>
+        <form class="login-form" (ngSubmit)="onLogin()">
 
-        <button type="submit" class="btn-primary">
-          <span>Login</span>
-        </button>
-      </form>
-
-      <div class="divider">
-        <div class="line"></div>
-        <span>Or Continue with</span>
-        <div class="line"></div>
-      </div>
-
-      <button type="button" class="btn-social" (click)="loginWithGoogle()">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-          alt="Google" />
-        <span>Google</span>
-      </button>
-
-      <div class="divider">
-        <div class="line"></div>
-        <span>Quick Demo Login</span>
-        <div class="line"></div>
-      </div>
-
-      <div class="dummy-login-container">
-        <button type="button" class="btn-dummy user" (click)="fillDummyCredentials('user')">
-          <span class="material-symbols-outlined">person</span>
-          <div class="dummy-text">
-            <span class="dummy-title">Demo User</span>
-            <span class="dummy-sub">user@gmail.com</span>
+          <div class="input-group">
+            <span class="material-symbols-outlined input-icon">person</span>
+            <input type="text" [(ngModel)]="username" name="username" placeholder="Email or Username" class="custom-input"
+              required />
           </div>
+
+          <div class="input-group">
+            <span class="material-symbols-outlined input-icon">password</span>
+            <input type="password" [(ngModel)]="password" name="password" placeholder="Password" class="custom-input"
+              required />
+          </div>
+
+          <div class="forgot-password">
+            <a routerLink="/lupa-password" class="text-link-small">Forgot Password?</a>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            <span>Login</span>
+          </button>
+        </form>
+
+        <div class="divider">
+          <div class="line"></div>
+          <span>Or Continue with</span>
+          <div class="line"></div>
+        </div>
+
+        <button type="button" class="btn-social" (click)="loginWithGoogle()">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+            alt="Google" />
+          <span>Google</span>
         </button>
+
+        <div class="divider">
+          <div class="line"></div>
+          <span>Quick Demo Login</span>
+          <div class="line"></div>
+        </div>
+
+        <div class="dummy-login-container">
+          <button type="button" class="btn-dummy user" (click)="fillDummyCredentials('user')">
+            <span class="material-symbols-outlined">person</span>
+            <div class="dummy-text">
+              <span class="dummy-title">Demo User</span>
+              <span class="dummy-sub">user@gmail.com</span>
+            </div>
+          </button>
+        </div>
+
+        <button type="button" class="btn-dummy-direct" (click)="loginDummyDirect()" style="margin-top: 12px;">
+          <span class="material-symbols-outlined">bolt</span>
+          <span>Dummy Login (After Login)</span>
+        </button>
+
       </div>
-
-      <button type="button" class="btn-guest" routerLink="/tabs" style="margin-top: 12px;">
-        <span class="material-symbols-outlined">logout</span>
-        <span>Tampilan belum Login</span>
-      </button>
-
-    </div>
-  </main>
-</div>
+    </main>
+  </div>
+</ion-content>

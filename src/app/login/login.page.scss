@@ -14,60 +14,110 @@ $input-bg: #DBDBDB;
 }
 
 ion-content {
-  --background: transparent;
+  --background: linear-gradient(180deg, #E86F45 0%, #A93026 50%, #611116 100%);
 }
+
 
 // ---- Wrapper ----
 .login-wrapper {
   position: relative;
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
-  overflow: hidden;
+  min-height: 100%;
   font-family: 'Lexend', sans-serif;
-  background: $primary; // fallback
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
 }
 
 // ---- Background Gradient Layer ----
 .background-layer {
-  position: fixed;
+  position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #832e25 0%, #a2453a 100%);
   z-index: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding-top: 45px;
+  pointer-events: none;
 }
 
-.brand-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+.bg-waves {
+  width: 100%;
+  height: 100%;
+  opacity: 0.95;
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
 }
 
-.brand-title {
+// ---- Close / Back Button ----
+.close-btn {
+  position: absolute;
+  top: 28px;
+  left: 28px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #ffffff;
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  text-transform: uppercase;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  .material-symbols-outlined {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
-.brand-subtitle {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
+// ---- Brand logo area ----
+.brand-area {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 100px;
+  margin-bottom: 36px;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.brand-logo {
+  max-height: 90px;
+  max-width: 240px;
+  width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
+  margin-bottom: 16px;
+}
+
+.brand-tagline {
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 // ---- Stars ambient layer ----
 .stars-container {
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   opacity: 0.1;
@@ -88,8 +138,8 @@ ion-content {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  min-height: 100vh;
-  min-height: 100dvh;
+  flex: 1;
+  min-height: 100svh;
 }
 
 
@@ -429,6 +479,40 @@ ion-content {
     .material-symbols-outlined {
       color: $primary;
     }
+  }
+}
+
+.btn-dummy-direct {
+  width: 100%;
+  height: 52px;
+  background-color: #852920;
+  color: #ffffff;
+  font-family: 'Lexend', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease, transform 0.1s;
+  box-sizing: border-box;
+  margin-top: 12px;
+  box-shadow: 0 4px 12px rgba(133, 41, 32, 0.2);
+
+  .material-symbols-outlined {
+    font-size: 20px;
+    font-variation-settings: 'FILL' 0, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+  }
+
+  &:hover {
+    background-color: #722018;
+  }
+
+  &:active {
+    transform: scale(0.97);
   }
 }
 

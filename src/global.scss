@@ -224,3 +224,12 @@ app-tabs ion-toolbar,
     }
   }
 }
+
+/* Enable smooth scrolling globally for all ionic content views */
+ion-content::part(scroll) {
+  scroll-behavior: smooth;
+  /* Native momentum scrolling on iOS/Android WebView */
+  -webkit-overflow-scrolling: touch;
+  /* Prevent scroll chaining to parent */
+  overscroll-behavior: contain;
+}

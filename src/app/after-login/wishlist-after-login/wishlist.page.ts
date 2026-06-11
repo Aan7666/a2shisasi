@@ -16,6 +16,10 @@ export class WishlistPage implements OnInit {
   isLoggedIn: boolean = false;
   isSelectionMode: boolean = false;
   isAllSelected: boolean = false;
+  
+  filteredWishlistItems: any[] = [];
+  isSearchBarOpen: boolean = false;
+  searchQuery: string = '';
 
   wishlistItems = [
     {
@@ -55,6 +59,7 @@ export class WishlistPage implements OnInit {
 
   ngOnInit() {
     this.checkLoginStatus();
+    this.filteredWishlistItems = [...this.wishlistItems];
   }
 
   onSelectItems() {
@@ -93,6 +98,7 @@ export class WishlistPage implements OnInit {
     }
 
     this.wishlistItems = this.wishlistItems.filter(item => !item.selected);
+    this.filterWishlistItems();
     this.isAllSelected = false;
     this.isSelectionMode = false;
 
@@ -107,6 +113,7 @@ export class WishlistPage implements OnInit {
 
   ionViewWillEnter() {
     this.checkLoginStatus();
+    this.filteredWishlistItems = [...this.wishlistItems];
   }
 
   checkLoginStatus() {
@@ -115,5 +122,29 @@ export class WishlistPage implements OnInit {
 
   redirectToLogin() {
     this.router.navigate(['/login']);
+  }
+
+  goToSearch() {
+    this.router.navigate(['/tabs-after-login/search']);
+  }
+
+  toggleSearchBar() {
+    this.isSearchBarOpen = !this.isSearchBarOpen;
+    if (!this.isSearchBarOpen) {
+      this.searchQuery = '';
+      this.filterWishlistItems();
+    }
+  }
+
+  filterWishlistItems() {
+    const query = this.searchQuery.toLowerCase().trim();
+    if (!query) {
+      this.filteredWishlistItems = [...this.wishlistItems];
+    } else {
+      this.filteredWishlistItems = this.wishlistItems.filter(item => 
+        item.title.toLowerCase().includes(query) || 
+        item.instructor.toLowerCase().includes(query)
+      );
+    }
   }
 }

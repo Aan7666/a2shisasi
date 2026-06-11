@@ -35,4 +35,8 @@ export class CoursesPage implements OnInit {
   redirectToLogin() {
     this.router.navigate(['/login']);
   }
+
+  goToSearch() {
+    this.router.navigate(['/tabs/search']);
+  }
 }
