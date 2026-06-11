@@ -2,11 +2,13 @@
   <!-- Red Header Section -->
   <div class="red-header">
     <!-- Standard Header -->
-    <div class="header-button search-btn" [style.display]="(isSelectionMode || isSearchBarOpen) ? 'none' : 'flex'" (click)="toggleSearchBar()">
+    <div class="header-button search-btn" [style.display]="(isSelectionMode || isSearchBarOpen) ? 'none' : 'flex'"
+      (click)="toggleSearchBar()">
       <ion-icon name="search-outline"></ion-icon>
     </div>
     <h1 class="header-title" *ngIf="!isSearchBarOpen">Wishlist</h1>
-    <div class="header-button more-btn" id="more-menu-trigger" [style.display]="(isSelectionMode || isSearchBarOpen) ? 'none' : 'flex'">
+    <div class="header-button more-btn" id="more-menu-trigger"
+      [style.display]="(isSelectionMode || isSearchBarOpen) ? 'none' : 'flex'">
       <ion-icon name="ellipsis-vertical"></ion-icon>
     </div>
     <div class="header-button cancel-btn" *ngIf="isSelectionMode && !isSearchBarOpen" (click)="cancelSelection()">
@@ -16,7 +18,8 @@
     <!-- Search Bar Header -->
     <div class="search-bar-container-header" *ngIf="isSearchBarOpen">
       <ion-icon name="search-outline" class="search-icon-header"></ion-icon>
-      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="filterWishlistItems()" placeholder="Search wishlist..." class="search-input-header" autofocus />
+      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="filterWishlistItems()"
+        placeholder="Search wishlist..." class="search-input-header" autofocus />
       <button class="clear-search-btn" (click)="toggleSearchBar()">
         <ion-icon name="close-outline"></ion-icon>
       </button>
@@ -39,15 +42,11 @@
 
   <!-- Main Container -->
   <div class="main-container">
-    
+
     <!-- Wishlist Items List -->
     <div class="wishlist-list" *ngIf="filteredWishlistItems.length > 0">
-      <div 
-        class="wishlist-card" 
-        *ngFor="let item of filteredWishlistItems" 
-        [class.in-selection]="isSelectionMode"
-        (click)="isSelectionMode ? toggleItemSelection(item) : null"
-      >
+      <div class="wishlist-card" *ngFor="let item of filteredWishlistItems" [class.in-selection]="isSelectionMode"
+        (click)="isSelectionMode ? toggleItemSelection(item) : null">
         <!-- Selection Checkbox -->
         <div class="selection-checkbox" *ngIf="isSelectionMode">
           <div class="checkbox-circle" [class.checked]="item.selected">
@@ -58,12 +57,12 @@
         <div class="card-img-placeholder">
           <ion-icon name="heart" class="heart-icon"></ion-icon>
         </div>
-        
+
         <div class="card-body">
           <h3 class="course-title">{{ item.title }}</h3>
           <p class="course-instructor">{{ item.instructor }}</p>
           <p class="course-price">{{ item.price }}</p>
-          
+
           <div class="card-meta-row">
             <span class="meta-students">
               <ion-icon name="people-outline"></ion-icon>
@@ -85,12 +84,12 @@
         <div class="icon-wrapper desktop-wrapper">
           <ion-icon name="desktop-outline" class="empty-icon"></ion-icon>
         </div>
-        
+
         <!-- Medal (Center/Bottom) -->
         <div class="icon-wrapper medal-wrapper">
           <ion-icon name="medal-outline" class="empty-icon"></ion-icon>
         </div>
-        
+
         <!-- Book (Right) -->
         <div class="icon-wrapper book-wrapper">
           <ion-icon name="book-outline" class="empty-icon"></ion-icon>
@@ -125,7 +124,7 @@
       </div>
       <span class="select-all-text">All</span>
     </div>
-    
+
     <div class="right-actions">
       <button class="delete-btn" (click)="deleteSelected()">
         <ion-icon name="trash"></ion-icon>

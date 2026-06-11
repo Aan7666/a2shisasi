@@ -20,7 +20,7 @@ export class ProfilePage implements OnInit {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.checkLoginStatus();
@@ -35,7 +35,7 @@ export class ProfilePage implements OnInit {
     if (this.isLoggedIn) {
       const currentUser = this.authService.getCurrentUser();
       if (currentUser) {
-        this.userName = currentUser.fullName;
+        this.userName = currentUser.name;
         this.userEmail = currentUser.email;
       }
     } else {
@@ -49,11 +49,21 @@ export class ProfilePage implements OnInit {
   }
 
   onSignOut() {
-    this.authService.logout();
-    this.isLoggedIn = false;
-    this.userName = '';
-    this.userEmail = '';
-    this.router.navigate(['/login']);
+    this.authService.logout().subscribe({
+      next: () => {
+        this.isLoggedIn = false;
+        this.userName = '';
+        this.userEmail = '';
+        this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.authService.clearSession();
+        this.isLoggedIn = false;
+        this.userName = '';
+        this.userEmail = '';
+        this.router.navigate(['/login']);
+      }
+    });
   }
 
   onAboutUs() {

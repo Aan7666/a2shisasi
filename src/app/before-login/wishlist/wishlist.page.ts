@@ -113,8 +113,8 @@ export class WishlistPage implements OnInit {
     if (!query) {
       this.filteredWishlistItems = [...this.wishlistItems];
     } else {
-      this.filteredWishlistItems = this.wishlistItems.filter(item => 
-        item.title.toLowerCase().includes(query) || 
+      this.filteredWishlistItems = this.wishlistItems.filter(item =>
+        item.title.toLowerCase().includes(query) ||
         item.instructor.toLowerCase().includes(query)
       );
     }

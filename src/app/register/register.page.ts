@@ -20,16 +20,14 @@ interface Star {
   imports: [IonicModule, CommonModule, FormsModule, RouterLink]
 })
 export class RegisterPage implements OnInit {
-
   stars: Star[] = [];
-
-  // Wizard state properties
   step: number = 1;
   email: string = '';
   otpCode: string = '';
   fullName: string = '';
   password: string = '';
   confirmPassword: string = '';
+  isLoading: boolean = false;
 
   constructor(private router: Router, private authService: AuthService) { }
 
@@ -48,17 +46,9 @@ export class RegisterPage implements OnInit {
 
   nextStep() {
     if (this.step === 1) {
-      if (this.email.trim() && this.email.includes('@')) {
-        this.step = 2;
-      } else {
-        alert('Please enter a valid email address.');
-      }
+      this.onSendOtp();
     } else if (this.step === 2) {
-      if (this.otpCode.trim() && this.otpCode.length === 6) {
-        this.step = 3;
-      } else {
-        alert('Please enter a valid 6-digit OTP code.');
-      }
+      this.onVerifyOtp();
     } else if (this.step === 3) {
       this.onRegister();
     }
@@ -72,39 +62,96 @@ export class RegisterPage implements OnInit {
     }
   }
 
+  onSendOtp() {
+    if (!this.email.trim() || !this.email.includes('@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    this.isLoading = true;
+    this.authService.sendOtp(this.email.trim()).subscribe({
+      next: (result) => {
+        this.isLoading = false;
+        if (result.success) {
+          this.step = 2;
+        } else {
+          alert(result.message || 'Gagal mengirim OTP.');
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        alert(err.error?.message || 'Gagal mengirim OTP.');
+      }
+    });
+  }
+
+  onVerifyOtp() {
+    if (!this.otpCode.trim() || this.otpCode.length !== 6) {
+      alert('Please enter a valid 6-digit OTP code.');
+      return;
+    }
+    this.isLoading = true;
+    this.authService.verifyOtp(this.email, this.otpCode).subscribe({
+      next: (result) => {
+        this.isLoading = false;
+        if (result.success) {
+          this.step = 3;
+        } else {
+          alert(result.message || 'OTP tidak valid.');
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        alert(err.error?.message || 'OTP tidak valid atau sudah expired.');
+      }
+    });
+  }
+
   onRegister() {
     if (!this.fullName.trim()) {
       alert('Please enter your full name.');
       return;
     }
-    if (!this.password || this.password.length < 6) {
-      alert('Password must be at least 6 characters.');
+    if (!this.password || this.password.length < 8) {
+      alert('Password minimal 8 karakter.');
       return;
     }
     if (this.password !== this.confirmPassword) {
       alert('Passwords do not match.');
       return;
     }
-    
-    const result = this.authService.register({
+    this.isLoading = true;
+    this.authService.completeRegister({
       email: this.email,
-      fullName: this.fullName,
-      password: this.password
+      name: this.fullName,
+      password: this.password,
+      password_confirmation: this.confirmPassword
+    }).subscribe({
+      next: (result) => {
+        this.isLoading = false;
+        if (result.success) {
+          alert('Registrasi berhasil! Silakan login.');
+          this.router.navigate(['/login']);
+        } else {
+          alert(result.message || 'Registrasi gagal.');
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        alert(err.error?.message || 'Registrasi gagal.');
+      }
     });
-
-    if (result.success) {
-      alert('Registration successful! Please login.');
-      // Redirect to login page upon success
-      this.router.navigate(['/login']);
-    } else {
-      alert(result.message);
-    }
   }
 
-  registerWithGoogle() {
-    console.log('Register dengan Google...');
-    // Mock successful sign in with Google
-    this.email = 'google.user@example.com';
-    this.step = 2;
+  async registerWithGoogle() {
+    try {
+      const result = await this.authService.getGoogleAuthUrl();
+      if (result?.data?.url) {
+        window.open(result.data.url, '_system');
+      } else {
+        alert('Gagal mendapatkan URL Google.');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan. Coba lagi.');
+    }
   }
 }

@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
 import { Platform, AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { App } from '@capacitor/app';
+import { App, URLOpenListenerEvent } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
 import { Location } from '@angular/common';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -15,12 +17,34 @@ export class AppComponent {
     private platform: Platform,
     private alertController: AlertController,
     private router: Router,
-    private location: Location
+    private location: Location,
+    private authService: AuthService
   ) {
     this.initializeApp();
   }
 
   initializeApp() {
+    App.addListener('appUrlOpen', async (event: URLOpenListenerEvent) => {
+      console.log('Deep link received:', event.url); // ← tambah ini
+      const url = new URL(event.url);
+      const token = url.searchParams.get('token');
+      const userData = url.searchParams.get('user');
+      const isNewUser = url.searchParams.get('is_new_user');
+      console.log('token:', token); // ← tambah ini
+      console.log('isNewUser:', isNewUser); // ← tambah ini
+      await Browser.close();
+
+      if (isNewUser === '1') {
+        const data = JSON.parse(decodeURIComponent(url.searchParams.get('data') || '{}'));
+        localStorage.setItem('google_register_data', JSON.stringify(data));
+        this.router.navigate(['/register'], { queryParams: { step: 'google' } });
+      } else if (token && userData) {
+        const user = JSON.parse(decodeURIComponent(userData));
+        localStorage.setItem('a2shi_token', token);
+        localStorage.setItem('a2shi_user', JSON.stringify(user));
+        this.router.navigate(['/tabs-after-login']);
+      }
+    });
     this.platform.ready().then(() => {
       this.setupBackButtonBehavior();
     });

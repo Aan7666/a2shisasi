@@ -180,7 +180,7 @@ ion-content {
   width: 100%;
 
   h1 {
-    font-size: 32px;
+    font-size: 24px;
     font-weight: 700;
     color: $text-dark;
     margin: 0 0 6px;
@@ -188,7 +188,7 @@ ion-content {
   }
 
   p {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     color: $text-muted;
     margin: 0;
@@ -214,7 +214,7 @@ ion-content {
 // ---- Section labels ----
 .form-title {
   width: 100%;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: $text-muted;
   margin: 0 0 16px;
@@ -255,10 +255,10 @@ ion-content {
 
 .custom-input {
   width: 100%;
-  height: 56px;
+  height: 48px;
   background-color: $input-bg;
   border: none;
-  border-radius: 9999px;
+  border-radius: 20px;
   padding: 0 24px 0 58px;
   font-family: 'Lexend', sans-serif;
   font-size: 14px;
@@ -281,14 +281,14 @@ ion-content {
 // ---- Action Buttons ----
 .btn-primary {
   width: 100%;
-  height: 56px;
+  height: 48px;
   background-color: $button-color;
   color: #ffffff;
   font-family: 'Lexend', sans-serif;
   font-size: 16px;
   font-weight: 500;
   border: none;
-  border-radius: 9999px;
+  border-radius: 20px;
   box-shadow: 0 4px 16px rgba(154, 64, 53, 0.25);
   display: flex;
   align-items: center;
@@ -342,7 +342,7 @@ ion-content {
   font-size: 14px;
   font-weight: 500;
   border: none;
-  border-radius: 9999px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;

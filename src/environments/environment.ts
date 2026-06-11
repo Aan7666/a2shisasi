@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: 'https://a2shi-academy.io/api'
+  apiUrl: 'https://a2shi.com/api'
 };
 
 /*

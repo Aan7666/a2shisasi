@@ -14,6 +14,8 @@
     flex: 1;
     display: block;
     position: relative;
+    overflow-y: auto;
+    min-height: 0;
   }
 }
 
@@ -30,8 +32,13 @@ ion-tab-button {
   --background: #ffffff;
   --color: #9e9e9e;
   --color-selected: #852920;
-  padding: 6px 0 4px;
+  padding: 6px 0 6px; /* Diubah agar seimbang atas bawah */
   min-width: 0;
+  
+  // Memaksa semua isi tab button (termasuk tab-center) berbaris rapi di bawah
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; 
 
   ion-icon {
     font-size: 22px;
@@ -58,10 +65,20 @@ ion-tab-button {
     }
   }
 
-  // Tab tengah — hanya tampilkan label, ikon dikosongkan
+  // ─── PERBAIKAN KHUSUS TAB TENGAH ───
   &.tab-center {
+    // Hapus margin-top besar yang merusak barisan kemarin
+    justify-content: flex-end; 
+
+    ion-icon {
+      // Kita sembunyikan ikon bawaan html agar spacenya kosong untuk bubble
+      visibility: hidden; 
+      opacity: 0;
+      font-size: 22px; /* Tetap beri ukuran agar tingginya sama dengan tab lain */
+    }
+
     ion-label {
-      margin-top: 38px; // dorong label ke bawah agar tidak tertimpa bubble
+      margin-top: 2px; /* Samakan persis dengan ion-label standar di atas */
       font-size: 10px;
     }
 
@@ -74,12 +91,13 @@ ion-tab-button {
 
 // ── Bubble FIXED — benar-benar di luar semua container ──────
 .floating-bubble {
+  pointer-events: none;
   position: fixed;
-  bottom: 12px; // (60px tab-bar / 2) + offset naik
+  bottom: 28px; // (60px tab-bar / 2) + offset naik
   left: 50%;
   transform: translateX(-50%);
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background-color: #852920;
   display: flex;
@@ -89,8 +107,9 @@ ion-tab-button {
   box-shadow: 0 4px 12px rgba(133, 41, 32, 0.4);
   cursor: pointer;
 
+
   ion-icon {
-    font-size: 26px;
+    font-size: 24px;
     color: #ffffff;
     pointer-events: none;
   }
@@ -104,7 +123,7 @@ ion-tab-button {
 // ── Sign in banner ──────────────────────────────────────────
 .signin-banner {
   position: fixed;
-  bottom: 60px;
+  bottom: 68px;
   left: 0;
   right: 0;
   height: 42px;

@@ -5,169 +5,91 @@ import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface User {
+  id: number;
   email: string;
-  fullName: string;
-  password?: string;
+  name: string;
+  role: string;
+  avatar?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly USERS_KEY = 'a2shi_users';
-  private readonly SESSION_KEY = 'a2shi_current_users';
+  private readonly TOKEN_KEY = 'a2shi_token';
+  private readonly USER_KEY = 'a2shi_user';
+  private readonly apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {
-    this.seedDummyUsers();
-  }
+  constructor(private http: HttpClient) { }
 
-  /**
-   * Seed dummy users for testing/offline mode if not already present
-   */
-  private seedDummyUsers(): void {
-    const users = this.getUsers();
-    const dummyUsers: User[] = [
-      {
-        email: 'admin@gmail.com',
-        fullName: 'Admin Dummy',
-        password: 'admin'
-      },
-      {
-        email: 'user@gmail.com',
-        fullName: 'User Dummy',
-        password: 'user123'
-      }
-    ];
-
-    let modified = false;
-    for (const dummy of dummyUsers) {
-      const exists = users.some(u => u.email.toLowerCase() === dummy.email.toLowerCase());
-      if (!exists) {
-        users.push(dummy);
-        modified = true;
-      }
-    }
-
-    if (modified) {
-      this.saveUsers(users);
-    }
-  }
-
-  /**
-   * Get all registered users from LocalStorage
-   */
-  private getUsers(): User[] {
-    const usersJson = localStorage.getItem(this.USERS_KEY);
-    return usersJson ? JSON.parse(usersJson) : [];
-  }
-
-  /**
-   * Save users list to LocalStorage
-   */
-  private saveUsers(users: User[]): void {
-    localStorage.setItem(this.USERS_KEY, JSON.stringify(users));
-  }
-
-  /**
-   * Register a new user
-   */
-  register(user: User): { success: boolean; message: string } {
-    if (!user.email || !user.fullName || !user.password) {
-      return { success: false, message: 'All fields are required.' };
-    }
-
-    const users = this.getUsers();
-
-    // Check if email already registered
-    const emailExists = users.some(u => u.email.toLowerCase() === user.email.toLowerCase());
-    if (emailExists) {
-      return { success: false, message: 'This email is already registered.' };
-    }
-
-    // Check if full name (username) already registered
-    const usernameExists = users.some(u => u.fullName.toLowerCase() === user.fullName.toLowerCase());
-    if (usernameExists) {
-      return { success: false, message: 'This full name is already registered.' };
-    }
-
-    // Add user
-    users.push(user);
-    this.saveUsers(users);
-
-    return { success: true, message: 'Registration successful!' };
-  }
-
-  /**
-   * Authenticate a user locally by email/username and password
-   */
-  loginLocal(emailOrUsername: string, passwordInput: string): { success: boolean; message: string; user?: User } {
-    if (!emailOrUsername || !passwordInput) {
-      return { success: false, message: 'Username and password are required.' };
-    }
-
-    const users = this.getUsers();
-    const query = emailOrUsername.toLowerCase();
-
-    // Find matching user
-    const foundUser = users.find(u =>
-      (u.email.toLowerCase() === query || u.fullName.toLowerCase() === query) &&
-      u.password === passwordInput
-    );
-
-    if (!foundUser) {
-      return { success: false, message: 'Invalid username/email or password.' };
-    }
-
-    // Set current active user session (omit password for security)
-    const sessionUser: User = {
-      email: foundUser.email,
-      fullName: foundUser.fullName
-    };
-    localStorage.setItem(this.SESSION_KEY, JSON.stringify(sessionUser));
-
-    return { success: true, message: 'Login successful!', user: sessionUser };
-  }
-
-  /**
-   * Authenticate a user via Laravel Backend API
-   */
-  login(email: string, passwordInput: string): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}/login`, {
-      email: email,
-      password: passwordInput
-    }).pipe(
+  // ── LOGIN ─────────────────────────────────────────────────
+  login(email: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/login`, { email, password }).pipe(
       tap(response => {
-        if (response && response.success && response.user) {
-          // Map backend response 'name' to 'fullName' for UI compatibility
-          const sessionUser: User = {
-            email: response.user.email,
-            fullName: response.user.name
-          };
-          localStorage.setItem(this.SESSION_KEY, JSON.stringify(sessionUser));
+        if (response?.data?.token) {
+          localStorage.setItem(this.TOKEN_KEY, response.data.token);
+          localStorage.setItem(this.USER_KEY, JSON.stringify(response.data.user));
         }
       })
     );
   }
 
-  /**
-   * Get current active user session
-   */
+  // ── GOOGLE LOGIN ──────────────────────────────────────────
+  getGoogleAuthUrl(): Promise<any> {
+    return fetch(`${this.apiUrl}/auth/google?source=mobile`, {
+      headers: { 'Accept': 'application/json' }
+    }).then(r => r.json());
+  }
+
+  // ── FORGOT PASSWORD ───────────────────────────────────────
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/forgot-password`, { email });
+  }
+
+  verifyForgotOtp(email: string, code: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/forgot-password/verify-otp`, { email, code });
+  }
+
+  resetPassword(email: string, password: string, password_confirmation: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/reset-password`, { email, password, password_confirmation });
+  }
+
+  // ── REGISTER ──────────────────────────────────────────────
+  sendOtp(email: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/register/send-otp`, { email });
+  }
+
+  verifyOtp(email: string, code: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/register/verify-otp`, { email, code });
+  }
+
+  completeRegister(data: { email: string; name: string; password: string; password_confirmation: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/register/complete`, data);
+  }
+
+  // ── LOGOUT ───────────────────────────────────────────────
+  logout(): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/auth/logout`, {}).pipe(
+      tap(() => this.clearSession())
+    );
+  }
+
+  clearSession(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
+  }
+
+  // ── HELPER ───────────────────────────────────────────────
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
   getCurrentUser(): User | null {
-    const sessionJson = localStorage.getItem(this.SESSION_KEY);
-    return sessionJson ? JSON.parse(sessionJson) : null;
+    const userJson = localStorage.getItem(this.USER_KEY);
+    return userJson ? JSON.parse(userJson) : null;
   }
 
-  /**
-   * End user session
-   */
-  logout(): void {
-    localStorage.removeItem(this.SESSION_KEY);
-  }
-
-  /**
-   * Check if user is logged in
-   */
   isLoggedIn(): boolean {
-    return this.getCurrentUser() !== null;
+    return !!this.getToken();
   }
 }

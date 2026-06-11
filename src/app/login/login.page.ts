@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { RouterLink, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { Browser } from '@capacitor/browser';
+import { environment } from '../../environments/environment';
 
 interface Star {
   size: number;
@@ -20,12 +22,11 @@ interface Star {
   imports: [IonicModule, CommonModule, FormsModule, RouterLink]
 })
 export class LoginPage implements OnInit {
-
   stars: Star[] = [];
-
-  // Form properties
-  username = '';
+  email = '';
   password = '';
+  isLoading = false;
+  showPassword = false;
 
   constructor(private router: Router, private authService: AuthService) { }
 
@@ -42,62 +43,48 @@ export class LoginPage implements OnInit {
     }));
   }
 
+  togglePassword() {
+    this.showPassword = !this.showPassword;
+  }
+
   onLogin() {
-    if (!this.username.trim() || !this.password) {
+    if (!this.email.trim() || !this.password) {
       alert('Please enter both email and password.');
       return;
     }
 
-    this.authService.login(this.username, this.password).subscribe({
+    this.isLoading = true;
+
+    this.authService.login(this.email, this.password).subscribe({
       next: (result) => {
+        this.isLoading = false;
         if (result.success) {
-          alert(result.message || 'Login successful!');
           this.router.navigate(['/tabs-after-login']);
         } else {
-          alert(result.message || 'Login failed.');
+          alert(result.message || 'Login gagal.');
         }
       },
       error: (err) => {
-        console.warn('API login failed, trying offline/local login...', err);
-        // Fallback to local authentication
-        const localResult = this.authService.loginLocal(this.username, this.password);
-        if (localResult.success) {
-          alert(localResult.message || 'Login successful (Offline Mode)!');
-          this.router.navigate(['/tabs-after-login']);
-        } else {
-          console.error(err);
-          const errMsg = err.error?.message || 'Email atau password salah!';
-          alert(errMsg);
-        }
+        this.isLoading = false;
+        const errMsg = err.error?.message || 'Email atau password salah!';
+        alert(errMsg);
       }
     });
   }
 
-  fillDummyCredentials(role: 'user') {
-    if (role === 'user') {
-      this.username = 'user@gmail.com';
-      this.password = 'user123';
+
+  async loginWithGoogle() {
+    try {
+      const result = await this.authService.getGoogleAuthUrl();
+      if (result?.data?.url) {
+        // UBAH DARI: window.open(result.data.url, '_system');
+        // MENJADI:
+        await Browser.open({ url: result.data.url });
+      } else {
+        alert('Gagal mendapatkan URL Google.');
+      }
+    } catch (err) {
+      alert('Terjadi kesalahan. Coba lagi.');
     }
-    this.onLogin();
-  }
-
-  loginWithGoogle() {
-    console.log('Login dengan Google...');
-    // Mock Google Login as a valid database session
-    const mockGoogleEmail = 'google.user@example.com';
-    // Register if doesn't exist, then login
-    this.authService.register({
-      email: mockGoogleEmail,
-      fullName: 'Google User',
-      password: 'google_password'
-    });
-    this.authService.loginLocal(mockGoogleEmail, 'google_password');
-    alert('Google Login successful!');
-    this.router.navigate(['/tabs-after-login']);
-  }
-
-  loginDummyDirect() {
-    this.authService.loginLocal('user@gmail.com', 'user123');
-    this.router.navigate(['/tabs-after-login']);
   }
 }

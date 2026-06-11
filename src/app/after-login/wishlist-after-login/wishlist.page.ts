@@ -16,7 +16,7 @@ export class WishlistPage implements OnInit {
   isLoggedIn: boolean = false;
   isSelectionMode: boolean = false;
   isAllSelected: boolean = false;
-  
+
   filteredWishlistItems: any[] = [];
   isSearchBarOpen: boolean = false;
   searchQuery: string = '';
@@ -141,8 +141,8 @@ export class WishlistPage implements OnInit {
     if (!query) {
       this.filteredWishlistItems = [...this.wishlistItems];
     } else {
-      this.filteredWishlistItems = this.wishlistItems.filter(item => 
-        item.title.toLowerCase().includes(query) || 
+      this.filteredWishlistItems = this.wishlistItems.filter(item =>
+        item.title.toLowerCase().includes(query) ||
         item.instructor.toLowerCase().includes(query)
       );
     }

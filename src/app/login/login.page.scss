@@ -22,7 +22,12 @@ ion-content {
 .login-wrapper {
   position: relative;
   width: 100%;
-  min-height: 100%;
+  
+  /* ── UBAH DI SINI ── */
+  min-height: 100dvh; /* Gunakan dvh agar presisi dengan layar HP */
+  overflow-y: auto;   /* Izinkan halaman discroll secara keseluruhan HANYA jika layar HP terlalu pendek */
+  /* ────────────────── */
+  
   font-family: 'Lexend', sans-serif;
   display: flex;
   flex-direction: column;
@@ -51,7 +56,7 @@ ion-content {
 // ---- Close / Back Button ----
 .close-btn {
   position: absolute;
-  top: 28px;
+  top: 38px;
   left: 28px;
   width: 44px;
   height: 44px;
@@ -136,10 +141,15 @@ ion-content {
   position: relative;
   z-index: 10;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-end; /* Memastikan Card Putih selalu ditarik ke paling bawah */
   justify-content: center;
-  flex: 1;
-  min-height: 100svh;
+  
+  /* ── UBAH DI SINI ── */
+  flex: 1; /* Cukup gunakan flex: 1 agar dia otomatis mengisi sisa ruang dari wrapper */
+  width: 100%;
+  
+  /* HAPUS BARIS INI: min-height: 100svh; */
+  /* ────────────────── */
 }
 
 
@@ -149,20 +159,31 @@ ion-content {
     transform: translateY(100%);
   }
   to {
-    transform: translateY(20px);
+    transform: translateY(0);
   }
 }
 
 .login-card {
   background: #ffffff;
-  width: 100%;
-  max-width: 480px;
-  border-radius: 48px 48px 0 0;
-  padding: 32px 32px 48px;
-  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.12);
+  
+  /* Memastikan card selalu full-width di HP */
+  width: 100% !important;
+  max-width: 100% !important; 
+  margin: 0 !important;
+  
+  /* Melengkung di atas, rata (siku) di bawah agar menempel ke ujung layar */
+  border-radius: 30px 30px 0 0 !important;
+  
+  /* ── TRIK PROFESIONAL ANDA DITERAPKAN DI SINI ── */
+  padding: 32px 24px calc(24px + env(safe-area-inset-bottom, 16px)) 24px !important; 
+  box-sizing: border-box !important;
+  
+  box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  align-items: center;
+  
+  /* Membiarkan tinggi card menyesuaikan isinya, tanpa batasan max-height */
+  height: fit-content; 
 
   &.animate-slide-up {
     animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -176,7 +197,7 @@ ion-content {
   width: 100%;
 
   h1 {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 600;
     color: $on-surface;
     margin: 0 0 8px;
@@ -184,7 +205,7 @@ ion-content {
   }
 
   p {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 400;
     color: $on-surface-variant;
     margin: 0;
@@ -204,7 +225,7 @@ ion-content {
 // ---- Form Title ----
 .form-title {
   width: 100%;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   color: $on-surface;
   margin: 0 0 20px;
@@ -243,10 +264,10 @@ ion-content {
 
 .custom-input {
   width: 100%;
-  height: 58px;
+  height: 48px;
   background-color: $input-bg;
   border: none;
-  border-radius: 9999px;
+  border-radius: 20px;
   padding: 0 20px 0 58px;
   font-family: 'Lexend', sans-serif;
   font-size: 14px;
@@ -266,10 +287,47 @@ ion-content {
   }
 }
 
+// ---- Toggle Password Button ----
+.toggle-password-btn {
+  position: absolute;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 50%;
+  color: $on-surface-variant;
+  transition: color 0.2s, background-color 0.2s;
+  outline: none;
+  z-index: 2;
+
+  .material-symbols-outlined {
+    font-size: 20px;
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+
+  &:hover {
+    color: $primary;
+    background-color: rgba($primary, 0.08);
+  }
+
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
+// Input dengan toggle — beri padding kanan agar teks tidak tertutup ikon mata
+.input-group:has(.toggle-password-btn) .custom-input {
+  padding-right: 52px;
+}
+
 // ---- Forgot Password ----
 .forgot-password {
   display: flex;
-  justify-content: center;
+  justify-content: right;
   margin-top: 4px;
 }
 
@@ -288,14 +346,14 @@ ion-content {
 // ---- Primary Button (Login) ----
 .btn-primary {
   width: 100%;
-  height: 58px;
+  height: 48px;
   background-color: $primary-container;
   color: #ffffff;
   font-family: 'Lexend', sans-serif;
   font-size: 16px;
   font-weight: 500;
   border: none;
-  border-radius: 9999px;
+  border-radius: 20px;
   box-shadow: 0 4px 16px rgba(131, 46, 37, 0.3);
   display: flex;
   align-items: center;
@@ -340,7 +398,7 @@ ion-content {
 // ---- Social Login Button ----
 .btn-social {
   width: 100%;
-  height: 52px;
+  height: 48px;
   background-color: $input-bg;
   color: $on-surface-variant;
   font-family: 'Lexend', sans-serif;
@@ -520,5 +578,48 @@ ion-content {
 @media (min-width: 480px) {
   .login-card {
     padding: 40px 48px 56px;
+  }
+}
+
+// =========================================================================
+// COMPACT MODE: Khusus untuk HP dengan layar pendek (seperti Galaxy S8+)
+// =========================================================================
+@media (max-height: 760px) {
+  
+  // 1. Perkecil logo sedikit untuk menghemat ruang di atas
+  .brand-logo {
+    width: 100px !important;
+  }
+  
+  // 2. Kurangi padding atas pada Card Putih
+  .login-card {
+    padding-top: 24px !important; 
+  }
+
+  // 3. Kurangi jarak margin pada teks Header
+  .card-header {
+    margin-bottom: 12px !important;
+  }
+  
+  .form-title {
+    margin-bottom: 8px !important;
+  }
+
+  // 4. Kurangi jarak antar kolom input
+  .login-form {
+    gap: 10px !important;
+  }
+
+  // 5. Kurangi margin pada garis pembatas (Divider)
+  .divider {
+    margin: 12px 0 !important;
+  }
+
+  // 6. Sedikit kurangi tinggi semua input & tombol (dari 48px menjadi 44px)
+  .custom-input, 
+  .btn-primary, 
+  .btn-guest, 
+  .btn-social {
+    height: 44px !important;
   }
 }

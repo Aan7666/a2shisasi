@@ -13,126 +13,80 @@
 
     <h2 class="section-title">Trending Courses</h2>
     <div class="horizontal-scroll">
+      <!-- Loading indicator -->
+      <div *ngIf="isLoadingCourses" style="display: flex; justify-content: center; width: 100%; padding: 20px 0;">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+      </div>
 
-      <div class="mini-course-card" [routerLink]="['/detail-course']" style="cursor: pointer;">
-        <div class="card-img-placeholder"></div>
+      <!-- No courses message -->
+      <div *ngIf="!isLoadingCourses && courses.length === 0" style="text-align: center; width: 100%; padding: 20px 0; color: #757575;">
+        Tidak ada course saat ini.
+      </div>
+
+      <!-- Dynamic Course Cards -->
+      <div *ngFor="let course of courses" 
+           class="mini-course-card" 
+           [routerLink]="['/detail-course']" 
+           [queryParams]="{ id: course.id }" 
+           style="cursor: pointer;">
+        <div class="card-img-placeholder">
+          <img [src]="getCourseImageUrl(course)" alt="{{ course.title }}" style="width: 100%; height: 100%; object-fit: cover;" />
+        </div>
         <div class="card-body">
-          <h3 class="course-title">Web Development</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp450.000</p>
+          <h3 class="course-title">{{ course.title }}</h3>
+          <p class="course-instructor">{{ course.instructor?.name || 'Unknown' }}</p>
+          <p class="course-price">Rp{{ course.price | number:'1.0-0' }}</p>
           <div class="card-meta-row">
             <span class="meta-students">
               <ion-icon name="people-outline"></ion-icon>
-              10
+              0
             </span>
             <span class="meta-rating">
               <ion-icon name="star"></ion-icon>
-              4.7
+              5.0
             </span>
           </div>
         </div>
       </div>
-
-      <div class="mini-course-card" [routerLink]="['/detail-course']" style="cursor: pointer;">
-        <div class="card-img-placeholder"></div>
-        <div class="card-body">
-          <h3 class="course-title">Mobile Development</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp450.000</p>
-          <div class="card-meta-row">
-            <span class="meta-students">
-              <ion-icon name="people-outline"></ion-icon>
-              10
-            </span>
-            <span class="meta-rating">
-              <ion-icon name="star"></ion-icon>
-              4.7
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="mini-course-card" [routerLink]="['/detail-course']" style="cursor: pointer;">
-        <div class="card-img-placeholder"></div>
-        <div class="card-body">
-          <h3 class="course-title">Cyber Security</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp250.000</p>
-          <div class="card-meta-row">
-            <span class="meta-students">
-              <ion-icon name="people-outline"></ion-icon>
-              10
-            </span>
-            <span class="meta-rating">
-              <ion-icon name="star"></ion-icon>
-              4.7
-            </span>
-          </div>
-        </div>
-      </div>
-
     </div>
 
     <h2 class="section-title">Top Courses in IT</h2>
     <div class="horizontal-scroll">
+      <!-- Loading indicator -->
+      <div *ngIf="isLoadingCourses" style="display: flex; justify-content: center; width: 100%; padding: 20px 0;">
+        <ion-spinner name="crescent" color="primary"></ion-spinner>
+      </div>
 
-      <div class="mini-course-card" [routerLink]="['/detail-course']" style="cursor: pointer;">
-        <div class="card-img-placeholder"></div>
+      <!-- No courses message -->
+      <div *ngIf="!isLoadingCourses && courses.length === 0" style="text-align: center; width: 100%; padding: 20px 0; color: #757575;">
+        Tidak ada course saat ini.
+      </div>
+
+      <!-- Dynamic Course Cards -->
+      <div *ngFor="let course of courses" 
+           class="mini-course-card" 
+           [routerLink]="['/detail-course']" 
+           [queryParams]="{ id: course.id }" 
+           style="cursor: pointer;">
+        <div class="card-img-placeholder">
+          <img [src]="getCourseImageUrl(course)" alt="{{ course.title }}" style="width: 100%; height: 100%; object-fit: cover;" />
+        </div>
         <div class="card-body">
-          <h3 class="course-title">Web Development</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp150.000</p>
+          <h3 class="course-title">{{ course.title }}</h3>
+          <p class="course-instructor">{{ course.instructor?.name || 'Unknown' }}</p>
+          <p class="course-price">Rp{{ course.price | number:'1.0-0' }}</p>
           <div class="card-meta-row">
             <span class="meta-students">
               <ion-icon name="people-outline"></ion-icon>
-              10
+              0
             </span>
             <span class="meta-rating">
               <ion-icon name="star"></ion-icon>
-              4.7
+              5.0
             </span>
           </div>
         </div>
       </div>
-
-      <div class="mini-course-card" [routerLink]="['/detail-course']" style="cursor: pointer;">
-        <div class="card-img-placeholder"></div>
-        <div class="card-body">
-          <h3 class="course-title">Mobile Development</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp150.000</p>
-          <div class="card-meta-row">
-            <span class="meta-students">
-              <ion-icon name="people-outline"></ion-icon>
-              10
-            </span>
-            <span class="meta-rating">
-              <ion-icon name="star"></ion-icon>
-              4.7
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="mini-course-card" [routerLink]="['/detail-course']" style="cursor: pointer;">
-        <div class="card-img-placeholder"></div>
-        <div class="card-body">
-          <h3 class="course-title">Cyber Security</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp350.000</p>
-          <div class="card-meta-row">
-            <span class="meta-students">
-              <ion-icon name="people-outline"></ion-icon>
-              10
-            </span>
-            <span class="meta-rating">
-              <ion-icon name="star"></ion-icon>
-              4.7
-            </span>
-          </div>
-        </div>
-      </div>
-
     </div>
 
     <h2 class="section-title">Category</h2>

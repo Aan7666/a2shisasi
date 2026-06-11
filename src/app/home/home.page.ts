@@ -29,7 +29,7 @@ export class HomePage implements OnInit {
     this.isLoggedIn = this.authService.isLoggedIn();
     if (this.isLoggedIn) {
       const currentUser = this.authService.getCurrentUser();
-      this.userName = currentUser ? currentUser.fullName : 'User';
+      this.userName = currentUser ? currentUser.name : 'User';
     } else {
       this.userName = 'User';
     }

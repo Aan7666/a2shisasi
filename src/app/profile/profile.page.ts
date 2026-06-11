@@ -35,7 +35,7 @@ export class ProfilePage implements OnInit {
     if (this.isLoggedIn) {
       const currentUser = this.authService.getCurrentUser();
       if (currentUser) {
-        this.userName = currentUser.fullName;
+        this.userName = currentUser.name;
         this.userEmail = currentUser.email;
       }
     } else {
