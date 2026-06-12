@@ -10,20 +10,49 @@ export interface Instructor {
   avatar?: string;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
 export interface Lesson {
   id: number;
   course_id: number;
   title: string;
-  type: string;
-  duration: string;
+  type: string;           // 'video' | 'text' | 'document'
+  description?: string;
+  duration?: string;
+  duration_or_pages?: string;
   order: number;
+  is_completed?: boolean;
+}
+
+export interface LessonDetail {
+  id: number;
+  title: string;
+  type: string;
+  description?: string;
+  content?: string;       // for type='text'
+  file_url?: string;      // video URL (Cloudinary) or PDF URL
+  file_name?: string;
+  duration_or_pages?: string;
+  order: number;
+  is_completed: boolean;
+  next_lesson_id?: number;
+  prev_lesson_id?: number;
 }
 
 export interface Course {
   id: number;
   title: string;
   instructor?: Instructor;
+  category?: Category;
   price: number;
+  rating?: number;
+  total_students?: number;
+  lessons_count?: number;
+  has_access?: boolean;
   status: string;
   thumbnail?: string;
   image?: string;
@@ -33,7 +62,21 @@ export interface Course {
   thumbnail_path?: string;
   image_url?: string;
   description?: string;
+  created_at?: string;
   lessons?: Lesson[];
+}
+
+export interface CategorySection {
+  category_id: number;
+  category_name: string;
+  category_slug: string;
+  courses: Course[];
+}
+
+export interface HomeData {
+  trending: Course[];
+  category_sections: CategorySection[];
+  newest: Course[];
 }
 
 @Injectable({
@@ -43,6 +86,31 @@ export class CourseService {
   private readonly apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
+
+  // GET /api/home
+  getHomeData(limit: number = 8): Observable<HomeData> {
+    return this.http.get<any>(`${this.apiUrl}/home?limit=${limit}`).pipe(
+      map(response => {
+        const data = response?.data || response;
+        return {
+          trending: data?.trending || [],
+          category_sections: data?.category_sections || [],
+          newest: data?.newest || [],
+        } as HomeData;
+      })
+    );
+  }
+
+  // GET /api/categories
+  getCategories(): Observable<any[]> {
+    return this.http.get<any>(`${this.apiUrl}/categories`).pipe(
+      map(response => {
+        if (response?.data) return response.data;
+        if (Array.isArray(response)) return response;
+        return [];
+      })
+    );
+  }
 
   // GET /api/courses
   getCourses(): Observable<Course[]> {
@@ -91,4 +159,32 @@ export class CourseService {
       })
     );
   }
+
+  // ── LESSON ENDPOINTS ──────────────────────────────────────
+
+  // GET /api/student/courses/{courseId}/lessons
+  getLessons(courseId: number): Observable<Lesson[]> {
+    return this.http.get<any>(`${this.apiUrl}/student/courses/${courseId}/lessons`).pipe(
+      map(response => {
+        if (response?.data) return response.data;
+        if (Array.isArray(response)) return response;
+        return [];
+      })
+    );
+  }
+
+  // GET /api/student/courses/{courseId}/lessons/{lessonId}
+  getLessonDetail(courseId: number, lessonId: number): Observable<LessonDetail> {
+    return this.http.get<any>(`${this.apiUrl}/student/courses/${courseId}/lessons/${lessonId}`).pipe(
+      map(response => response?.data || response)
+    );
+  }
+
+  // POST /api/student/courses/{courseId}/lessons/{lessonId}/complete
+  markComplete(courseId: number, lessonId: number): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/student/courses/${courseId}/lessons/${lessonId}/complete`, {}
+    );
+  }
 }
+

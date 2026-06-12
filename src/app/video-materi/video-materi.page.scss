@@ -766,3 +766,195 @@ ion-content.video-materi-content {
 .animate-fade-in {
   animation: fadeIn 0.25s ease-out forwards;
 }
+
+/* ── NEW: Real video element ── */
+.real-video-player {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 6;
+  background: #000;
+}
+
+/* ── Completed badge overlay ── */
+.completed-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: rgba(39, 174, 96, 0.25);
+  border: 1px solid rgba(39, 174, 96, 0.6);
+  border-radius: 20px;
+  padding: 4px 12px;
+  color: #a8f0c6;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 10px;
+
+  ion-icon { font-size: 14px; color: #2ecc71; }
+}
+
+/* ── Text content box ── */
+.text-content-box {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  .text-content-body {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    line-height: 1.65;
+    font-weight: 400;
+
+    p { margin: 0 0 12px 0; }
+    h1, h2, h3 { color: #ffffff; margin: 0 0 8px 0; }
+    a { color: #ffbb00; }
+  }
+}
+
+/* ── Prev / Next lesson navigation row ── */
+.lesson-nav-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+
+  .nav-btn {
+    flex: 1;
+    height: 42px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255,255,255,0.35);
+    background: transparent;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+
+    ion-icon { font-size: 16px; }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    &:not(:disabled):active {
+      background: rgba(255,255,255,0.12);
+      transform: scale(0.97);
+    }
+  }
+
+  .next-btn {
+    background-color: #9D00FF;
+    border-color: #9D00FF;
+    box-shadow: 0 4px 12px rgba(157,0,255,0.3);
+  }
+}
+
+/* ── Lessons loading skeleton ── */
+.lessons-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 4px 0;
+}
+
+.skeleton-lesson {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+
+  .sk-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    flex-shrink: 0;
+    animation: skWave 1.4s infinite;
+  }
+
+  .sk-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sk-line {
+    height: 10px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.15);
+    animation: skWave 1.4s infinite;
+    &.wide   { width: 80%; }
+    &.narrow { width: 50%; }
+  }
+}
+
+@keyframes skWave {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}
+
+/* ── Completed lesson card state ── */
+.lesson-card-item.completed {
+  .lesson-number .done-icon {
+    color: #2ecc71;
+    font-size: 18px;
+    display: block;
+  }
+  .lesson-body .lesson-name {
+    color: rgba(255,255,255,0.6);
+    text-decoration: line-through;
+  }
+}
+
+/* ── Playing indicator (3 animated bars) ── */
+.playing-indicator {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 16px;
+  flex-shrink: 0;
+
+  span {
+    display: block;
+    width: 3px;
+    background: #9D00FF;
+    border-radius: 2px;
+    animation: bar 0.8s ease-in-out infinite;
+
+    &:nth-child(1) { height: 6px;  animation-delay: 0s; }
+    &:nth-child(2) { height: 14px; animation-delay: 0.15s; }
+    &:nth-child(3) { height: 9px;  animation-delay: 0.3s; }
+  }
+}
+
+@keyframes bar {
+  0%, 100% { transform: scaleY(0.5); }
+  50%       { transform: scaleY(1.2); }
+}
+
+/* ── Type badge variants ── */
+.doc-badge  ion-icon { color: #f39c12; }
+.text-badge ion-icon { color: #3498db; }
+
+/* ── Error overlay ── */
+.error-state-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 20px;
+
+  ion-icon { font-size: 48px; color: rgba(255,255,255,0.5); }
+  p { color: rgba(255,255,255,0.8); font-size: 13px; margin: 0; line-height: 1.5; }
+}
+

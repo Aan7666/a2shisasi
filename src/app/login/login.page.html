@@ -1,5 +1,33 @@
 <ion-content [fullscreen]="true">
   <div class="login-wrapper">
+
+        <!-- SVG background curves -->
+    <div class="background-layer">
+      <div class="bg-waves">
+        <svg width="100%" height="100%" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"
+          xmlns="http://www.w3.org/2000/svg">
+          <circle cx="350" cy="180" r="280" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="40" />
+          <circle cx="350" cy="180" r="160" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="16" />
+          <path d="M-100,450 C80,350 180,550 500,350" fill="none" stroke="rgba(255, 255, 255, 0.06)"
+            stroke-width="60" />
+          <path d="M-50,430 C130,330 230,530 550,330" fill="none" stroke="rgba(255, 255, 255, 0.03)"
+            stroke-width="30" />
+          <circle cx="50" cy="650" r="140" fill="none" stroke="rgba(255, 255, 255, 0.04)" stroke-width="12" />
+        </svg>
+      </div>
+    </div>
+
+    <div class="stars-container">
+      <div *ngFor="let star of stars" class="star" [ngStyle]="{
+             'width.px': star.size,
+             'height.px': star.size,
+             'top.%': star.top,
+             'left.%': star.left,
+             'opacity': star.opacity
+           }">
+      </div>
+    </div>
+    
     <!-- Close Button -->
     <button class="close-btn" routerLink="/tabs" aria-label="Back">
       <span class="material-symbols-outlined">close</span>

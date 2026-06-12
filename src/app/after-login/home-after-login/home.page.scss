@@ -111,6 +111,8 @@ ion-content {
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease;
+  cursor: pointer;
+  pointer-events: auto;
 
   &:active {
     transform: scale(0.98);

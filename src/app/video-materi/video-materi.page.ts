@@ -1,222 +1,132 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
-import { Router } from '@angular/router';
-
-interface Lesson {
-  id: string;
-  number: number;
-  title: string;
-  type: 'video' | 'quiz';
-  durationText: string;
-  durationSeconds: number;
-  resourcesCount?: number;
-  questionsCount?: number;
-}
-
-interface Section {
-  title: string;
-  lessons: Lesson[];
-}
-
-interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctIndex: number;
-}
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CourseService, Lesson, LessonDetail } from '../services/course.service';
 
 @Component({
   selector: 'app-video-materi',
   templateUrl: './video-materi.page.html',
   styleUrls: ['./video-materi.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule, RouterModule, TitleCasePipe]
 })
 export class VideoMateriPage implements OnInit, OnDestroy {
-  activeTab: 'pelajaran' = 'pelajaran';
-  
-  courseTitle: string = 'Belajar Figma dari awal sampai mahir';
-  instructorName: string = 'Frank Esteban';
-  instructorTitle: string = 'Figma designer Team';
-  
-  sections: Section[] = [
-    {
-      title: 'Bagian 1 - Pembelajaran pemula figma',
-      lessons: [
-        {
-          id: 'b1-l1',
-          number: 1,
-          title: 'Croping tambah font atur style font',
-          type: 'video',
-          durationText: 'Video - 08:09 mnt - sumber daya (1)',
-          durationSeconds: 489,
-          resourcesCount: 1
-        },
-        {
-          id: 'b1-l2',
-          number: 2,
-          title: 'Tambah warna dan gradient warna',
-          type: 'video',
-          durationText: 'Video - 08:09 mnt - sumber daya (1)',
-          durationSeconds: 489,
-          resourcesCount: 1
-        },
-        {
-          id: 'b1-l3',
-          number: 3,
-          title: 'Tambah warna dan gradient warna',
-          type: 'quiz',
-          durationText: 'Kuis - 4 pertanyaan',
-          durationSeconds: 0,
-          questionsCount: 4
-        }
-      ]
-    },
-    {
-      title: 'Bagian 2 - Pembelajaran pemula figma',
-      lessons: [
-        {
-          id: 'b2-l1',
-          number: 1,
-          title: 'Croping tambah font atur style font',
-          type: 'video',
-          durationText: 'Video - 08:09 mnt - sumber daya (1)',
-          durationSeconds: 489,
-          resourcesCount: 1
-        },
-        {
-          id: 'b2-l2',
-          number: 2,
-          title: 'Tambah warna dan gradient warna',
-          type: 'video',
-          durationText: 'Video - 08:09 mnt - sumber daya (1)',
-          durationSeconds: 489,
-          resourcesCount: 1
-        },
-        {
-          id: 'b2-l3',
-          number: 3,
-          title: 'Tambah warna dan gradient warna',
-          type: 'quiz',
-          durationText: 'Kuis - 4 pertanyaan',
-          durationSeconds: 0,
-          questionsCount: 4
-        }
-      ]
-    }
-  ];
 
-  activeLesson!: Lesson;
-  activeSectionIndex: number = 0;
-  activeLessonIndex: number = 0;
+  // ── Params from route ──
+  courseId: number = 0;
+  lessonId: number = 0;
 
-  // Video playback simulation states
+  // ── State ──
+  lessons: Lesson[] = [];
+  activeLesson: LessonDetail | null = null;
+  isLoadingList: boolean = true;
+  isLoadingLesson: boolean = false;
+  hasError: boolean = false;
+
+  // ── Video playback ──
   isPlaying: boolean = false;
   currentTime: number = 0;
   videoInterval: any = null;
   videoProgress: number = 0;
 
-  // Interactive Quiz states
-  quizActive: boolean = false;
-  currentQuestionIndex: number = 0;
-  selectedAnswerIndex: number = -1;
-  quizCompleted: boolean = false;
-  quizScore: number = 0;
-
-  quizQuestions: QuizQuestion[] = [
-    {
-      question: 'Apa kegunaan utama dari Auto Layout di Figma?',
-      options: [
-        'Membuat desain responsif yang menyesuaikan ukuran konten secara dinamis',
-        'Mengedit foto dan gambar berbasis pixel (raster)',
-        'Mengekspor file langsung menjadi format PDF interaktif',
-        'Membuat animasi transisi 3D antar screen'
-      ],
-      correctIndex: 0
-    },
-    {
-      question: 'Bagaimana shortcut keyboard standar untuk membuat Component baru di Figma?',
-      options: [
-        'Ctrl + Shift + C (atau Cmd + Shift + C)',
-        'Ctrl + Alt + K (atau Cmd + Option + K)',
-        'Ctrl + Shift + G (atau Cmd + Shift + G)',
-        'Ctrl + Z (atau Cmd + Z)'
-      ],
-      correctIndex: 1
-    },
-    {
-      question: 'Apa kegunaan fitur \'Constraints\' pada objek di Figma?',
-      options: [
-        'Membatasi jumlah warna yang boleh dipakai dalam satu halaman',
-        'Mengontrol perilaku posisi dan ukuran elemen saat frame induknya diubah ukurannya',
-        'Menghapus layer yang tidak aktif secara otomatis untuk menghemat memori',
-        'Mengunci semua layer agar tidak bisa digeser sama sekali'
-      ],
-      correctIndex: 1
-    },
-    {
-      question: 'Format file apa saja yang secara bawaan didukung Figma saat melakukan Export?',
-      options: [
-        'Hanya format PNG dan JPEG saja',
-        'PNG, JPG, SVG, dan PDF',
-        'EXE, APK, dan DMG saja',
-        'MP4, AVI, dan WebM saja'
-      ],
-      correctIndex: 1
-    }
-  ];
+  // ── Completion ──
+  markingComplete: boolean = false;
 
   constructor(
+    private route: ActivatedRoute,
     private router: Router,
+    private courseService: CourseService,
     private toastController: ToastController
-  ) {
-    // Set initial active lesson to Section 1 Lesson 1
-    this.activeLesson = this.sections[0].lessons[0];
-  }
+  ) {}
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      this.courseId = Number(params['course_id']) || 0;
+      this.lessonId = Number(params['lesson_id']) || 0;
+
+      if (!this.courseId) {
+        this.hasError = true;
+        this.isLoadingList = false;
+        return;
+      }
+      this.loadLessons();
+    });
   }
 
   ngOnDestroy() {
     this.clearVideoInterval();
   }
 
-  goBack() {
-    window.history.back();
+  // ── Load lesson list ──────────────────────────────────────
+  loadLessons() {
+    this.isLoadingList = true;
+    this.courseService.getLessons(this.courseId).subscribe({
+      next: (data) => {
+        this.lessons = data;
+        this.isLoadingList = false;
+
+        // Pick which lesson to open
+        const target = this.lessonId
+          ? data.find(l => l.id === this.lessonId)
+          : data[0];
+
+        if (target) {
+          this.openLesson(target.id);
+        }
+      },
+      error: (err) => {
+        console.error('Gagal memuat lessons', err);
+        this.hasError = true;
+        this.isLoadingList = false;
+      }
+    });
   }
 
-  selectLesson(sectionIndex: number, lessonIndex: number) {
+  // ── Open a specific lesson ────────────────────────────────
+  openLesson(lessonId: number) {
     this.clearVideoInterval();
     this.isPlaying = false;
     this.currentTime = 0;
     this.videoProgress = 0;
-    this.quizActive = false;
-    this.quizCompleted = false;
+    this.isLoadingLesson = true;
+    this.lessonId = lessonId;
 
-    this.activeSectionIndex = sectionIndex;
-    this.activeLessonIndex = lessonIndex;
-    this.activeLesson = this.sections[sectionIndex].lessons[lessonIndex];
+    this.courseService.getLessonDetail(this.courseId, lessonId).subscribe({
+      next: (data) => {
+        this.activeLesson = data;
+        this.isLoadingLesson = false;
+      },
+      error: (err) => {
+        console.error('Gagal memuat detail lesson', err);
+        this.isLoadingLesson = false;
+        this.showToast('Gagal memuat materi. Coba lagi.');
+      }
+    });
   }
 
+  // ── Video controls ────────────────────────────────────────
   togglePlay() {
-    if (this.activeLesson.type !== 'video') return;
+    if (!this.activeLesson || this.activeLesson.type !== 'video') return;
 
     if (this.isPlaying) {
       this.clearVideoInterval();
       this.isPlaying = false;
     } else {
       this.isPlaying = true;
+      const totalSec = this.parseDurationToSeconds(this.activeLesson.duration_or_pages);
       this.videoInterval = setInterval(() => {
-        if (this.currentTime < this.activeLesson.durationSeconds) {
+        if (this.currentTime < totalSec) {
           this.currentTime += 1;
-          this.videoProgress = (this.currentTime / this.activeLesson.durationSeconds) * 100;
+          this.videoProgress = totalSec > 0 ? (this.currentTime / totalSec) * 100 : 0;
         } else {
           this.clearVideoInterval();
           this.isPlaying = false;
           this.currentTime = 0;
           this.videoProgress = 0;
-          this.showToast('Video selesai diputar!');
+          this.showToast('Video selesai! Tandai sebagai selesai?');
+          this.markLessonComplete();
         }
       }, 1000);
     }
@@ -235,70 +145,61 @@ export class VideoMateriPage implements OnInit, OnDestroy {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 
-  // Quiz methods
-  startQuiz() {
-    this.quizActive = true;
-    this.currentQuestionIndex = 0;
-    this.selectedAnswerIndex = -1;
-    this.quizCompleted = false;
-    this.quizScore = 0;
+  /** Parses "08:30" or "510" or "8 mnt" to total seconds */
+  parseDurationToSeconds(dur: string | undefined): number {
+    if (!dur) return 0;
+    const mmss = dur.match(/^(\d+):(\d+)$/);
+    if (mmss) return Number(mmss[1]) * 60 + Number(mmss[2]);
+    const mins = dur.match(/(\d+)\s*mnt/i);
+    if (mins) return Number(mins[1]) * 60;
+    const num = parseInt(dur, 10);
+    return isNaN(num) ? 0 : num;
   }
 
-  selectAnswer(index: number) {
-    this.selectedAnswerIndex = index;
+  // ── Mark lesson complete ──────────────────────────────────
+  markLessonComplete() {
+    if (!this.activeLesson || this.activeLesson.is_completed || this.markingComplete) return;
+    this.markingComplete = true;
+
+    this.courseService.markComplete(this.courseId, this.activeLesson.id).subscribe({
+      next: () => {
+        if (this.activeLesson) this.activeLesson.is_completed = true;
+        // Update is_completed in the sidebar list too
+        const found = this.lessons.find(l => l.id === this.activeLesson?.id);
+        if (found) found.is_completed = true;
+        this.markingComplete = false;
+        this.showToast('Pelajaran selesai! ✅');
+      },
+      error: () => { this.markingComplete = false; }
+    });
   }
 
-  submitAnswer() {
-    if (this.selectedAnswerIndex === -1) {
-      this.showToast('Pilih salah satu jawaban terlebih dahulu!');
+  // ── Navigation ────────────────────────────────────────────
+  goToNextLesson() {
+    if (!this.activeLesson?.next_lesson_id) {
+      this.showToast('Selamat! Kamu telah menyelesaikan semua materi. 🎉');
       return;
     }
-
-    const currentQuestion = this.quizQuestions[this.currentQuestionIndex];
-    if (this.selectedAnswerIndex === currentQuestion.correctIndex) {
-      this.quizScore += 1;
-    }
-
-    if (this.currentQuestionIndex < this.quizQuestions.length - 1) {
-      this.currentQuestionIndex += 1;
-      this.selectedAnswerIndex = -1;
-    } else {
-      this.quizCompleted = true;
-    }
+    this.openLesson(this.activeLesson.next_lesson_id);
   }
 
-  closeQuiz() {
-    this.quizActive = false;
+  goToPrevLesson() {
+    if (!this.activeLesson?.prev_lesson_id) return;
+    this.openLesson(this.activeLesson.prev_lesson_id);
   }
 
-  restartQuiz() {
-    this.startQuiz();
+  isActiveLessonInList(lesson: Lesson): boolean {
+    return lesson.id === this.activeLesson?.id;
   }
 
-  goToNextLesson() {
-    this.quizActive = false;
-    this.quizCompleted = false;
-
-    let nextLessonIndex = this.activeLessonIndex + 1;
-    let nextSectionIndex = this.activeSectionIndex;
-
-    if (nextLessonIndex >= this.sections[nextSectionIndex].lessons.length) {
-      nextLessonIndex = 0;
-      nextSectionIndex += 1;
-    }
-
-    if (nextSectionIndex < this.sections.length) {
-      this.selectLesson(nextSectionIndex, nextLessonIndex);
-      this.showToast(`Lanjut ke Pelajaran ${nextLessonIndex + 1}`);
-    } else {
-      this.showToast('Selamat! Anda telah menyelesaikan semua materi di course ini.');
-    }
+  goBack() {
+    this.router.navigate(['/detail-course', this.courseId]);
   }
 
   async showToast(msg: string) {
     const toast = await this.toastController.create({
       message: msg,
-      duration: 2000,
+      duration: 2500,
       color: 'dark',
       position: 'bottom'
     });

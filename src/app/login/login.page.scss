@@ -103,12 +103,12 @@ ion-content {
 }
 
 .brand-logo {
-  max-height: 90px;
-  max-width: 240px;
+  max-height: 140px;
+  max-width: 300px;
   width: 100%;
   object-fit: contain;
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
-  margin-bottom: 16px;
+  margin-bottom: 0px;
 }
 
 .brand-tagline {
@@ -398,6 +398,8 @@ ion-content {
 // ---- Social Login Button ----
 .btn-social {
   width: 100%;
+  max-width: 160px;
+  align-self: center;
   height: 48px;
   background-color: $input-bg;
   color: $on-surface-variant;
@@ -405,7 +407,7 @@ ion-content {
   font-size: 16px;
   font-weight: 500;
   border: none;
-  border-radius: 9999px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -588,7 +590,8 @@ ion-content {
   
   // 1. Perkecil logo sedikit untuk menghemat ruang di atas
   .brand-logo {
-    width: 100px !important;
+    width: 120px !important;
+    margin-bottom: 0px !important; 
   }
   
   // 2. Kurangi padding atas pada Card Putih

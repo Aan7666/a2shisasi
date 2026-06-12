@@ -44,7 +44,7 @@ const routes: Routes = [
     loadChildren: () => import('./keranjang/keranjang.module').then( m => m.KeranjangPageModule)
   },
   {
-    path: 'detail-course',
+    path: 'detail-course/:id',
     loadChildren: () => import('./detail-course/detail-course.module').then( m => m.DetailCoursePageModule)
   },
   {

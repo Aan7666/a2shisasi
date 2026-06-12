@@ -1,196 +1,234 @@
 <ion-content [fullscreen]="true" class="detail-course-content">
-  <!-- Red Header Section -->
-  <div class="red-header">
-    <button class="back-btn" (click)="goBack()" aria-label="Back">
-      <ion-icon name="chevron-back-outline"></ion-icon>
-    </button>
-    <h1 class="header-title">Web Development</h1>
-  </div>
 
-  <!-- Main Container -->
-  <div class="main-container">
-    
-    <!-- Course Image/Video Placeholder -->
-    <div class="course-media-placeholder">
-      <ion-icon name="play-circle-outline" class="media-play-icon"></ion-icon>
+  <!-- ── LOADING SKELETON ── -->
+  <ng-container *ngIf="isLoading">
+    <div class="red-header">
+      <button class="back-btn" (click)="goBack()"><ion-icon name="chevron-back-outline"></ion-icon></button>
+      <h1 class="header-title">Memuat...</h1>
     </div>
+    <div class="main-container">
+      <div class="skeleton-media"></div>
+      <div class="skeleton-line wide" style="height:22px; margin-bottom:12px;"></div>
+      <div class="skeleton-line narrow" style="height:14px; margin-bottom:8px;"></div>
+      <div class="skeleton-line medium" style="height:14px; margin-bottom:24px;"></div>
+    </div>
+  </ng-container>
 
-    <!-- Course Info Section -->
-    <div class="course-header-info">
-      <h2 class="course-title">Web Development</h2>
-      <p class="course-subtitle">Start your journey as a web developer by learning HTML, CSS, JavaScript, and more.</p>
-      
-      <!-- Meta Information -->
-      <div class="meta-row">
-        <span class="meta-item">
-          <ion-icon name="people-outline"></ion-icon>
-        </span>
-        <span class="meta-item">
-          <ion-icon name="star-outline"></ion-icon>
-        </span>
+  <!-- ── ERROR STATE ── -->
+  <ng-container *ngIf="hasError && !isLoading">
+    <div class="red-header">
+      <button class="back-btn" (click)="goBack()"><ion-icon name="chevron-back-outline"></ion-icon></button>
+      <h1 class="header-title">Detail Course</h1>
+    </div>
+    <div class="main-container">
+      <div class="error-state">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <p>Gagal memuat course. Silakan coba lagi.</p>
+        <button class="btn-buy-now" (click)="loadCourse(courseId)">Coba Lagi</button>
       </div>
-
-      <p class="creator-text">Created by <span>Pedri Gonzalez</span></p>
-      <h3 class="course-price">Rp150.000</h3>
     </div>
+  </ng-container>
 
-    <!-- Action Buttons -->
-    <div class="action-buttons-row">
-      <button class="outline-action-btn" [class.active]="isWishlisted" (click)="toggleWishlist()">
-        <ion-icon [name]="isWishlisted ? 'heart' : 'heart-outline'" class="heart-icon"></ion-icon>
-        <span>Add to wishlist</span>
+  <!-- ── MAIN CONTENT ── -->
+  <ng-container *ngIf="!isLoading && !hasError && course">
+
+    <!-- Red Header Section -->
+    <div class="red-header">
+      <button class="back-btn" (click)="goBack()" aria-label="Back">
+        <ion-icon name="chevron-back-outline"></ion-icon>
       </button>
-      <button class="outline-action-btn" [class.active]="isAddedToCart" (click)="toggleCart()">
-        <ion-icon name="cart-outline" class="cart-icon"></ion-icon>
-        <span>Add to cart</span>
-      </button>
+      <h1 class="header-title">{{ course.title }}</h1>
     </div>
 
-    <button class="btn-buy-now" (click)="buyNow()">
-      Buy Now
-    </button>
+    <!-- Main Container -->
+    <div class="main-container">
 
-    <!-- What You Will Learn Section -->
-    <div class="what-learn-section">
-      <h3 class="section-title">What You Will Learn</h3>
-      <ul class="learning-list">
-        <li>
-          <ion-icon name="checkmark-circle-outline" class="check-icon"></ion-icon>
-          <span>HTML for the framework</span>
-        </li>
-        <li>
-          <ion-icon name="checkmark-circle-outline" class="check-icon"></ion-icon>
-          <span>CSS for the design</span>
-        </li>
-        <li>
-          <ion-icon name="checkmark-circle-outline" class="check-icon"></ion-icon>
-          <span>JavaScript for the functionality/interaction</span>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Segment / Tabs System -->
-    <div class="custom-tabs-segment">
-      <div 
-        class="tab-segment-btn" 
-        [class.active]="activeTab === 'description'"
-        (click)="setActiveTab('description')"
-      >
-        Description
-      </div>
-      <div 
-        class="tab-segment-btn" 
-        [class.active]="activeTab === 'curriculum'"
-        (click)="setActiveTab('curriculum')"
-      >
-        Curriculum
-      </div>
-      <div 
-        class="tab-segment-btn" 
-        [class.active]="activeTab === 'instructor'"
-        (click)="setActiveTab('instructor')"
-      >
-        Instructor
-      </div>
-    </div>
-
-    <!-- Dynamic Tabs Content -->
-    <div class="tab-content-container">
-      
-      <!-- DESCRIPTION TAB -->
-      <div class="tab-pane animate-fade-in" *ngIf="activeTab === 'description'">
-        <div class="description-text" [class.expanded]="isDescriptionExpanded">
-          <p>
-            This comprehensive course will take you from a complete beginner to a confident web developer. You'll learn the most in-demand technologies including HTML5, CSS3, and Modern JavaScript, while building real-world projects that you can showcase in your portfolio.
-          </p>
-          <p>
-            Whether you're looking to start a new career, build your own website, or just curious about how the web works, this bootcamp provides everything you need to succeed in the tech industry.
-          </p>
+      <!-- Course Thumbnail / Media -->
+      <div class="course-media-wrap" [class.has-image]="getThumbnail()">
+        <img
+          *ngIf="getThumbnail()"
+          [src]="getThumbnail()!"
+          [alt]="course.title"
+          class="course-thumbnail-img"
+          (error)="$any($event.target).style.display='none'" />
+        <div class="media-overlay">
+          <ion-icon name="play-circle-outline" class="media-play-icon"></ion-icon>
         </div>
-        <button class="btn-show-more" (click)="toggleDescription()">
-          <span>{{ isDescriptionExpanded ? 'Show less' : 'Show more' }}</span>
-          <ion-icon [name]="isDescriptionExpanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+      </div>
+
+      <!-- Course Info Section -->
+      <div class="course-header-info">
+
+        <!-- Category badge -->
+        <span class="category-badge" *ngIf="course.category">{{ course.category.name }}</span>
+
+        <h2 class="course-title">{{ course.title }}</h2>
+        <p class="course-subtitle" *ngIf="course.description">{{ course.description | slice:0:120 }}{{ (course.description?.length ?? 0) > 120 ? '…' : '' }}</p>
+
+        <!-- Meta Information -->
+        <div class="meta-row">
+          <span class="meta-item" *ngIf="course.total_students !== undefined">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>{{ course.total_students }} siswa</span>
+          </span>
+          <span class="meta-item" *ngIf="course.rating !== undefined">
+            <ion-icon name="star"></ion-icon>
+            <span>{{ course.rating }}</span>
+          </span>
+          <span class="meta-item" *ngIf="course.lessons_count !== undefined">
+            <ion-icon name="book-outline"></ion-icon>
+            <span>{{ course.lessons_count }} lesson</span>
+          </span>
+        </div>
+
+        <p class="creator-text">
+          Dibuat oleh <span>{{ course.instructor?.name ?? 'Instruktur' }}</span>
+        </p>
+
+        <h3 class="course-price">{{ formatPrice(course.price) }}</h3>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons-row">
+        <button class="outline-action-btn" [class.active]="isWishlisted" (click)="toggleWishlist()">
+          <ion-icon [name]="isWishlisted ? 'heart' : 'heart-outline'" class="heart-icon"></ion-icon>
+          <span>Wishlist</span>
+        </button>
+        <button class="outline-action-btn" [class.active]="isAddedToCart" (click)="toggleCart()" *ngIf="!course.has_access">
+          <ion-icon name="cart-outline" class="cart-icon"></ion-icon>
+          <span>Keranjang</span>
         </button>
       </div>
 
-      <!-- CURRICULUM TAB -->
-      <div class="tab-pane animate-fade-in" *ngIf="activeTab === 'curriculum'">
-        <div class="curriculum-summary">
-          <span class="main-label">Curriculum</span>
-          <span class="sub-label">10 Part . 50 Lesson</span>
+      <!-- CTA Button -->
+      <button class="btn-buy-now" (click)="buyNow()">
+        <ng-container *ngIf="course.has_access; else buyBlock">
+          <ion-icon name="play-circle-outline"></ion-icon>
+          Mulai Belajar
+        </ng-container>
+        <ng-template #buyBlock>Beli Sekarang</ng-template>
+      </button>
+
+      <!-- ── TABS ── -->
+      <div class="custom-tabs-segment">
+        <div class="tab-segment-btn" [class.active]="activeTab === 'description'" (click)="setActiveTab('description')">Deskripsi</div>
+        <div class="tab-segment-btn" [class.active]="activeTab === 'curriculum'" (click)="setActiveTab('curriculum')">Kurikulum</div>
+        <div class="tab-segment-btn" [class.active]="activeTab === 'instructor'" (click)="setActiveTab('instructor')">Instruktur</div>
+      </div>
+
+      <!-- ── TAB CONTENT ── -->
+      <div class="tab-content-container">
+
+        <!-- DESCRIPTION TAB -->
+        <div class="tab-pane animate-fade-in" *ngIf="activeTab === 'description'">
+          <div class="description-text" [class.expanded]="isDescriptionExpanded">
+            <p *ngIf="course.description; else noDesc">{{ course.description }}</p>
+            <ng-template #noDesc><p style="color:#9e9e9e;">Tidak ada deskripsi tersedia.</p></ng-template>
+          </div>
+          <button class="btn-show-more" (click)="toggleDescription()" *ngIf="course.description && (course.description?.length ?? 0) > 200">
+            <span>{{ isDescriptionExpanded ? 'Tampilkan lebih sedikit' : 'Tampilkan lebih banyak' }}</span>
+            <ion-icon [name]="isDescriptionExpanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+          </button>
         </div>
 
-        <div class="curriculum-list">
-          <div class="curriculum-part" *ngFor="let part of curriculumParts">
-            <h4 class="part-title">Bagian {{ part.partNumber }} - {{ part.title }}</h4>
-            
-            <div class="lesson-list" *ngIf="part.lessons && part.lessons.length > 0">
-              <div class="lesson-item" *ngFor="let lesson of part.lessons" (click)="goToVideoMateri()">
-                <div class="lesson-index">{{ lesson.number }}</div>
-                <div class="lesson-details">
-                  <div class="lesson-title">{{ lesson.title }}</div>
-                  <div class="lesson-duration">{{ lesson.duration }}</div>
+        <!-- CURRICULUM TAB -->
+        <div class="tab-pane animate-fade-in" *ngIf="activeTab === 'curriculum'">
+          <div class="curriculum-summary">
+            <span class="main-label">Kurikulum</span>
+            <span class="sub-label">{{ course.lessons_count ?? (course.lessons?.length ?? 0) }} Lesson</span>
+          </div>
+
+          <!-- Empty state -->
+          <div class="empty-lessons" *ngIf="!course.lessons || course.lessons.length === 0">
+            <ion-icon name="document-text-outline"></ion-icon>
+            <p>Belum ada lesson tersedia.</p>
+          </div>
+
+          <!-- Real lessons from API -->
+          <div class="curriculum-list" *ngIf="course.lessons && course.lessons.length > 0">
+            <div class="lesson-item"
+              *ngFor="let lesson of course.lessons; let i = index"
+              (click)="course.has_access ? goToVideoMateri(lesson.id) : null"
+              [class.locked]="!course.has_access">
+
+              <div class="lesson-index">{{ i + 1 }}</div>
+
+              <div class="lesson-details">
+                <div class="lesson-title">{{ lesson.title }}</div>
+                <div class="lesson-duration">
+                  <ion-icon [name]="lesson.type === 'video' ? 'videocam-outline' : 'document-text-outline'"></ion-icon>
+                  {{ lesson.type | titlecase }}
+                  <span *ngIf="lesson.duration"> · {{ lesson.duration }}</span>
                 </div>
-                <button class="lesson-play-btn">
-                  <ion-icon name="play-circle" class="play-icon"></ion-icon>
-                </button>
+              </div>
+
+              <button class="lesson-play-btn">
+                <ion-icon
+                  [name]="course.has_access ? 'play-circle' : 'lock-closed-outline'"
+                  class="play-icon"
+                  [class.locked-icon]="!course.has_access">
+                </ion-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- INSTRUCTOR TAB -->
+        <div class="tab-pane animate-fade-in" *ngIf="activeTab === 'instructor'">
+          <ng-container *ngIf="course.instructor; else noInstructor">
+            <h4 class="instructor-heading">Instruktur</h4>
+            <h3 class="instructor-name">{{ course.instructor.name }}</h3>
+
+            <!-- Stats / Profile Row -->
+            <div class="instructor-profile-row">
+              <!-- Avatar -->
+              <div class="instructor-avatar-wrap">
+                <img
+                  *ngIf="getAvatar()"
+                  [src]="getAvatar()!"
+                  [alt]="course.instructor.name"
+                  class="instructor-avatar-img"
+                  (error)="$any($event.target).style.display='none'" />
+                <div class="instructor-avatar-placeholder" *ngIf="!getAvatar()">
+                  <ion-icon name="person" class="avatar-fallback-icon"></ion-icon>
+                </div>
+              </div>
+
+              <div class="instructor-stats-column">
+                <div class="stat-item" *ngIf="course.rating">
+                  <ion-icon name="star" class="stat-icon star"></ion-icon>
+                  <span>{{ course.rating }} Rating instruktur</span>
+                </div>
+                <div class="stat-item" *ngIf="course.total_students">
+                  <ion-icon name="people-outline" class="stat-icon"></ion-icon>
+                  <span>{{ course.total_students }} Peserta</span>
+                </div>
+                <div class="stat-item" *ngIf="course.lessons_count">
+                  <ion-icon name="play-outline" class="stat-icon"></ion-icon>
+                  <span>{{ course.lessons_count }} Lesson</span>
+                </div>
               </div>
             </div>
-          </div>
+
+            <div class="instructor-bio-text" [class.expanded]="isInstructorExpanded">
+              <p>Instruktur course ini adalah <strong>{{ course.instructor.name }}</strong>. Klik "Tampilkan lebih banyak" untuk info lebih lanjut.</p>
+            </div>
+            <button class="btn-show-more" (click)="toggleInstructor()">
+              <span>{{ isInstructorExpanded ? 'Tampilkan lebih sedikit' : 'Tampilkan lebih banyak' }}</span>
+              <ion-icon [name]="isInstructorExpanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+            </button>
+          </ng-container>
+
+          <ng-template #noInstructor>
+            <div class="empty-lessons">
+              <ion-icon name="person-outline"></ion-icon>
+              <p>Informasi instruktur tidak tersedia.</p>
+            </div>
+          </ng-template>
         </div>
 
-        <button class="btn-other-parts">
-          7 Other Part
-        </button>
       </div>
-
-      <!-- INSTRUCTOR TAB -->
-      <div class="tab-pane animate-fade-in" *ngIf="activeTab === 'instructor'">
-        <h4 class="instructor-heading">Instructor</h4>
-        <h3 class="instructor-name">Pedri Gonzalez</h3>
-        <p class="instructor-sub">A teacher who loves to teach about Technology</p>
-
-        <!-- Stats Card Row -->
-        <div class="instructor-profile-row">
-          <div class="instructor-avatar-placeholder">
-            <ion-icon name="person" class="avatar-fallback-icon"></ion-icon>
-          </div>
-          <div class="instructor-stats-column">
-            <div class="stat-item">
-              <ion-icon name="star" class="stat-icon star"></ion-icon>
-              <span>4.5 Instructor rating</span>
-            </div>
-            <div class="stat-item">
-              <ion-icon name="chatbubble-ellipses-outline" class="stat-icon"></ion-icon>
-              <span>34,748 Reviews</span>
-            </div>
-            <div class="stat-item">
-              <ion-icon name="people-outline" class="stat-icon"></ion-icon>
-              <span>145.5 Participants</span>
-            </div>
-            <div class="stat-item">
-              <ion-icon name="play-outline" class="stat-icon"></ion-icon>
-              <span>7 Courses</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="instructor-bio-text" [class.expanded]="isInstructorExpanded">
-          <p>
-            Hello I'm Pedri, a professional web developer with more than 10 years of experience in this industry. He has taught over 100,000 students worldwide and is passionate about making web development accessible to everyone.
-          </p>
-        </div>
-        <button class="btn-show-more" (click)="toggleInstructor()">
-          <span>{{ isInstructorExpanded ? 'Show less' : 'Show more' }}</span>
-          <ion-icon [name]="isInstructorExpanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
-        </button>
-
-        <button class="btn-view-profile">
-          View Profile
-        </button>
-      </div>
-
     </div>
+  </ng-container>
 
-  </div>
 </ion-content>

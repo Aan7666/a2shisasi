@@ -1,69 +1,100 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
-import { Router } from '@angular/router';
-
-interface Lesson {
-  number: number;
-  title: string;
-  duration: string;
-}
-
-interface CurriculumPart {
-  partNumber: number;
-  title: string;
-  lessons?: Lesson[];
-}
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CourseService, Course } from '../services/course.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-detail-course',
   templateUrl: './detail-course.page.html',
   styleUrls: ['./detail-course.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule, RouterModule, TitleCasePipe]
 })
 export class DetailCoursePage implements OnInit {
   activeTab: 'description' | 'curriculum' | 'instructor' = 'description';
   isDescriptionExpanded: boolean = false;
   isInstructorExpanded: boolean = false;
-  
-  // Rating and state mock data
+
+  // Wishlist / Cart state (UI-only for now)
   isWishlisted: boolean = false;
   isAddedToCart: boolean = false;
 
-  curriculumParts: CurriculumPart[] = [
-    {
-      partNumber: 1,
-      title: 'Before web dev Journey',
-      lessons: [
-        { number: 1, title: 'Course Introduction - Roadmap', duration: 'Video - 11.30 mnt' },
-        { number: 2, title: 'Meet Your Instructor', duration: 'Video - 05.30 mnt' },
-        { number: 3, title: "Let's talk about AI hype", duration: 'Video - 06.30 mnt' },
-        { number: 4, title: 'Jobs salary range and skills', duration: 'Video - 10.00 mnt' },
-        { number: 5, title: 'What tools you need for web development', duration: 'Video - 19.56 mnt' }
-      ]
-    },
-    {
-      partNumber: 2,
-      title: 'Code file - Download here'
-    },
-    {
-      partNumber: 3,
-      title: 'Basic of web Development'
-    }
-  ];
+  // API data
+  course: Course | null = null;
+  isLoading: boolean = true;
+  hasError: boolean = false;
+  courseId: number = 0;
+
+  private readonly storageBaseUrl = environment.apiUrl.replace('/api', '/storage/');
 
   constructor(
+    private route: ActivatedRoute,
     private router: Router,
+    private courseService: CourseService,
     private toastController: ToastController
   ) { }
 
   ngOnInit() {
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    if (id) {
+      this.courseId = id;
+      this.loadCourse(id);
+    } else {
+      this.hasError = true;
+      this.isLoading = false;
+    }
+  }
+
+  loadCourse(id: number) {
+    this.isLoading = true;
+    this.hasError = false;
+
+    this.courseService.getCourseDetail(id).subscribe({
+      next: (data) => {
+        this.course = data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load course', err);
+        this.hasError = true;
+        this.isLoading = false;
+      }
+    });
+  }
+
+  /** Resolves thumbnail to a full URL */
+  getThumbnail(): string | null {
+    if (!this.course) return null;
+    const raw = this.course.thumbnail || this.course.image || this.course.cover_image
+              || this.course.cover || this.course.image_url
+              || this.course.thumbnail_path || this.course.image_path;
+    if (!raw) return null;
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    return this.storageBaseUrl + raw.replace(/^\//, '');
+  }
+
+  /** Resolves instructor avatar to a full URL */
+  getAvatar(): string | null {
+    const avatarPath = this.course?.instructor?.avatar;
+    if (!avatarPath) return null;
+    if (avatarPath.startsWith('http://') || avatarPath.startsWith('https://')) return avatarPath;
+    return this.storageBaseUrl + avatarPath.replace(/^\//, '');
+  }
+
+  formatPrice(price: number | undefined): string {
+    if (!price || price === 0) return 'Gratis';
+    return 'Rp' + price.toLocaleString('id-ID');
+  }
+
+  formatDuration(duration: string | number | undefined): string {
+    if (!duration) return '';
+    return `${duration} mnt`;
   }
 
   goBack() {
-    // Navigate back to the previous page
     window.history.back();
   }
 
@@ -81,33 +112,35 @@ export class DetailCoursePage implements OnInit {
 
   async toggleWishlist() {
     this.isWishlisted = !this.isWishlisted;
-    const message = this.isWishlisted ? 'Added to wishlist' : 'Removed from wishlist';
+    const msg = this.isWishlisted ? 'Ditambahkan ke wishlist' : 'Dihapus dari wishlist';
     const toast = await this.toastController.create({
-      message: message,
-      duration: 1500,
-      color: 'dark',
-      position: 'bottom'
+      message: msg, duration: 1500, color: 'dark', position: 'bottom'
     });
     await toast.present();
   }
 
   async toggleCart() {
     this.isAddedToCart = !this.isAddedToCart;
-    const message = this.isAddedToCart ? 'Added to cart' : 'Removed from cart';
+    const msg = this.isAddedToCart ? 'Ditambahkan ke keranjang' : 'Dihapus dari keranjang';
     const toast = await this.toastController.create({
-      message: message,
-      duration: 1500,
-      color: 'dark',
-      position: 'bottom'
+      message: msg, duration: 1500, color: 'dark', position: 'bottom'
     });
     await toast.present();
   }
 
   async buyNow() {
-    this.router.navigate(['/checkout']);
+    if (this.course?.has_access) {
+      // User already enrolled — go directly to first lesson
+      this.goToVideoMateri();
+    } else {
+      this.router.navigate(['/checkout'], { queryParams: { course_id: this.courseId } });
+    }
   }
 
-  goToVideoMateri() {
-    this.router.navigate(['/video-materi']);
+  goToVideoMateri(lessonId?: number) {
+    const params: any = { course_id: this.courseId };
+    if (lessonId) params['lesson_id'] = lessonId;
+    this.router.navigate(['/video-materi'], { queryParams: params });
   }
 }
+

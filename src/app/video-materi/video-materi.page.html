@@ -1,188 +1,219 @@
 <ion-content [fullscreen]="true" class="video-materi-content">
-  <!-- 1. Video/Media Player Container -->
-  <div class="video-player-container" [style.background-image]="'url(assets/figma_dashboard_bg.png)'">
-    <div class="dark-overlay"></div>
 
-    <!-- Back Button (Chevron Down) -->
-    <button class="back-chevron-btn" (click)="goBack()" aria-label="Go Back">
-      <ion-icon name="chevron-down-outline"></ion-icon>
-    </button>
-
-    <!-- Interactive Simulated Video Playback UI -->
-    <div class="video-playback-overlay" *ngIf="isPlaying && activeLesson.type === 'video'">
-      <div class="video-controls-top">
-        <span class="live-badge">SIMULASI LIVE</span>
+  <!-- ── ERROR STATE ── -->
+  <ng-container *ngIf="hasError && !isLoadingList">
+    <div class="video-player-container">
+      <button class="back-chevron-btn" (click)="goBack()">
+        <ion-icon name="chevron-down-outline"></ion-icon>
+      </button>
+      <div class="video-header-details">
+        <div class="error-state-overlay">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <p>Gagal memuat materi. Pastikan kamu sudah membeli course ini.</p>
+          <button class="btn-memulai" (click)="loadLessons()">Coba Lagi</button>
+        </div>
       </div>
-      
-      <!-- Center play/pause controls -->
-      <button class="center-play-pause-btn" (click)="togglePlay()" aria-label="Pause Video">
-        <ion-icon name="pause-circle"></ion-icon>
+    </div>
+  </ng-container>
+
+  <!-- ── MAIN CONTENT ── -->
+  <ng-container *ngIf="!hasError">
+
+    <!-- 1. Media Player Container -->
+    <div class="video-player-container">
+
+      <!-- Back Button -->
+      <button class="back-chevron-btn" (click)="goBack()" aria-label="Go Back">
+        <ion-icon name="chevron-down-outline"></ion-icon>
       </button>
 
-      <!-- Bottom Progress Bar & Time Tracker -->
-      <div class="video-controls-bottom">
-        <div class="time-row">
-          <span>{{ formatTime(currentTime) }}</span>
-          <span>{{ formatTime(activeLesson.durationSeconds) }}</span>
-        </div>
-        <div class="progress-bar-wrapper">
-          <div class="progress-bar-fill" [style.width.%]="videoProgress"></div>
-        </div>
+      <!-- ── LOADING STATE ── -->
+      <div class="video-header-details" *ngIf="isLoadingLesson">
+        <div class="lesson-indicator">Memuat materi...</div>
+        <ion-spinner name="crescent" style="color:white; margin-top:20px;"></ion-spinner>
       </div>
+
+      <!-- ── VIDEO TYPE ── -->
+      <ng-container *ngIf="!isLoadingLesson && activeLesson && activeLesson.type === 'video'">
+
+        <!-- Real video element -->
+        <video
+          *ngIf="activeLesson.file_url && isPlaying"
+          [src]="activeLesson.file_url"
+          class="real-video-player"
+          autoplay
+          controls
+          (ended)="markLessonComplete()">
+        </video>
+
+        <!-- Interactive Simulated Overlay when playing (fallback if no direct URL) -->
+        <div class="video-playback-overlay" *ngIf="isPlaying && !activeLesson.file_url">
+          <div class="video-controls-top">
+            <span class="live-badge">SIMULASI LIVE</span>
+          </div>
+          <button class="center-play-pause-btn" (click)="togglePlay()">
+            <ion-icon name="pause-circle"></ion-icon>
+          </button>
+          <div class="video-controls-bottom">
+            <div class="time-row">
+              <span>{{ formatTime(currentTime) }}</span>
+              <span>{{ activeLesson.duration_or_pages ?? '—' }}</span>
+            </div>
+            <div class="progress-bar-wrapper">
+              <div class="progress-bar-fill" [style.width.%]="videoProgress"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Header state (not playing) -->
+        <div class="video-header-details" *ngIf="!isPlaying">
+          <div class="lesson-indicator">
+            Lesson {{ activeLesson.order }}
+          </div>
+          <h2 class="lesson-title">{{ activeLesson.title }}</h2>
+
+          <div class="action-btn-wrapper">
+            <button class="btn-memulai animate-pulse" (click)="togglePlay()">
+              {{ activeLesson.is_completed ? '▶ Putar Lagi' : 'Memulai' }}
+            </button>
+          </div>
+
+          <!-- Completed badge -->
+          <div class="completed-badge" *ngIf="activeLesson.is_completed">
+            <ion-icon name="checkmark-circle"></ion-icon> Sudah diselesaikan
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── DOCUMENT TYPE ── -->
+      <ng-container *ngIf="!isLoadingLesson && activeLesson && activeLesson.type === 'document'">
+        <div class="video-header-details">
+          <div class="lesson-indicator">Lesson {{ activeLesson.order }} · Dokumen</div>
+          <h2 class="lesson-title">{{ activeLesson.title }}</h2>
+          <div class="action-btn-wrapper" *ngIf="activeLesson.file_url">
+            <a [href]="activeLesson.file_url" target="_blank" class="btn-memulai">
+              <ion-icon name="document-outline"></ion-icon>
+              Buka Dokumen
+            </a>
+          </div>
+          <div class="completed-badge" *ngIf="activeLesson.is_completed">
+            <ion-icon name="checkmark-circle"></ion-icon> Sudah diselesaikan
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── TEXT TYPE ── -->
+      <ng-container *ngIf="!isLoadingLesson && activeLesson && activeLesson.type === 'text'">
+        <div class="video-header-details">
+          <div class="lesson-indicator">Lesson {{ activeLesson.order }} · Teks</div>
+          <h2 class="lesson-title">{{ activeLesson.title }}</h2>
+          <div class="action-btn-wrapper">
+            <button class="btn-memulai" (click)="markLessonComplete()" [disabled]="activeLesson.is_completed">
+              {{ activeLesson.is_completed ? 'Selesai ✅' : 'Tandai Selesai' }}
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── NO LESSON YET ── -->
+      <div class="video-header-details" *ngIf="!isLoadingLesson && !activeLesson && !hasError">
+        <div class="lesson-indicator">Belum ada materi</div>
+        <h2 class="lesson-title">Pilih pelajaran dari daftar di bawah</h2>
+      </div>
+
     </div>
 
-    <!-- Standard Header State Overlay (Not Playing) -->
-    <div class="video-header-details" *ngIf="!isPlaying || activeLesson.type !== 'video'">
-      
-      <!-- Lesson Info Info -->
-      <div class="lesson-indicator">
-        Pelajaran {{ activeLessonIndex + 1 }}
-      </div>
-      <h2 class="lesson-title">
-        {{ activeLesson.title }}
-      </h2>
+    <!-- 2. Course Details & Curriculum -->
+    <div class="content-details-container">
 
-      <!-- Action buttons depending on lesson type -->
-      <!-- A. Video Lesson Action Button -->
-      <div class="action-btn-wrapper" *ngIf="activeLesson.type === 'video'">
-        <button class="btn-memulai animate-pulse" (click)="togglePlay()">
-          Memulai
-        </button>
-      </div>
-
-      <!-- B. Quiz Lesson Action Button -->
-      <div class="action-btn-wrapper" *ngIf="activeLesson.type === 'quiz'">
-        <!-- Circular Quiz Progress Tracker -->
-        <button class="btn-buka-kuis" (click)="startQuiz()">
-          <span class="btn-text">Buka kuis</span>
-          <div class="quiz-radial-progress">
-            <svg viewBox="0 0 36 36" class="circular-chart">
-              <path class="circle-bg"
-                d="M18 2.0845
-                  a 15.9155 15.9155 0 0 1 0 31.831
-                  a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-              <path class="circle"
-                stroke-dasharray="75, 100"
-                d="M18 2.0845
-                  a 15.9155 15.9155 0 0 1 0 31.831
-                  a 15.9155 15.9155 0 0 1 0 -31.831"
-              />
-            </svg>
-          </div>
-        </button>
-        <p class="skip-materi-text" (click)="goToNextLesson()">
-          Lompat ke pembelajaran berikutnya
+      <!-- Course header -->
+      <div class="course-main-header" *ngIf="activeLesson">
+        <h1 class="course-title">{{ activeLesson.title }}</h1>
+        <p class="course-creator" *ngIf="activeLesson.description">
+          {{ activeLesson.description }}
         </p>
       </div>
 
-      <!-- Creator Mini Profile overlay at bottom right -->
-      <div class="creator-mini-profile">
-        <img src="assets/frank_esteban_avatar.png" alt="Frank Esteban" class="mini-avatar" />
-        <div class="mini-profile-text">
-          <p class="name">{{ instructorName }}</p>
-          <p class="title">{{ instructorTitle }}</p>
-        </div>
+      <!-- Text content (for type=text) -->
+      <div class="text-content-box" *ngIf="activeLesson?.type === 'text' && activeLesson?.content">
+        <div class="text-content-body" [innerHTML]="activeLesson!.content"></div>
       </div>
-    </div>
-  </div>
 
-  <!-- 2. Course Details & Curriculum Section -->
-  <div class="content-details-container">
-    <div class="course-main-header">
-      <h1 class="course-title">{{ courseTitle }}</h1>
-      <p class="course-creator">{{ instructorName }}, {{ instructorTitle }}</p>
-    </div>
-
-    <!-- Pelajaran Custom Tab -->
-    <div class="custom-tabs-bar">
-      <div class="tab-item active">
-        Pelajaran
-      </div>
-    </div>
-
-    <!-- Active Interactive Quiz Card (When Quiz is opened) -->
-    <div class="quiz-overlay-card animate-fade-in" *ngIf="quizActive">
-      <div class="quiz-card-header">
-        <h3>Evaluasi Figma</h3>
-        <button class="close-quiz-btn" (click)="closeQuiz()" aria-label="Close Quiz">
-          <ion-icon name="close-circle-outline"></ion-icon>
+      <!-- Navigation row: prev / next -->
+      <div class="lesson-nav-row" *ngIf="activeLesson">
+        <button class="nav-btn prev-btn"
+          [disabled]="!activeLesson.prev_lesson_id"
+          (click)="goToPrevLesson()">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+          Sebelumnya
+        </button>
+        <button class="nav-btn next-btn"
+          (click)="goToNextLesson()">
+          Berikutnya
+          <ion-icon name="chevron-forward-outline"></ion-icon>
         </button>
       </div>
 
-      <!-- Quiz Content Area -->
-      <div class="quiz-card-body" *ngIf="!quizCompleted">
-        <div class="quiz-question-info">
-          <span>Pertanyaan {{ currentQuestionIndex + 1 }} dari {{ quizQuestions.length }}</span>
-          <div class="quiz-step-dots">
-            <span *ngFor="let q of quizQuestions; let idx = index" 
-                  [class.active]="idx <= currentQuestionIndex">
-            </span>
-          </div>
-        </div>
-
-        <p class="question-text">{{ quizQuestions[currentQuestionIndex].question }}</p>
-
-        <div class="quiz-options-list">
-          <div class="quiz-option-item" 
-               *ngFor="let option of quizQuestions[currentQuestionIndex].options; let optIdx = index"
-               [class.selected]="selectedAnswerIndex === optIdx"
-               (click)="selectAnswer(optIdx)">
-            <span class="option-letter">{{ ['A', 'B', 'C', 'D'][optIdx] }}</span>
-            <span class="option-text">{{ option }}</span>
-          </div>
-        </div>
-
-        <button class="btn-submit-answer" (click)="submitAnswer()">
-          {{ currentQuestionIndex === quizQuestions.length - 1 ? 'Selesaikan Kuis' : 'Lanjut' }}
-        </button>
+      <!-- Tab bar -->
+      <div class="custom-tabs-bar">
+        <div class="tab-item active">Pelajaran</div>
       </div>
 
-      <!-- Quiz Results View -->
-      <div class="quiz-card-body results-view" *ngIf="quizCompleted">
-        <div class="results-score-circle">
-          <span class="score-number">{{ quizScore }}</span>
-          <span class="score-total">/ {{ quizQuestions.length }}</span>
-        </div>
-        
-        <h4>Kuis Selesai!</h4>
-        <p class="result-feedback">
-          {{ quizScore === quizQuestions.length ? 'Luar biasa! Semua jawaban Anda benar.' : 'Kerja bagus! Pelajari materi lagi untuk skor sempurna.' }}
-        </p>
-
-        <div class="results-actions">
-          <button class="btn-restart-quiz" (click)="restartQuiz()">Ulangi Kuis</button>
-          <button class="btn-next-lesson" (click)="goToNextLesson()">Lanjut Pelajaran</button>
+      <!-- Loading skeleton for lesson list -->
+      <div *ngIf="isLoadingList" class="lessons-loading">
+        <div class="skeleton-lesson" *ngFor="let i of [1,2,3,4]">
+          <div class="sk-num"></div>
+          <div class="sk-body">
+            <div class="sk-line wide"></div>
+            <div class="sk-line narrow"></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Curriculum Parts List (Only display list when quiz is not active or as background) -->
-    <div class="curriculum-sections" [class.dimmed]="quizActive">
-      <div class="section-group" *ngFor="let section of sections; let secIdx = index">
-        <h3 class="section-group-title">{{ section.title }}</h3>
-
+      <!-- Curriculum list — flat (no sections, API returns flat list) -->
+      <div class="curriculum-sections" *ngIf="!isLoadingList">
         <div class="lessons-list">
-          <div class="lesson-card-item" 
-               *ngFor="let lesson of section.lessons; let lesIdx = index"
-               [class.active]="activeSectionIndex === secIdx && activeLessonIndex === lesIdx"
-               (click)="selectLesson(secIdx, lesIdx)">
-            
+          <div class="lesson-card-item"
+               *ngFor="let lesson of lessons; let i = index"
+               [class.active]="isActiveLessonInList(lesson)"
+               [class.completed]="lesson.is_completed"
+               (click)="openLesson(lesson.id)">
+
+            <!-- Completed check or number -->
             <div class="lesson-number">
-              {{ lesson.number }}
+              <ion-icon name="checkmark-circle" class="done-icon" *ngIf="lesson.is_completed"></ion-icon>
+              <span *ngIf="!lesson.is_completed">{{ i + 1 }}</span>
             </div>
 
             <div class="lesson-body">
               <h4 class="lesson-name">{{ lesson.title }}</h4>
-              
               <div class="lesson-meta">
-                <span class="cc-badge" *ngIf="lesson.type === 'video'">CC</span>
-                <span class="meta-desc">{{ lesson.durationText }}</span>
+                <span class="cc-badge" *ngIf="lesson.type === 'video'">
+                  <ion-icon name="videocam-outline"></ion-icon>
+                </span>
+                <span class="cc-badge doc-badge" *ngIf="lesson.type === 'document'">
+                  <ion-icon name="document-outline"></ion-icon>
+                </span>
+                <span class="cc-badge text-badge" *ngIf="lesson.type === 'text'">
+                  <ion-icon name="reader-outline"></ion-icon>
+                </span>
+                <span class="meta-desc">
+                  {{ lesson.type | titlecase }}
+                  <span *ngIf="lesson.duration_or_pages"> · {{ lesson.duration_or_pages }}</span>
+                </span>
               </div>
+            </div>
+
+            <!-- Active playing indicator -->
+            <div class="playing-indicator" *ngIf="isActiveLessonInList(lesson) && isPlaying">
+              <span></span><span></span><span></span>
             </div>
           </div>
         </div>
       </div>
+
     </div>
-  </div>
+
+  </ng-container>
+
 </ion-content>

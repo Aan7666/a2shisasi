@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CourseService, Course } from '../../services/course.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-home',
@@ -64,7 +65,7 @@ export class HomePage implements OnInit {
       return imagePath;
     }
     const cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
-    return `https://a2shi.com/${cleanPath}`;
+    return `${environment.apiUrl.replace('/api', '/storage/')}${cleanPath}`;
   }
 
   redirectToLogin() {
@@ -73,5 +74,9 @@ export class HomePage implements OnInit {
 
   goToCart() {
     this.router.navigate(['/keranjang']);
+  }
+
+  goToCourse(id: number) {
+    this.router.navigate(['/detail-course', id]);
   }
 }

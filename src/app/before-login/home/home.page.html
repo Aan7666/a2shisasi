@@ -13,6 +13,7 @@
 
     <h2 class="section-title">Trending Courses</h2>
     <div class="horizontal-scroll">
+
       <!-- Loading indicator -->
       <div *ngIf="isLoadingCourses" style="display: flex; justify-content: center; width: 100%; padding: 20px 0;">
         <ion-spinner name="crescent" color="primary"></ion-spinner>
@@ -24,11 +25,11 @@
       </div>
 
       <!-- Dynamic Course Cards -->
-      <div *ngFor="let course of courses" 
-           class="mini-course-card" 
-           [routerLink]="['/detail-course']" 
-           [queryParams]="{ id: course.id }" 
-           style="cursor: pointer;">
+      <div *ngFor="let course of courses"
+           class="mini-course-card"
+           button
+           tappable
+           (click)="goToCourse(course.id)">
         <div class="card-img-placeholder">
           <img [src]="getCourseImageUrl(course)" alt="{{ course.title }}" style="width: 100%; height: 100%; object-fit: cover;" />
         </div>
@@ -39,11 +40,11 @@
           <div class="card-meta-row">
             <span class="meta-students">
               <ion-icon name="people-outline"></ion-icon>
-              0
+              {{ course.total_students ?? 0 }}
             </span>
             <span class="meta-rating">
               <ion-icon name="star"></ion-icon>
-              5.0
+              {{ course.rating ?? '—' }}
             </span>
           </div>
         </div>
@@ -52,6 +53,7 @@
 
     <h2 class="section-title">Top Courses in IT</h2>
     <div class="horizontal-scroll">
+
       <!-- Loading indicator -->
       <div *ngIf="isLoadingCourses" style="display: flex; justify-content: center; width: 100%; padding: 20px 0;">
         <ion-spinner name="crescent" color="primary"></ion-spinner>
@@ -63,11 +65,11 @@
       </div>
 
       <!-- Dynamic Course Cards -->
-      <div *ngFor="let course of courses" 
-           class="mini-course-card" 
-           [routerLink]="['/detail-course']" 
-           [queryParams]="{ id: course.id }" 
-           style="cursor: pointer;">
+      <div *ngFor="let course of courses"
+           class="mini-course-card"
+           button
+           tappable
+           (click)="goToCourse(course.id)">
         <div class="card-img-placeholder">
           <img [src]="getCourseImageUrl(course)" alt="{{ course.title }}" style="width: 100%; height: 100%; object-fit: cover;" />
         </div>
@@ -78,11 +80,11 @@
           <div class="card-meta-row">
             <span class="meta-students">
               <ion-icon name="people-outline"></ion-icon>
-              0
+              {{ course.total_students ?? 0 }}
             </span>
             <span class="meta-rating">
               <ion-icon name="star"></ion-icon>
-              5.0
+              {{ course.rating ?? '—' }}
             </span>
           </div>
         </div>
@@ -98,7 +100,5 @@
       <div class="category-pill">c#</div>
     </div>
 
-    
   </div>
 </ion-content>
-

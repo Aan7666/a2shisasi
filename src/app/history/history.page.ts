@@ -116,7 +116,7 @@ export class HistoryPage implements OnInit {
     let statusLabel = '';
     let statusColor = '';
 
-    switch(tx.status) {
+    switch (tx.status) {
       case 'success':
         statusLabel = 'SUKSES';
         statusColor = '#2ecc71';

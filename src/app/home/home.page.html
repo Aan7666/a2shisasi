@@ -11,138 +11,221 @@
   <div class="main-container">
     <div class="hero-banner"></div>
 
-    <h2 class="section-title">Trending Courses</h2>
-    <div class="horizontal-scroll">
-
-      <div class="mini-course-card">
-        <div class="card-img-placeholder"></div>
-        <div class="card-body">
-          <h3 class="course-title">Web Development</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp450.000</p>
-          <div class="card-meta-row">
-            <span class="meta-students">
-              <ion-icon name="people-outline"></ion-icon>
-              10
-            </span>
-            <span class="meta-rating">
-              <ion-icon name="star"></ion-icon>
-              4.7
-            </span>
+    <!-- ── LOADING SKELETON ── -->
+    <ng-container *ngIf="isLoading">
+      <h2 class="section-title">Trending Courses</h2>
+      <div class="horizontal-scroll">
+        <div class="mini-course-card skeleton-card" *ngFor="let i of [1,2,3,4]">
+          <div class="skeleton-img"></div>
+          <div class="card-body">
+            <div class="skeleton-line wide"></div>
+            <div class="skeleton-line narrow"></div>
+            <div class="skeleton-line medium"></div>
           </div>
         </div>
       </div>
+    </ng-container>
 
-      <div class="mini-course-card">
-        <div class="card-img-placeholder"></div>
-        <div class="card-body">
-          <h3 class="course-title">Mobile Development</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp450.000</p>
-          <div class="card-meta-row">
-            <span class="meta-students">
-              <ion-icon name="people-outline"></ion-icon>
-              10
-            </span>
-            <span class="meta-rating">
-              <ion-icon name="star"></ion-icon>
-              4.7
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div class="mini-course-card">
-        <div class="card-img-placeholder"></div>
-        <div class="card-body">
-          <h3 class="course-title">Cyber Security</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp250.000</p>
-          <div class="card-meta-row">
-            <span class="meta-students">
-              <ion-icon name="people-outline"></ion-icon>
-              10
-            </span>
-            <span class="meta-rating">
-              <ion-icon name="star"></ion-icon>
-              4.7
-            </span>
-          </div>
-        </div>
-      </div>
-
+    <!-- ── ERROR STATE ── -->
+    <div class="error-state" *ngIf="hasError && !isLoading">
+      <ion-icon name="wifi-outline"></ion-icon>
+      <p>Gagal memuat data. Pastikan koneksi internet kamu aktif.</p>
+      <button class="retry-btn" (click)="loadHomeData()">Coba Lagi</button>
     </div>
 
-    <h2 class="section-title">Top Courses in IT</h2>
-    <div class="horizontal-scroll">
+    <!-- ── TRENDING COURSES ── -->
+    <ng-container *ngIf="!isLoading && !hasError">
 
-      <div class="mini-course-card">
-        <div class="card-img-placeholder"></div>
-        <div class="card-body">
-          <h3 class="course-title">Web Development</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp150.000</p>
-          <div class="card-meta-row">
-            <span class="meta-students">
-              <ion-icon name="people-outline"></ion-icon>
-              10
-            </span>
-            <span class="meta-rating">
-              <ion-icon name="star"></ion-icon>
-              4.7
-            </span>
+      <ng-container *ngIf="trendingCourses.length > 0">
+        <h2 class="section-title">Trending Courses</h2>
+        <div class="horizontal-scroll">
+          <div
+            class="mini-course-card"
+            *ngFor="let course of trendingCourses"
+            (click)="goToCourse(course.id)">
+
+            <!-- Thumbnail -->
+            <div class="card-img-wrap">
+              <img
+                *ngIf="getThumbnail(course)"
+                [src]="getThumbnail(course)!"
+                [alt]="course.title"
+                class="card-thumbnail"
+                (error)="$any($event.target).style.display='none'" />
+              <div
+                class="card-img-placeholder"
+                [style.display]="getThumbnail(course) ? 'none' : 'block'">
+              </div>
+            </div>
+
+            <div class="card-body">
+              <h3 class="course-title">{{ course.title }}</h3>
+
+              <!-- Instructor with avatar -->
+              <div class="instructor-row" *ngIf="course.instructor">
+                <img
+                  *ngIf="getAvatar(course.instructor.avatar)"
+                  [src]="getAvatar(course.instructor.avatar)!"
+                  [alt]="course.instructor.name"
+                  class="instructor-avatar"
+                  (error)="$any($event.target).style.display='none'" />
+                <ion-icon
+                  *ngIf="!getAvatar(course.instructor.avatar)"
+                  name="person-circle-outline"
+                  class="avatar-fallback-icon">
+                </ion-icon>
+                <span class="course-instructor">{{ course.instructor.name }}</span>
+              </div>
+
+              <p class="course-price">{{ formatPrice(course.price) }}</p>
+              <div class="card-meta-row">
+                <span class="meta-students">
+                  <ion-icon name="people-outline"></ion-icon>
+                  {{ course.total_students ?? 0 }}
+                </span>
+                <span class="meta-rating">
+                  <ion-icon name="star"></ion-icon>
+                  {{ course.rating ?? '—' }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </ng-container>
 
-      <div class="mini-course-card">
-        <div class="card-img-placeholder"></div>
-        <div class="card-body">
-          <h3 class="course-title">Mobile Development</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp150.000</p>
-          <div class="card-meta-row">
-            <span class="meta-students">
-              <ion-icon name="people-outline"></ion-icon>
-              10
-            </span>
-            <span class="meta-rating">
-              <ion-icon name="star"></ion-icon>
-              4.7
-            </span>
+      <!-- ── CATEGORY SECTIONS ── -->
+      <ng-container *ngFor="let section of categorySections">
+        <ng-container *ngIf="section.courses.length > 0">
+          <div class="section-header">
+            <h2 class="section-title">Top di {{ section.category_name }}</h2>
+            <span class="see-all" (click)="goToCategorySearch(section.category_slug)">Lihat semua</span>
+          </div>
+          <div class="horizontal-scroll">
+            <div
+              class="mini-course-card"
+              *ngFor="let course of section.courses"
+              (click)="goToCourse(course.id)">
+
+              <div class="card-img-wrap">
+                <img
+                  *ngIf="getThumbnail(course)"
+                  [src]="getThumbnail(course)!"
+                  [alt]="course.title"
+                  class="card-thumbnail"
+                  (error)="$any($event.target).style.display='none'" />
+                <div
+                  class="card-img-placeholder"
+                  [style.display]="getThumbnail(course) ? 'none' : 'block'">
+                </div>
+              </div>
+
+              <div class="card-body">
+                <h3 class="course-title">{{ course.title }}</h3>
+                <div class="instructor-row" *ngIf="course.instructor">
+                  <img
+                    *ngIf="getAvatar(course.instructor.avatar)"
+                    [src]="getAvatar(course.instructor.avatar)!"
+                    [alt]="course.instructor.name"
+                    class="instructor-avatar"
+                    (error)="$any($event.target).style.display='none'" />
+                  <ion-icon
+                    *ngIf="!getAvatar(course.instructor.avatar)"
+                    name="person-circle-outline"
+                    class="avatar-fallback-icon">
+                  </ion-icon>
+                  <span class="course-instructor">{{ course.instructor.name }}</span>
+                </div>
+                <p class="course-price">{{ formatPrice(course.price) }}</p>
+                <div class="card-meta-row">
+                  <span class="meta-students">
+                    <ion-icon name="people-outline"></ion-icon>
+                    {{ course.total_students ?? 0 }}
+                  </span>
+                  <span class="meta-rating">
+                    <ion-icon name="star"></ion-icon>
+                    {{ course.rating ?? '—' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+
+      <!-- ── NEWEST COURSES ── -->
+      <ng-container *ngIf="newestCourses.length > 0">
+        <h2 class="section-title">Course Terbaru</h2>
+        <div class="horizontal-scroll">
+          <div
+            class="mini-course-card"
+            *ngFor="let course of newestCourses"
+            (click)="goToCourse(course.id)">
+
+            <div class="card-img-wrap">
+              <img
+                *ngIf="getThumbnail(course)"
+                [src]="getThumbnail(course)!"
+                [alt]="course.title"
+                class="card-thumbnail"
+                (error)="$any($event.target).style.display='none'" />
+              <div
+                class="card-img-placeholder"
+                [style.display]="getThumbnail(course) ? 'none' : 'block'">
+              </div>
+            </div>
+
+            <div class="card-body">
+              <h3 class="course-title">{{ course.title }}</h3>
+              <div class="instructor-row" *ngIf="course.instructor">
+                <img
+                  *ngIf="getAvatar(course.instructor.avatar)"
+                  [src]="getAvatar(course.instructor.avatar)!"
+                  [alt]="course.instructor.name"
+                  class="instructor-avatar"
+                  (error)="$any($event.target).style.display='none'" />
+                <ion-icon
+                  *ngIf="!getAvatar(course.instructor.avatar)"
+                  name="person-circle-outline"
+                  class="avatar-fallback-icon">
+                </ion-icon>
+                <span class="course-instructor">{{ course.instructor.name }}</span>
+              </div>
+              <p class="course-price">{{ formatPrice(course.price) }}</p>
+              <div class="card-meta-row">
+                <span class="meta-students">
+                  <ion-icon name="people-outline"></ion-icon>
+                  {{ course.total_students ?? 0 }}
+                </span>
+                <span class="meta-rating">
+                  <ion-icon name="star"></ion-icon>
+                  {{ course.rating ?? '—' }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </ng-container>
 
-      <div class="mini-course-card">
-        <div class="card-img-placeholder"></div>
-        <div class="card-body">
-          <h3 class="course-title">Cyber Security</h3>
-          <p class="course-instructor">Pedri Gonzalez</p>
-          <p class="course-price">Rp350.000</p>
-          <div class="card-meta-row">
-            <span class="meta-students">
-              <ion-icon name="people-outline"></ion-icon>
-              10
-            </span>
-            <span class="meta-rating">
-              <ion-icon name="star"></ion-icon>
-              4.7
-            </span>
+      <!-- ── CATEGORIES ── -->
+      <h2 class="section-title">Kategori</h2>
+      <div class="categories-wrap">
+        <ng-container *ngIf="categories.length > 0; else staticCats">
+          <div
+            class="category-pill"
+            *ngFor="let cat of categories"
+            (click)="goToCategorySearch(cat.slug)">
+            {{ cat.name }}
           </div>
-        </div>
+        </ng-container>
+        <ng-template #staticCats>
+          <div class="category-pill">IT & Programming</div>
+          <div class="category-pill">Desain</div>
+          <div class="category-pill">Bisnis</div>
+          <div class="category-pill">Musik</div>
+        </ng-template>
       </div>
 
-    </div>
-
-    <h2 class="section-title">Category</h2>
-    <div class="categories-wrap">
-      <div class="category-pill">word</div>
-      <div class="category-pill">excel</div>
-      <div class="category-pill">desain</div>
-      <div class="category-pill">musik</div>
-      <div class="category-pill">c#</div>
-    </div>
+    </ng-container>
 
     <div class="signin-banner" *ngIf="!isLoggedIn">
       <span class="banner-text">Sign in to unlock the full potential of your learning journey.</span>
