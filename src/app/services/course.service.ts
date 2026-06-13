@@ -1,83 +1,20 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import {
+  ApiResponse,
+  Course,
+  CourseDetail,
+  Category,
+  HomeData,
+  CategorySection,
+  Lesson,
+  LessonDetail
+} from './course.interfaces';
 
-export interface Instructor {
-  id: number;
-  name: string;
-  avatar?: string;
-}
-
-export interface Category {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-export interface Lesson {
-  id: number;
-  course_id: number;
-  title: string;
-  type: string;           // 'video' | 'text' | 'document'
-  description?: string;
-  duration?: string;
-  duration_or_pages?: string;
-  order: number;
-  is_completed?: boolean;
-}
-
-export interface LessonDetail {
-  id: number;
-  title: string;
-  type: string;
-  description?: string;
-  content?: string;       // for type='text'
-  file_url?: string;      // video URL (Cloudinary) or PDF URL
-  file_name?: string;
-  duration_or_pages?: string;
-  order: number;
-  is_completed: boolean;
-  next_lesson_id?: number;
-  prev_lesson_id?: number;
-}
-
-export interface Course {
-  id: number;
-  title: string;
-  instructor?: Instructor;
-  category?: Category;
-  price: number;
-  rating?: number;
-  total_students?: number;
-  lessons_count?: number;
-  has_access?: boolean;
-  status: string;
-  thumbnail?: string;
-  image?: string;
-  cover_image?: string;
-  cover?: string;
-  image_path?: string;
-  thumbnail_path?: string;
-  image_url?: string;
-  description?: string;
-  created_at?: string;
-  lessons?: Lesson[];
-}
-
-export interface CategorySection {
-  category_id: number;
-  category_name: string;
-  category_slug: string;
-  courses: Course[];
-}
-
-export interface HomeData {
-  trending: Course[];
-  category_sections: CategorySection[];
-  newest: Course[];
-}
+export * from './course.interfaces';
 
 @Injectable({
   providedIn: 'root'
@@ -87,104 +24,218 @@ export class CourseService {
 
   constructor(private http: HttpClient) { }
 
-  // GET /api/home
-  getHomeData(limit: number = 8): Observable<HomeData> {
-    return this.http.get<any>(`${this.apiUrl}/home?limit=${limit}`).pipe(
-      map(response => {
-        const data = response?.data || response;
-        return {
-          trending: data?.trending || [],
-          category_sections: data?.category_sections || [],
-          newest: data?.newest || [],
-        } as HomeData;
-      })
-    );
-  }
-
-  // GET /api/categories
-  getCategories(): Observable<any[]> {
-    return this.http.get<any>(`${this.apiUrl}/categories`).pipe(
-      map(response => {
-        if (response?.data) return response.data;
-        if (Array.isArray(response)) return response;
-        return [];
-      })
-    );
-  }
-
-  // GET /api/courses
+  /**
+   * 1. GET /courses
+   * Public, tanpa auth
+   * Returns: Course[]
+   */
   getCourses(): Observable<Course[]> {
-    return this.http.get<any>(`${this.apiUrl}/courses`).pipe(
+    return this.http.get<ApiResponse<Course[]>>(`${this.apiUrl}/courses`).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * 2. GET /courses/{id}
+   * Public, JWT opsional. Jika user login, token disertakan oleh interceptor.
+   * Returns: CourseDetail
+   */
+  getCourseDetail(id: number): Observable<CourseDetail> {
+    const url = `${this.apiUrl}/courses/${id}`;
+    console.log('[CourseService] Fetching course detail from:', url);
+
+    return this.http.get<any>(url).pipe(
       map(response => {
-        if (response && response.success && response.data) {
-          return response.data;
-        }
-        if (response && response.data) {
-          return response.data;
-        }
-        if (Array.isArray(response)) {
-          return response;
-        }
-        return [];
+        console.log('[CourseService] Raw response:', response);
+        // ApiResponse wrapper format: { success, message, data }
+        if (response?.success && response?.data) return response.data as CourseDetail;
+        if (response?.data)                        return response.data as CourseDetail;
+        // Jika backend mengembalikan objek course langsung (tanpa wrapper)
+        if (response?.id)                          return response as CourseDetail;
+        throw new Error('Format response tidak dikenali dari server');
+      }),
+      catchError((err: HttpErrorResponse) => {
+        console.error('[CourseService] ❌ HTTP Error:', err.status, err.statusText);
+        console.error('[CourseService] Error body:', err.error);
+        return this.handleError(err);
       })
     );
   }
 
-  // GET /api/courses/{id}
-  getCourseDetail(id: number): Observable<Course | null> {
-    return this.http.get<any>(`${this.apiUrl}/courses/${id}`).pipe(
-      map(response => {
-        if (response && response.success && response.data) {
-          return response.data;
-        }
-        if (response && response.data) {
-          return response.data;
-        }
-        return response || null;
-      })
+  /**
+   * 3. GET /courses/trending
+   * Public
+   * Params: limit (default 10)
+   * Returns: Course[]
+   */
+  getTrendingCourses(limit: number = 10): Observable<Course[]> {
+    const params = new HttpParams().set('limit', limit.toString());
+    return this.http.get<ApiResponse<Course[]>>(`${this.apiUrl}/courses/trending`, { params }).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
     );
   }
 
-  // GET /api/courses/{id}/check-access
+  /**
+   * 4. GET /courses/category/{slug}
+   * Public
+   * Params: sort, limit (default 10)
+   * Returns: { category: Category, courses: Course[] }
+   */
+  getCoursesByCategory(slug: string, sort: string = 'rating', limit: number = 10): Observable<{ category: Category; courses: Course[] }> {
+    let params = new HttpParams()
+      .set('sort', sort)
+      .set('limit', limit.toString());
+
+    return this.http.get<ApiResponse<{ category: Category; courses: Course[] }>>(
+      `${this.apiUrl}/courses/category/${slug}`,
+      { params }
+    ).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * 5. GET /courses/search
+   * Public
+   * Params: q, category_id, sort, limit
+   * Returns: Course[]
+   */
+  searchCourses(paramsInput: { q?: string; category_id?: number; sort?: string; limit?: number }): Observable<Course[]> {
+    let params = new HttpParams();
+    
+    if (paramsInput.q) {
+      params = params.set('q', paramsInput.q);
+    }
+    if (paramsInput.category_id !== undefined && paramsInput.category_id !== null) {
+      params = params.set('category_id', paramsInput.category_id.toString());
+    }
+    if (paramsInput.sort) {
+      params = params.set('sort', paramsInput.sort);
+    }
+    if (paramsInput.limit) {
+      params = params.set('limit', paramsInput.limit.toString());
+    }
+
+    return this.http.get<ApiResponse<Course[]>>(`${this.apiUrl}/courses/search`, { params }).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * 6. GET /categories
+   * Public
+   * Returns: Category[] dengan courses_count
+   */
+  getCategories(): Observable<Category[]> {
+    return this.http.get<ApiResponse<Category[]>>(`${this.apiUrl}/categories`).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * 7. GET /home
+   * Public
+   * Params: limit (default 5)
+   * Returns: HomeData (trending, category_sections, newest)
+   */
+  getHomeData(limit: number = 5): Observable<HomeData> {
+    const params = new HttpParams().set('limit', limit.toString());
+    return this.http.get<ApiResponse<HomeData>>(`${this.apiUrl}/home`, { params }).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * 8. GET /courses/{id}/check-access
+   * AUTH REQUIRED
+   * Returns: boolean (akses atau tidak)
+   */
+  checkCourseAccess(courseId: number): Observable<boolean> {
+    return this.http.get<ApiResponse<{ hasAccess: boolean }>>(`${this.apiUrl}/courses/${courseId}/check-access`).pipe(
+      map(response => response.data.hasAccess),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Alias untuk backward compatibility
+   */
   checkAccess(id: number): Observable<boolean> {
-    return this.http.get<any>(`${this.apiUrl}/courses/${id}/check-access`).pipe(
-      map(response => {
-        if (response && response.success && response.data) {
-          return response.data.hasAccess;
-        }
-        if (response && response.data) {
-          return response.data.hasAccess;
-        }
-        return false;
-      })
+    return this.checkCourseAccess(id);
+  }
+
+  /**
+   * 9. GET /my-learning
+   * AUTH REQUIRED
+   * Returns: Course[]
+   */
+  getMyLearning(): Observable<Course[]> {
+    return this.http.get<ApiResponse<Course[]>>(`${this.apiUrl}/my-learning`).pipe(
+      map(response => response.data),
+      catchError(this.handleError)
     );
   }
 
   // ── LESSON ENDPOINTS ──────────────────────────────────────
 
-  // GET /api/student/courses/{courseId}/lessons
+  /**
+   * GET /student/courses/{courseId}/lessons
+   * Returns: Lesson[]
+   */
   getLessons(courseId: number): Observable<Lesson[]> {
-    return this.http.get<any>(`${this.apiUrl}/student/courses/${courseId}/lessons`).pipe(
-      map(response => {
-        if (response?.data) return response.data;
-        if (Array.isArray(response)) return response;
-        return [];
-      })
+    return this.http.get<ApiResponse<Lesson[]>>(`${this.apiUrl}/student/courses/${courseId}/lessons`).pipe(
+      map(response => response.data || (response as any)),
+      catchError(this.handleError)
     );
   }
 
-  // GET /api/student/courses/{courseId}/lessons/{lessonId}
+  /**
+   * GET /student/courses/{courseId}/lessons/{lessonId}
+   * Returns: LessonDetail
+   */
   getLessonDetail(courseId: number, lessonId: number): Observable<LessonDetail> {
-    return this.http.get<any>(`${this.apiUrl}/student/courses/${courseId}/lessons/${lessonId}`).pipe(
-      map(response => response?.data || response)
+    return this.http.get<ApiResponse<LessonDetail>>(`${this.apiUrl}/student/courses/${courseId}/lessons/${lessonId}`).pipe(
+      map(response => response.data || (response as any)),
+      catchError(this.handleError)
     );
   }
 
-  // POST /api/student/courses/{courseId}/lessons/{lessonId}/complete
+  /**
+   * POST /student/courses/{courseId}/lessons/{lessonId}/complete
+   */
   markComplete(courseId: number, lessonId: number): Observable<any> {
-    return this.http.post<any>(
-      `${this.apiUrl}/student/courses/${courseId}/lessons/${lessonId}/complete`, {}
+    return this.http.post<ApiResponse<any>>(
+      `${this.apiUrl}/student/courses/${courseId}/lessons/${lessonId}/complete`, 
+      {}
+    ).pipe(
+      map(response => response.data || (response as any)),
+      catchError(this.handleError)
     );
+  }
+
+  /**
+   * Generic error handler
+   */
+  private handleError(error: HttpErrorResponse): Observable<never> {
+    let errorMessage = 'Terjadi kesalahan pada sistem.';
+    if (error.error instanceof ErrorEvent) {
+      // Client-side error
+      errorMessage = error.error.message;
+    } else {
+      // Server-side error
+      if (error.error && error.error.message) {
+        errorMessage = error.error.message;
+      } else {
+        errorMessage = `Error Code: ${error.status}\nPesan: ${error.message}`;
+      }
+    }
+    console.error('CourseService Error:', error);
+    return throwError(() => new Error(errorMessage));
   }
 }
-

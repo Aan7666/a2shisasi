@@ -63,7 +63,7 @@
         <span class="category-badge" *ngIf="course.category">{{ course.category.name }}</span>
 
         <h2 class="course-title">{{ course.title }}</h2>
-        <p class="course-subtitle" *ngIf="course.description">{{ course.description | slice:0:120 }}{{ (course.description?.length ?? 0) > 120 ? '…' : '' }}</p>
+        <p class="course-subtitle" *ngIf="course.description">{{ course.description | slice:0:120 }}{{ course.description.length > 120 ? '…' : '' }}</p>
 
         <!-- Meta Information -->
         <div class="meta-row">

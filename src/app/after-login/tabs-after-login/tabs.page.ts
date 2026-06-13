@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -7,7 +7,9 @@ import {
   IonTabBar,
   IonTabButton
 } from '@ionic/angular/standalone';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 
 import { addIcons } from 'ionicons';
 import {
@@ -43,10 +45,11 @@ import { ProfilePage } from '../profile-after-login/profile.page';
     ProfilePage
   ]
 })
-export class TabsPage implements OnInit {
+export class TabsPage implements OnInit, OnDestroy {
 
   activeTab: string = 'home';
   isLoggedIn: boolean = false;
+  private routerSub!: Subscription;
 
   readonly TAB_BAR_HEIGHT = 60;
   readonly BANNER_HEIGHT = 42;
@@ -62,15 +65,46 @@ export class TabsPage implements OnInit {
       'person': person, 'person-outline': personOutline,
       'book': book, 'book-outline': bookOutline
     });
+
+    // Sync tab when route changes
+    this.routerSub = this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.syncTabWithUrl();
+    });
   }
 
   ngOnInit() {
-    this.isLoggedIn = !!localStorage.getItem('token');
+    this.isLoggedIn = !!(localStorage.getItem('token') || localStorage.getItem('a2shi_token'));
+    this.syncTabWithUrl();
     this.updateBottomOffset();
+  }
+
+  ngOnDestroy() {
+    if (this.routerSub) {
+      this.routerSub.unsubscribe();
+    }
+  }
+
+  syncTabWithUrl() {
+    const url = this.router.url;
+    if (url.includes('/home')) {
+      this.activeTab = 'home';
+    } else if (url.includes('/wishlist')) {
+      this.activeTab = 'wishlist';
+    } else if (url.includes('/courses')) {
+      this.activeTab = 'courses';
+    } else if (url.includes('/search')) {
+      this.activeTab = 'search';
+    } else if (url.includes('/profile')) {
+      this.activeTab = 'profile';
+    }
+    this.cdr.detectChanges();
   }
 
   selectTab(tab: string) {
     this.activeTab = tab;
+    this.router.navigate([`/tabs-after-login/${tab}`]);
     this.updateBottomOffset();
     this.cdr.detectChanges();
   }

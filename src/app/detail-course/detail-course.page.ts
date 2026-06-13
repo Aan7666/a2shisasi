@@ -3,7 +3,7 @@ import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { CourseService, Course } from '../services/course.service';
+import { CourseService, CourseDetail } from '../services/course.service';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -23,7 +23,7 @@ export class DetailCoursePage implements OnInit {
   isAddedToCart: boolean = false;
 
   // API data
-  course: Course | null = null;
+  course: CourseDetail | null = null;
   isLoading: boolean = true;
   hasError: boolean = false;
   courseId: number = 0;
@@ -69,8 +69,8 @@ export class DetailCoursePage implements OnInit {
   getThumbnail(): string | null {
     if (!this.course) return null;
     const raw = this.course.thumbnail || this.course.image || this.course.cover_image
-              || this.course.cover || this.course.image_url
-              || this.course.thumbnail_path || this.course.image_path;
+      || this.course.cover || this.course.image_url
+      || this.course.thumbnail_path || this.course.image_path;
     if (!raw) return null;
     if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
     return this.storageBaseUrl + raw.replace(/^\//, '');
@@ -101,6 +101,7 @@ export class DetailCoursePage implements OnInit {
   setActiveTab(tab: 'description' | 'curriculum' | 'instructor') {
     this.activeTab = tab;
   }
+
 
   toggleDescription() {
     this.isDescriptionExpanded = !this.isDescriptionExpanded;

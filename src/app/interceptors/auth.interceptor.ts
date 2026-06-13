@@ -11,7 +11,8 @@ import { Observable } from 'rxjs';
 export class AuthInterceptor implements HttpInterceptor {
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        const token = localStorage.getItem('a2shi_token');
+        // Mendukung key 'token' yang baru dan 'a2shi_token' yang lama
+        const token = localStorage.getItem('token') || localStorage.getItem('a2shi_token');
 
         if (token) {
             const cloned = req.clone({
