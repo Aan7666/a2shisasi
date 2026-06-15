@@ -26,6 +26,7 @@ export class DetailCoursePage implements OnInit {
   course: CourseDetail | null = null;
   isLoading: boolean = true;
   hasError: boolean = false;
+  errorMessage: string = '';
   courseId: number = 0;
 
   private readonly storageBaseUrl = environment.apiUrl.replace('/api', '/storage/');
@@ -56,10 +57,23 @@ export class DetailCoursePage implements OnInit {
       next: (data) => {
         this.course = data;
         this.isLoading = false;
+        
+        const saved = localStorage.getItem('wishlist_items');
+        if (saved) {
+          const items = JSON.parse(saved);
+          this.isWishlisted = !!items.find((item: any) => item.id === this.courseId);
+        }
+        
+        const savedCart = localStorage.getItem('cart_items');
+        if (savedCart) {
+          const cItems = JSON.parse(savedCart);
+          this.isAddedToCart = !!cItems.find((item: any) => item.id === this.courseId);
+        }
       },
       error: (err) => {
         console.error('Failed to load course', err);
         this.hasError = true;
+        this.errorMessage = err.message || 'Terjadi kesalahan sistem.';
         this.isLoading = false;
       }
     });
@@ -102,7 +116,6 @@ export class DetailCoursePage implements OnInit {
     this.activeTab = tab;
   }
 
-
   toggleDescription() {
     this.isDescriptionExpanded = !this.isDescriptionExpanded;
   }
@@ -113,6 +126,28 @@ export class DetailCoursePage implements OnInit {
 
   async toggleWishlist() {
     this.isWishlisted = !this.isWishlisted;
+    
+    // Manage localStorage
+    const saved = localStorage.getItem('wishlist_items');
+    let wishlistItems: any[] = saved ? JSON.parse(saved) : [];
+    
+    if (this.isWishlisted && this.course) {
+      if (!wishlistItems.find(item => item.id === this.course!.id)) {
+        wishlistItems.push({
+          id: this.course.id,
+          title: this.course.title,
+          instructor: this.course.instructor?.name || 'Instruktur',
+          price: this.formatPrice(this.course.price),
+          rating: this.course.rating || 0,
+          students: this.course.total_students || 0,
+          selected: false
+        });
+      }
+    } else if (!this.isWishlisted && this.course) {
+      wishlistItems = wishlistItems.filter(item => item.id !== this.course!.id);
+    }
+    localStorage.setItem('wishlist_items', JSON.stringify(wishlistItems));
+
     const msg = this.isWishlisted ? 'Ditambahkan ke wishlist' : 'Dihapus dari wishlist';
     const toast = await this.toastController.create({
       message: msg, duration: 1500, color: 'dark', position: 'bottom'
@@ -122,6 +157,29 @@ export class DetailCoursePage implements OnInit {
 
   async toggleCart() {
     this.isAddedToCart = !this.isAddedToCart;
+
+    // Manage localStorage for cart
+    const saved = localStorage.getItem('cart_items');
+    let cartItems: any[] = saved ? JSON.parse(saved) : [];
+    
+    if (this.isAddedToCart && this.course) {
+      if (!cartItems.find(item => item.id === this.course!.id)) {
+        cartItems.push({
+          id: this.course.id,
+          title: this.course.title,
+          instructor: this.course.instructor?.name || 'Instruktur',
+          price: this.formatPrice(this.course.price),
+          rawPrice: this.course.price,
+          rating: this.course.rating || 0,
+          students: this.course.total_students || 0,
+          thumbnail: this.getThumbnail()
+        });
+      }
+    } else if (!this.isAddedToCart && this.course) {
+      cartItems = cartItems.filter(item => item.id !== this.course!.id);
+    }
+    localStorage.setItem('cart_items', JSON.stringify(cartItems));
+
     const msg = this.isAddedToCart ? 'Ditambahkan ke keranjang' : 'Dihapus dari keranjang';
     const toast = await this.toastController.create({
       message: msg, duration: 1500, color: 'dark', position: 'bottom'

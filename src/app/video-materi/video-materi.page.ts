@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController } from '@ionic/angular';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CourseService, Lesson, LessonDetail } from '../services/course.service';
+import { ProgressService } from '../services/progress.service';
 
 @Component({
   selector: 'app-video-materi',
@@ -38,6 +39,7 @@ export class VideoMateriPage implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private courseService: CourseService,
+    private progressService: ProgressService,
     private toastController: ToastController
   ) {}
 
@@ -161,7 +163,7 @@ export class VideoMateriPage implements OnInit, OnDestroy {
     if (!this.activeLesson || this.activeLesson.is_completed || this.markingComplete) return;
     this.markingComplete = true;
 
-    this.courseService.markComplete(this.courseId, this.activeLesson.id).subscribe({
+    this.progressService.markComplete(this.courseId, this.activeLesson.id).subscribe({
       next: () => {
         if (this.activeLesson) this.activeLesson.is_completed = true;
         // Update is_completed in the sidebar list too

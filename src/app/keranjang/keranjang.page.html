@@ -13,17 +13,52 @@
 </ion-header>
 
 <ion-content [fullscreen]="true" class="cart-content">
-  <div class="empty-cart-container">
+  <div class="empty-cart-container" *ngIf="cartItems.length === 0">
     <div class="icon-circle">
       <ion-icon name="cart-outline"></ion-icon>
     </div>
     <h2>Your Cart is Empty</h2>
     <p>Add courses to your cart and continue your learning journey.</p>
   </div>
+
+  <div class="cart-list" *ngIf="cartItems.length > 0">
+    <div class="cart-card" *ngFor="let item of cartItems" [routerLink]="['/detail-course', item.id]">
+      <div class="card-img-placeholder">
+        <img *ngIf="item.thumbnail" [src]="item.thumbnail" alt="thumbnail" class="thumbnail-img" (error)="$any($event.target).style.display='none'">
+        <ion-icon *ngIf="!item.thumbnail" name="image-outline" class="placeholder-icon"></ion-icon>
+      </div>
+
+      <div class="card-body">
+        <h3 class="course-title">{{ item.title }}</h3>
+        <p class="course-instructor">{{ item.instructor }}</p>
+        <p class="course-price">{{ item.price }}</p>
+
+        <div class="card-meta-row">
+          <span class="meta-rating">
+            <ion-icon name="star"></ion-icon>
+            {{ item.rating }}
+          </span>
+          <button class="remove-btn" (click)="$event.stopPropagation(); removeItem(item)">
+            <ion-icon name="trash-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </ion-content>
 
 <div class="bottom-action">
-  <ion-button expand="block" class="explore-btn" routerLink="/tabs-after-login/search">
+  <ion-button *ngIf="cartItems.length === 0" expand="block" class="explore-btn" routerLink="/tabs-after-login/home">
     Explore Courses
   </ion-button>
+  
+  <div class="checkout-container" *ngIf="cartItems.length > 0">
+    <div class="total-info">
+      <span class="total-label">Total:</span>
+      <span class="total-price">Rp{{ totalAmount | number }}</span>
+    </div>
+    <ion-button expand="block" class="checkout-btn" routerLink="/checkout">
+      Checkout
+    </ion-button>
+  </div>
 </div>

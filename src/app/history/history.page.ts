@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { CourseService, Course } from '../services/course.service';
+import { ProgressService } from '../services/progress.service';
+import { ProgressSummary } from '../models/index';
+import { environment } from '../../environments/environment';
 
 interface TransactionHistory {
   id: string;
@@ -12,14 +16,6 @@ interface TransactionHistory {
   date: string;
   status: 'success' | 'pending' | 'cancelled';
   paymentMethod: string;
-}
-
-interface LearningProgress {
-  id: string;
-  courseTitle: string;
-  progress: number; // 0 to 100
-  lastLesson: string;
-  completed: boolean;
 }
 
 @Component({
@@ -32,76 +28,76 @@ interface LearningProgress {
 export class HistoryPage implements OnInit {
   activeTab: 'transactions' | 'progress' = 'transactions';
 
-  transactions: TransactionHistory[] = [
-    {
-      id: 'tx-1',
-      invoice: 'INV/20260603/FG/9821',
-      courseTitle: 'Belajar Figma dari awal sampai mahir',
-      price: 'Rp150.000',
-      date: '03 Jun 2026, 14:22',
-      status: 'success',
-      paymentMethod: 'Dana e-Wallet'
-    },
-    {
-      id: 'tx-2',
-      invoice: 'INV/20260520/WD/4829',
-      courseTitle: 'Web Development Bootcamp: HTML, CSS & JS',
-      price: 'Rp250.000',
-      date: '20 Mei 2026, 09:15',
-      status: 'success',
-      paymentMethod: 'BCA Virtual Account'
-    },
-    {
-      id: 'tx-3',
-      invoice: 'INV/20260602/UX/1129',
-      courseTitle: 'UI/UX Design Masterclass 2026',
-      price: 'Rp180.000',
-      date: '02 Jun 2026, 19:40',
-      status: 'pending',
-      paymentMethod: 'Mandiri Virtual Account'
-    },
-    {
-      id: 'tx-4',
-      invoice: 'INV/20260510/PY/0091',
-      courseTitle: 'Python Pemrograman untuk Pemula',
-      price: 'Rp120.000',
-      date: '10 Mei 2026, 11:02',
-      status: 'cancelled',
-      paymentMethod: 'GoPay e-Wallet'
-    }
-  ];
+  // Transaksi — tetap dummy (endpoint transaksi belum di-expose di API)
+  transactions: TransactionHistory[] = [];
 
-  learningProgressList: LearningProgress[] = [
-    {
-      id: 'lp-1',
-      courseTitle: 'Belajar Figma dari awal sampai mahir',
-      progress: 66,
-      lastLesson: 'Bagian 1: Pelajaran 2 - Tambah warna dan gradient warna',
-      completed: false
-    },
-    {
-      id: 'lp-2',
-      courseTitle: 'Web Development Bootcamp: HTML, CSS & JS',
-      progress: 100,
-      lastLesson: 'Bagian 10: Pelajaran 5 - Kesimpulan & Roadmap Selanjutnya',
-      completed: true
-    },
-    {
-      id: 'lp-3',
-      courseTitle: 'UI/UX Design Masterclass 2026',
-      progress: 0,
-      lastLesson: 'Belum dimulai',
-      completed: false
-    }
-  ];
+  // My Learning dari API getMyLearning()
+  myCourses: Course[]           = [];
+  progressList: ProgressSummary[] = [];
+  isLoadingCourses: boolean     = false;
+  isLoadingProgress: boolean    = false;
+  hasError: boolean             = false;
+
+  private readonly storageBaseUrl = environment.apiUrl.replace('/api', '/storage/');
 
   constructor(
     private router: Router,
     private alertController: AlertController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private courseService: CourseService,
+    private progressService: ProgressService
   ) { }
 
   ngOnInit() {
+    this.loadMyLearning();
+  }
+
+  ionViewWillEnter() {
+    this.loadMyLearning();
+  }
+
+  /** GET /api/my-learning — kursus yang sudah dibeli/enrolled */
+  loadMyLearning() {
+    this.isLoadingCourses = true;
+    this.hasError         = false;
+
+    this.courseService.getMyLearning().subscribe({
+      next: (courses) => {
+        this.myCourses        = courses;
+        this.isLoadingCourses = false;
+        // Setelah dapat daftar course, muat progress masing-masing
+        this.loadProgress(courses);
+      },
+      error: (err) => {
+        console.error('Gagal memuat my-learning:', err);
+        this.isLoadingCourses = false;
+        this.hasError         = true;
+      }
+    });
+  }
+
+  /** GET /api/student/progress — semua progress sekaligus (lebih efisien) */
+  private loadProgress(courses: Course[]) {
+    if (!courses.length) return;
+    this.isLoadingProgress = true;
+
+    this.progressService.getMyProgress().subscribe({
+      next: (summaries) => {
+        this.progressList      = summaries;
+        this.isLoadingProgress = false;
+      },
+      error: () => {
+        this.isLoadingProgress = false;
+      }
+    });
+  }
+
+  /** Resolves thumbnail ke full URL */
+  getThumbnail(course: Course): string | null {
+    const raw = course.thumbnail || (course as any).image;
+    if (!raw) return null;
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    return this.storageBaseUrl + raw.replace(/^\//, '');
   }
 
   goBack() {
@@ -165,19 +161,23 @@ export class HistoryPage implements OnInit {
     await alert.present();
   }
 
-  continueCourse(course: LearningProgress) {
-    if (course.courseTitle.toLowerCase().includes('figma')) {
-      this.router.navigate(['/video-materi']);
-    } else {
-      this.router.navigate(['/detail-course']);
-    }
+  continueCourse(course: Course) {
+    this.router.navigate(['/video-materi'], { queryParams: { course_id: course.id } });
   }
 
-  async claimCertificate(course: LearningProgress) {
+  goToDetail(course: Course) {
+    this.router.navigate(['/detail-course', course.id]);
+  }
+
+  getProgressForCourse(courseId: number): ProgressSummary | undefined {
+    return this.progressList.find(p => p.courseId === courseId);
+  }
+
+  async claimCertificate(course: Course) {
     const alert = await this.alertController.create({
       header: 'Selamat!',
       subHeader: 'Klaim Sertifikat Anda',
-      message: `Selamat Anda telah menyelesaikan kelas <strong>${course.courseTitle}</strong>. Sertifikat kelulusan digital Anda telah diterbitkan secara otomatis!`,
+      message: `Selamat Anda telah menyelesaikan kelas <strong>${course.title}</strong>. Sertifikat kelulusan digital Anda telah diterbitkan secara otomatis!`,
       buttons: [
         {
           text: 'Batal',

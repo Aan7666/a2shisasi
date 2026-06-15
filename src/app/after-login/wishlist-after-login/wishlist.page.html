@@ -46,7 +46,7 @@
     <!-- Wishlist Items List -->
     <div class="wishlist-list" *ngIf="filteredWishlistItems.length > 0">
       <div class="wishlist-card" *ngFor="let item of filteredWishlistItems" [class.in-selection]="isSelectionMode"
-        (click)="isSelectionMode ? toggleItemSelection(item) : null">
+        (click)="isSelectionMode ? toggleItemSelection(item) : goToDetail(item)">
         <!-- Selection Checkbox -->
         <div class="selection-checkbox" *ngIf="isSelectionMode">
           <div class="checkbox-circle" [class.checked]="item.selected">
@@ -72,6 +72,9 @@
               <ion-icon name="star"></ion-icon>
               {{ item.rating }}
             </span>
+            <button class="remove-btn" (click)="confirmDelete(item, $event)" *ngIf="!isSelectionMode">
+              <ion-icon name="trash-outline"></ion-icon>
+            </button>
           </div>
         </div>
       </div>
@@ -116,7 +119,7 @@
 </ion-content>
 
 <!-- Bottom Action Bar (Select Items Footer) -->
-<ion-footer class="ion-no-border wishlist-footer" *ngIf="isSelectionMode">
+<ion-footer class="ion-no-border wishlist-footer" [class.ion-hide]="!isSelectionMode">
   <div class="selection-action-bar">
     <div class="select-all-container" (click)="toggleSelectAll()">
       <div class="checkbox-circle" [class.checked]="isAllSelected">

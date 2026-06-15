@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
@@ -19,7 +19,7 @@ interface Star {
   standalone: true,
   imports: [IonicModule, CommonModule, FormsModule, RouterLink]
 })
-export class RegisterPage implements OnInit {
+export class RegisterPage implements OnInit, OnDestroy {
   stars: Star[] = [];
   step: number = 1;
   email: string = '';
@@ -28,6 +28,10 @@ export class RegisterPage implements OnInit {
   password: string = '';
   confirmPassword: string = '';
   isLoading: boolean = false;
+
+  // Countdown resend OTP
+  resendCooldown: number = 0;
+  private countdownInterval: any = null;
 
   constructor(private router: Router, private authService: AuthService) { }
 
@@ -54,6 +58,53 @@ export class RegisterPage implements OnInit {
     }
   }
 
+  ngOnDestroy() {
+    this.clearCountdown();
+  }
+
+  startResendCountdown() {
+    this.resendCooldown = 60;
+    this.clearCountdown();
+    this.countdownInterval = setInterval(() => {
+      this.resendCooldown--;
+      if (this.resendCooldown <= 0) {
+        this.resendCooldown = 0;
+        this.clearCountdown();
+      }
+    }, 1000);
+  }
+
+  clearCountdown() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
+  }
+
+  onResendOtp() {
+    if (this.resendCooldown > 0 || this.isLoading) return;
+    this.isLoading = true;
+    this.authService.sendOtp(this.email.trim()).subscribe({
+      next: (result) => {
+        this.isLoading = false;
+        if (result.success) {
+          this.startResendCountdown();
+          alert('Kode OTP baru telah dikirim ke email Anda.');
+        } else {
+          alert(result.message || 'Gagal mengirim ulang OTP.');
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        if (err.status === 422) {
+          alert('Email sudah terdaftar');
+        } else {
+          alert(err.error?.message || 'Gagal mengirim ulang OTP.');
+        }
+      }
+    });
+  }
+
   prevStep() {
     if (this.step > 1) {
       this.step--;
@@ -73,13 +124,18 @@ export class RegisterPage implements OnInit {
         this.isLoading = false;
         if (result.success) {
           this.step = 2;
+          this.startResendCountdown();
         } else {
           alert(result.message || 'Gagal mengirim OTP.');
         }
       },
       error: (err) => {
         this.isLoading = false;
-        alert(err.error?.message || 'Gagal mengirim OTP.');
+        if (err.status === 422) {
+          alert('Email sudah terdaftar');
+        } else {
+          alert(err.error?.message || 'Gagal mengirim OTP.');
+        }
       }
     });
   }

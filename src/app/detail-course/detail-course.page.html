@@ -24,6 +24,7 @@
       <div class="error-state">
         <ion-icon name="alert-circle-outline"></ion-icon>
         <p>Gagal memuat course. Silakan coba lagi.</p>
+        <p style="color: #ff4d4d; font-size: 12px; margin-top: 8px; text-align: center;">Error: {{ errorMessage }}</p>
         <button class="btn-buy-now" (click)="loadCourse(courseId)">Coba Lagi</button>
       </div>
     </div>

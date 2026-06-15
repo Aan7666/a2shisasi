@@ -84,7 +84,7 @@ export class CoursesPage implements OnInit {
   // ── STUDENT: load enrolled courses ────────────────────────
   loadEnrolledCourses() {
     this.isLoadingCourses = true;
-    this.courseService.getCourses().subscribe({
+    this.courseService.getMyLearning().subscribe({
       next: (data) => {
         this.enrolledCourses = data;
         this.isLoadingCourses = false;

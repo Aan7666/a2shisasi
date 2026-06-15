@@ -104,7 +104,14 @@
 
           <div class="resend-container">
             Didn't get a code?
-            <a href="#" (click)="$event.preventDefault();" class="text-link">Send again</a>
+            <a href="#"
+               (click)="$event.preventDefault(); onResendOtp()"
+               class="text-link"
+               [class.disabled]="resendCooldown > 0 || isLoading"
+               [style.pointer-events]="resendCooldown > 0 || isLoading ? 'none' : 'auto'"
+               [style.opacity]="resendCooldown > 0 || isLoading ? '0.45' : '1'">
+              {{ resendCooldown > 0 ? 'Send again (' + resendCooldown + 's)' : 'Send again' }}
+            </a>
           </div>
         </ng-container>
 

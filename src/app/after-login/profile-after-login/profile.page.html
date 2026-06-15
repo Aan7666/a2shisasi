@@ -67,10 +67,10 @@
       <div class="menu-container">
         <div class="menu-group">
           <span class="section-label">Name</span>
-          <div class="menu-item-box">
+          <button class="menu-item-box clickable" (click)="openNameModal()">
             <ion-icon name="person-outline" class="item-icon"></ion-icon>
             <span class="item-text">{{ userName }}</span>
-          </div>
+          </button>
         </div>
 
         <div class="menu-group">
@@ -100,6 +100,11 @@
       <!-- Sign Out Button -->
       <div class="action-container">
         <button class="btn-signout" (click)="onSignOut()">SIGN OUT</button>
+      </div>
+
+      <!-- Delete Account Button -->
+      <div class="action-container delete-account-wrap">
+        <button class="btn-delete-account" (click)="confirmDeleteAccount()">Delete Account</button>
       </div>
 
     </ng-container>
@@ -165,6 +170,46 @@
             <button class="contact-btn-email">
               <ion-icon name="mail-outline"></ion-icon>
               <span>Kirim Email Bantuan</span>
+            </button>
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+  <!-- Edit Name Modal -->
+  <ion-modal [isOpen]="isNameModalOpen" (didDismiss)="isNameModalOpen = false" class="edit-name-modal">
+    <ng-template>
+      <ion-header class="ion-no-border">
+        <ion-toolbar class="modal-toolbar">
+          <ion-buttons slot="start">
+            <ion-button (click)="closeNameModal()" class="back-btn-custom">
+              &lt; Back
+            </ion-button>
+          </ion-buttons>
+          <ion-title class="modal-title-center">Name</ion-title>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="edit-name-content">
+        <div class="edit-name-container">
+          <!-- Person Icon -->
+          <div class="avatar-circle-wrapper">
+            <ion-icon name="person-circle-outline" class="large-avatar-icon"></ion-icon>
+          </div>
+
+          <!-- Name Input -->
+          <div class="input-section">
+            <label class="input-lbl">Your name</label>
+            <div class="name-input-box">
+              <input type="text" [(ngModel)]="tempName" name="tempName" class="name-text-input" placeholder="Enter your name" />
+            </div>
+            <span class="subtext-info">change your name here.</span>
+          </div>
+
+          <!-- Save Button -->
+          <div class="btn-save-container">
+            <button class="btn-save" (click)="saveName()" [disabled]="isSavingName">
+              {{ isSavingName ? 'Saving...' : 'Save' }}
             </button>
           </div>
         </div>

@@ -72,37 +72,45 @@
 
       <!-- LEARNING PROGRESS TAB -->
       <div class="tab-pane animate-fade-in" *ngIf="activeTab === 'progress'">
-        <div class="progress-list" *ngIf="learningProgressList.length > 0; else noProgress">
+        <!-- Loading state -->
+        <div *ngIf="isLoadingCourses" class="loading-state" style="text-align: center; padding: 20px;">
+          <ion-spinner name="crescent" color="danger"></ion-spinner>
+          <p>Memuat data belajar...</p>
+        </div>
+
+        <div class="progress-list" *ngIf="!isLoadingCourses && myCourses.length > 0; else noProgress">
           
-          <div class="progress-card" *ngFor="let course of learningProgressList">
+          <div class="progress-card" *ngFor="let course of myCourses">
             <div class="progress-header">
-              <h3 class="course-title">{{ course.courseTitle }}</h3>
-              <span class="completion-percent" [class.completed]="course.completed">
-                {{ course.progress }}% {{ course.completed ? 'Selesai' : '' }}
+              <h3 class="course-title" (click)="goToDetail(course)" style="cursor: pointer;">{{ course.title }}</h3>
+              <span class="completion-percent" [class.completed]="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100">
+                {{ getProgressForCourse(course.id)?.percentage || 0 }}% {{ (getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100) ? 'Selesai' : '' }}
               </span>
             </div>
 
             <!-- Progress Bar -->
             <div class="progress-bar-container">
-              <div class="progress-bar-fill" [style.width.%]="course.progress" [class.completed]="course.completed"></div>
+              <div class="progress-bar-fill" 
+                   [style.width.%]="getProgressForCourse(course.id)?.percentage || 0" 
+                   [class.completed]="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100"></div>
             </div>
 
             <p class="last-lesson-info">
-              <ion-icon name="play-outline" class="lesson-icon" *ngIf="!course.completed"></ion-icon>
-              <ion-icon name="checkmark-circle-outline" class="lesson-icon completed" *ngIf="course.completed"></ion-icon>
-              <span>{{ course.completed ? 'Kelas Selesai' : course.lastLesson }}</span>
+              <ion-icon name="play-outline" class="lesson-icon" *ngIf="!(getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100)"></ion-icon>
+              <ion-icon name="checkmark-circle-outline" class="lesson-icon completed" *ngIf="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100"></ion-icon>
+              <span>{{ (getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100) ? 'Kelas Selesai' : 'Lanjutkan ke materi berikutnya' }}</span>
             </p>
 
             <div class="progress-actions">
               <button 
-                *ngIf="!course.completed" 
+                *ngIf="!(getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100)" 
                 class="btn-continue-learning" 
                 (click)="continueCourse(course)"
               >
                 Lanjutkan Belajar
               </button>
               <button 
-                *ngIf="course.completed" 
+                *ngIf="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100" 
                 class="btn-claim-cert" 
                 (click)="claimCertificate(course)"
               >

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-splash',
@@ -12,11 +13,17 @@ import { Router } from '@angular/router';
 })
 export class SplashPage implements OnInit {
 
-  constructor(private router: Router) { }
+  constructor(private router: Router, private authService: AuthService) { }
 
   ngOnInit() {
-    // Redirect after 3 seconds depending on privacy policy acceptance
     setTimeout(() => {
+      // Kalau sudah login, langsung masuk tanpa harus login lagi
+      if (this.authService.isLoggedIn()) {
+        this.router.navigateByUrl('/tabs-after-login', { replaceUrl: true });
+        return;
+      }
+
+      // Belum login: cek apakah sudah accept privacy policy
       const accepted = localStorage.getItem('privacy_policy_accepted');
       if (accepted === 'true') {
         this.router.navigateByUrl('/login', { replaceUrl: true });

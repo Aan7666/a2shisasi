@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
@@ -19,7 +19,9 @@ export class ProfilePage implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private alertController: AlertController,
+    private toastController: ToastController
   ) { }
 
   ngOnInit() {
@@ -46,7 +48,60 @@ export class ProfilePage implements OnInit {
   }
 
   onSignOut() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
+    this.authService.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+      error: () => {
+        // Tetap logout lokal meski request gagal
+        this.authService.clearSession();
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+
+  async confirmDeleteAccount() {
+    const alert = await this.alertController.create({
+      header: 'Hapus Akun?',
+      message: 'Apakah Anda yakin ingin menghapus akun secara permanen? Tindakan ini tidak dapat dibatalkan dan seluruh data Anda akan hilang.',
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel'
+        },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          cssClass: 'danger-btn-alert',
+          handler: () => {
+            this.deleteAccount();
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  deleteAccount() {
+    this.authService.deleteAccount().subscribe({
+      next: () => {
+        this.showToast('Akun Anda berhasil dihapus.');
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        const msg = err.error?.message || 'Gagal menghapus akun.';
+        this.showToast(msg);
+        this.authService.clearSession();
+        this.router.navigate(['/login']);
+      }
+    });
+  }
+
+  private async showToast(message: string) {
+    const toast = await this.toastController.create({
+      message,
+      duration: 2500,
+      position: 'bottom',
+      color: 'dark'
+    });
+    await toast.present();
   }
 }

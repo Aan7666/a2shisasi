@@ -4,32 +4,116 @@
     <div class="search-bar-container">
       <div class="search-input-wrapper">
         <ion-icon name="search-outline" class="search-icon"></ion-icon>
-        <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" placeholder="Search" class="search-input" />
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearch()"
+          placeholder="Cari kursus..."
+          class="search-input"
+        />
+        <ion-icon
+          *ngIf="searchQuery"
+          name="close-circle-outline"
+          class="clear-icon"
+          (click)="searchQuery = ''; onSearch()"
+        ></ion-icon>
       </div>
     </div>
   </div>
 
   <!-- Main Container -->
   <div class="main-container">
-    
-    <!-- Top Searches Section -->
-    <h2 class="section-title">Top Searches</h2>
-    <div class="top-searches-container">
-      <button class="search-pill" *ngFor="let term of topSearches" (click)="selectSearch(term)">
-        {{ term }}
-      </button>
+
+    <!-- ── LOADING INDICATOR ── -->
+    <div *ngIf="isSearching" class="loading-state">
+      <ion-spinner name="crescent" color="danger"></ion-spinner>
+      <p>Mencari kursus...</p>
     </div>
 
-    <!-- Browse Categories Section -->
-    <h2 class="section-title browse-title">Browse categories</h2>
-    <div class="categories-grid">
-      <div class="category-card" *ngFor="let cat of categories" [ngStyle]="{'background-color': cat.background}">
-        <div class="category-icon-wrapper" [ngStyle]="{'color': cat.color, 'border-color': cat.color}">
-          <ion-icon [name]="cat.icon"></ion-icon>
-        </div>
-        <span class="category-name">{{ cat.title }}</span>
+    <!-- ── HASIL PENCARIAN ── -->
+    <ng-container *ngIf="!isSearching && hasSearched">
+      <h2 class="section-title">
+        Hasil untuk "<strong>{{ searchQuery }}</strong>"
+        <span class="result-count">({{ searchResults.length }} kursus)</span>
+      </h2>
+
+      <!-- Tidak ada hasil -->
+      <div *ngIf="searchResults.length === 0" class="empty-state">
+        <ion-icon name="search-outline"></ion-icon>
+        <p>Kursus tidak ditemukan.</p>
+        <small>Coba kata kunci lain atau jelajahi kategori di bawah.</small>
       </div>
-    </div>
+
+      <!-- Daftar hasil -->
+      <div class="results-list">
+        <div
+          class="course-card"
+          *ngFor="let course of searchResults"
+          (click)="goToCourse(course.id)"
+        >
+          <div class="course-thumb">
+            <img
+              *ngIf="getThumbnail(course)"
+              [src]="getThumbnail(course)!"
+              [alt]="course.title"
+            />
+            <div *ngIf="!getThumbnail(course)" class="thumb-placeholder">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+          </div>
+          <div class="course-info">
+            <p class="course-title">{{ course.title }}</p>
+            <p class="course-instructor">{{ course.instructor?.name }}</p>
+            <p class="course-price">{{ formatPrice(course.price) }}</p>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ── DEFAULT STATE (belum search) ── -->
+    <ng-container *ngIf="!hasSearched && !isSearching">
+
+      <!-- Top Searches -->
+      <h2 class="section-title">Top Searches</h2>
+      <div class="top-searches-container">
+        <button
+          class="search-pill"
+          *ngFor="let term of topSearches"
+          (click)="selectSearch(term)"
+        >
+          {{ term }}
+        </button>
+      </div>
+
+      <!-- Browse Categories -->
+      <h2 class="section-title browse-title">Browse Categories</h2>
+
+      <!-- Loading kategori -->
+      <div *ngIf="isLoadingCats" class="loading-state">
+        <ion-spinner name="crescent" color="danger"></ion-spinner>
+      </div>
+
+      <div *ngIf="!isLoadingCats" class="categories-grid">
+        <div
+          class="category-card"
+          *ngFor="let cat of categories; let i = index"
+          [ngStyle]="{ 'background-color': getCategoryColor(i) + '18' }"
+          (click)="searchByCategory(cat)"
+        >
+          <div
+            class="category-icon-wrapper"
+            [ngStyle]="{ 'color': getCategoryColor(i), 'border-color': getCategoryColor(i) }"
+          >
+            <ion-icon [name]="getCategoryIcon(cat.name)"></ion-icon>
+          </div>
+          <span class="category-name">{{ cat.name }}</span>
+          <span class="category-count" *ngIf="cat.courses_count">
+            {{ cat.courses_count }} kursus
+          </span>
+        </div>
+      </div>
+
+    </ng-container>
 
   </div>
 </ion-content>

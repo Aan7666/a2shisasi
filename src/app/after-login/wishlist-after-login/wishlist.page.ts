@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController } from '@ionic/angular';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -21,45 +21,64 @@ export class WishlistPage implements OnInit {
   isSearchBarOpen: boolean = false;
   searchQuery: string = '';
 
-  wishlistItems = [
-    {
-      id: 1,
-      title: 'Web Development Masterclass',
-      instructor: 'Pedri Gonzalez',
-      price: 'Rp450.000',
-      rating: 4.7,
-      students: 10,
-      selected: false
-    },
-    {
-      id: 2,
-      title: 'Mobile Development with Ionic',
-      instructor: 'Pedri Gonzalez',
-      price: 'Rp450.000',
-      rating: 4.7,
-      students: 12,
-      selected: false
-    },
-    {
-      id: 3,
-      title: 'Cyber Security Essentials',
-      instructor: 'Pedri Gonzalez',
-      price: 'Rp250.000',
-      rating: 4.7,
-      students: 8,
-      selected: false
-    }
-  ];
+  wishlistItems: any[] = [];
 
   constructor(
     private authService: AuthService,
     private router: Router,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private alertController: AlertController
   ) { }
 
   ngOnInit() {
     this.checkLoginStatus();
-    this.filteredWishlistItems = [...this.wishlistItems];
+    this.loadWishlist();
+  }
+
+  async confirmDelete(item: any, event: Event) {
+    event.stopPropagation();
+    const alert = await this.alertController.create({
+      header: 'Hapus Wishlist',
+      message: 'Apakah ingin menghapus course dari wishlist?',
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel'
+        },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          handler: () => {
+            this.deleteItem(item);
+          }
+        }
+      ]
+    });
+    await alert.present();
+  }
+
+  async deleteItem(item: any) {
+    this.wishlistItems = this.wishlistItems.filter(i => i.id !== item.id);
+    localStorage.setItem('wishlist_items', JSON.stringify(this.wishlistItems));
+    this.filterWishlistItems();
+    
+    const toast = await this.toastController.create({
+      message: 'Item berhasil dihapus',
+      duration: 2000,
+      position: 'bottom',
+      color: 'dark'
+    });
+    await toast.present();
+  }
+
+  loadWishlist() {
+    const saved = localStorage.getItem('wishlist_items');
+    if (saved) {
+      this.wishlistItems = JSON.parse(saved);
+    } else {
+      this.wishlistItems = [];
+    }
+    this.filterWishlistItems();
   }
 
   onSelectItems() {
@@ -97,23 +116,41 @@ export class WishlistPage implements OnInit {
       return;
     }
 
-    this.wishlistItems = this.wishlistItems.filter(item => !item.selected);
-    this.filterWishlistItems();
-    this.isAllSelected = false;
-    this.isSelectionMode = false;
+    const alert = await this.alertController.create({
+      header: 'Hapus Wishlist',
+      message: 'Apakah ingin menghapus course dari wishlist?',
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel'
+        },
+        {
+          text: 'Hapus',
+          role: 'destructive',
+          handler: async () => {
+            this.wishlistItems = this.wishlistItems.filter(item => !item.selected);
+            localStorage.setItem('wishlist_items', JSON.stringify(this.wishlistItems));
+            this.filterWishlistItems();
+            this.isAllSelected = false;
+            this.isSelectionMode = false;
 
-    const toast = await this.toastController.create({
-      message: `${selectedCount} item berhasil dihapus`,
-      duration: 2000,
-      position: 'bottom',
-      color: 'dark'
+            const toast = await this.toastController.create({
+              message: `${selectedCount} item berhasil dihapus`,
+              duration: 2000,
+              position: 'bottom',
+              color: 'dark'
+            });
+            await toast.present();
+          }
+        }
+      ]
     });
-    await toast.present();
+    await alert.present();
   }
 
   ionViewWillEnter() {
     this.checkLoginStatus();
-    this.filteredWishlistItems = [...this.wishlistItems];
+    this.loadWishlist();
   }
 
   checkLoginStatus() {
@@ -126,6 +163,12 @@ export class WishlistPage implements OnInit {
 
   goToSearch() {
     this.router.navigate(['/tabs-after-login/search']);
+  }
+
+  goToDetail(item: any) {
+    if (item && item.id) {
+      this.router.navigate(['/detail-course', item.id]);
+    }
   }
 
   toggleSearchBar() {

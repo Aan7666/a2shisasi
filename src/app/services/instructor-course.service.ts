@@ -57,6 +57,38 @@ export class InstructorCourseService {
   }
 
   /**
+   * PATCH /instructor/courses/:id/status
+   * Setara dengan updateCourseStatus() di PHP CourseController
+   * Status transitions:
+   *   draft       → unpublished (submit for review)
+   *   published   → archived
+   *   archived    → unpublished
+   */
+  updateStatus(id: number, status: 'draft' | 'unpublished' | 'published' | 'archived'): Observable<Course> {
+    return this.http.patch<ApiResponse<Course>>(`${this.apiUrl}/instructor/courses/${id}/status`, { status }).pipe(
+      map(res => res.data),
+      catchError(this.handleError)
+    );
+  }
+
+  /**
+   * Validasi transisi status (mirror dari PHP $allowedTransitions)
+   * Digunakan di komponen sebelum memanggil updateStatus()
+   */
+  isValidTransition(
+    currentStatus: string,
+    newStatus: string
+  ): boolean {
+    const allowedTransitions: Record<string, string[]> = {
+      draft:       ['unpublished'],
+      unpublished: [],
+      published:   ['archived'],
+      archived:    ['unpublished'],
+    };
+    return (allowedTransitions[currentStatus] ?? []).includes(newStatus);
+  }
+
+  /**
    * GET /instructor/dashboard
    * Returns InstructorDashboard
    */

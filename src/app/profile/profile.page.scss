@@ -140,6 +140,8 @@ ion-content {
   margin-top: auto; // Push button to bottom if there's flexible height
   padding: 16px 0 24px 0;
   display: flex;
+  flex-direction: column;
+  gap: 12px;
   justify-content: center;
   align-items: center;
 }
@@ -166,5 +168,29 @@ ion-content {
   &:active {
     transform: scale(0.94);
     box-shadow: 0 2px 6px rgba(133, 41, 32, 0.15);
+  }
+}
+
+/* DELETE ACCOUNT Button */
+.btn-delete {
+  background-color: transparent;
+  color: #852920; 
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 12px 42px;
+  border-radius: 9999px;
+  border: 2px solid #852920;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 153px; /* To match SIGN OUT width */
+
+  &:hover {
+    background-color: rgba(133, 41, 32, 0.1);
+  }
+
+  &:active {
+    transform: scale(0.94);
   }
 }

@@ -21,13 +21,16 @@ export interface Course {
   description: string;
   price: number;
   thumbnail: string;
-  status: 'draft' | 'published' | 'archived';
+  status: 'draft' | 'unpublished' | 'published' | 'archived';
   instructor_id: number;
+  category_id?: number;
   lessons?: Lesson[];
   enrollments_count?: number;
   instructor?: Instructor;
   category?: Category;
   has_access?: boolean;
+  rating?: number;
+  total_students?: number;
 }
 
 export interface Lesson {
