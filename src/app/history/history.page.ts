@@ -5,8 +5,12 @@ import { IonicModule, AlertController, ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { CourseService, Course } from '../services/course.service';
 import { ProgressService } from '../services/progress.service';
+import { CertificateService } from '../services/certificate.service';
+import { QuizService } from '../services/quiz.service';
 import { ProgressSummary } from '../models/index';
 import { environment } from '../../environments/environment';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 interface TransactionHistory {
   id: string;
@@ -45,7 +49,9 @@ export class HistoryPage implements OnInit {
     private alertController: AlertController,
     private toastController: ToastController,
     private courseService: CourseService,
-    private progressService: ProgressService
+    private progressService: ProgressService,
+    private certificateService: CertificateService,
+    private quizService: QuizService
   ) { }
 
   ngOnInit() {
@@ -83,8 +89,49 @@ export class HistoryPage implements OnInit {
 
     this.progressService.getMyProgress().subscribe({
       next: (summaries) => {
-        this.progressList      = summaries;
-        this.isLoadingProgress = false;
+        // Fetch quizzes for each course to check if there are uncompleted quizzes
+        const quizRequests = courses.map(course =>
+          this.quizService.getStudentQuizzes(course.id).pipe(
+            catchError(() => of([]))
+          )
+        );
+
+        forkJoin(quizRequests).subscribe({
+          next: (allQuizzes) => {
+            summaries.forEach((summary) => {
+              const courseIndex = courses.findIndex(c => c.id === summary.courseId || c.id === summary.course?.id);
+              if (courseIndex > -1) {
+                const quizzes = allQuizzes[courseIndex] || [];
+                const totalQuizzes = quizzes.length;
+                const completedQuizzes = quizzes.filter(q => q.isAttempted).length;
+
+                if (totalQuizzes > 0) {
+                  // Adjust percentage based on both lessons and quizzes
+                  const totalItems = summary.totalLessons + totalQuizzes;
+                  const completedItems = summary.completedLessons + completedQuizzes;
+                  
+                  summary.percentage = Math.floor((completedItems / totalItems) * 100);
+
+                  // If there is any uncompleted quiz, it shouldn't show 100% or completed
+                  if (completedQuizzes < totalQuizzes) {
+                    summary.percentage = Math.min(99, summary.percentage); // safety cap
+                    summary.status = 'in_progress';
+                  } else if (summary.completedLessons === summary.totalLessons) {
+                    summary.percentage = 100;
+                    summary.status = 'completed';
+                  }
+                }
+              }
+            });
+
+            this.progressList      = summaries;
+            this.isLoadingProgress = false;
+          },
+          error: () => {
+            this.progressList      = summaries;
+            this.isLoadingProgress = false;
+          }
+        });
       },
       error: () => {
         this.isLoadingProgress = false;
@@ -170,7 +217,7 @@ export class HistoryPage implements OnInit {
   }
 
   getProgressForCourse(courseId: number): ProgressSummary | undefined {
-    return this.progressList.find(p => p.courseId === courseId);
+    return this.progressList.find(p => p.courseId === courseId || p.course?.id === courseId);
   }
 
   async claimCertificate(course: Course) {
@@ -186,7 +233,22 @@ export class HistoryPage implements OnInit {
         {
           text: 'Unduh PDF',
           handler: () => {
-            this.showToast('Mengunduh sertifikat...');
+            this.showToast('Mencari sertifikat...');
+            this.certificateService.getMyCertificates().subscribe({
+              next: (certs) => {
+                const cert = certs.find((c: any) => c.course?.id === course.id);
+                if (cert) {
+                  this.showToast('Membuka sertifikat...');
+                  const downloadUrl = this.certificateService.getDownloadUrl(cert.id);
+                  window.open(downloadUrl, '_system');
+                } else {
+                  this.showToast('Sertifikat belum tersedia untuk kelas ini.');
+                }
+              },
+              error: () => {
+                this.showToast('Gagal memuat sertifikat.');
+              }
+            });
           }
         }
       ]

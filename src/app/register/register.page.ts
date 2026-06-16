@@ -28,6 +28,7 @@ export class RegisterPage implements OnInit, OnDestroy {
   password: string = '';
   confirmPassword: string = '';
   isLoading: boolean = false;
+  showPassword = false;
 
   // Countdown resend OTP
   resendCooldown: number = 0;
@@ -103,6 +104,10 @@ export class RegisterPage implements OnInit, OnDestroy {
         }
       }
     });
+  }
+
+  togglePassword() {
+    this.showPassword = !this.showPassword;
   }
 
   prevStep() {

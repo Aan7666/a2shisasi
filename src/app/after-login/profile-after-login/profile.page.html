@@ -56,8 +56,15 @@
 
       <!-- Profile Avatar Card -->
       <div class="profile-header-card">
-        <div class="avatar-wrapper">
-          <ion-icon name="person-circle" class="avatar-icon"></ion-icon>
+        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/png, image/jpeg, image/jpg" style="display: none;">
+        <div class="avatar-wrapper" (click)="fileInput.click()" [class.updating]="isUpdatingAvatar">
+          <img *ngIf="profileImageUrl && !isUpdatingAvatar" [src]="profileImageUrl" class="avatar-image" alt="Profile Photo">
+          <ion-icon *ngIf="!profileImageUrl && !isUpdatingAvatar" name="person-circle" class="avatar-icon"></ion-icon>
+          <ion-spinner *ngIf="isUpdatingAvatar" name="crescent" class="avatar-spinner"></ion-spinner>
+          
+          <div class="edit-badge">
+            <ion-icon name="camera-outline"></ion-icon>
+          </div>
         </div>
         <h2 class="profile-name">{{ userName }}</h2>
         <p class="profile-email">{{ userEmail }}</p>
@@ -102,9 +109,17 @@
         <button class="btn-signout" (click)="onSignOut()">SIGN OUT</button>
       </div>
 
-      <!-- Delete Account Button -->
-      <div class="action-container delete-account-wrap">
-        <button class="btn-delete-account" (click)="confirmDeleteAccount()">Delete Account</button>
+      <!-- Delete Account Section -->
+      <div class="delete-account-section">
+        <div class="confirm-checkbox-wrapper">
+          <ion-checkbox [(ngModel)]="isDeleteConfirmed" (ionChange)="onCheckboxChange($event)" class="delete-checkbox">
+            <span class="checkbox-lbl-text">Saya mengerti tindakan ini permanen <br>& tidak dapat dibatalkan</span>
+          </ion-checkbox>
+        </div>
+        
+        <div class="action-container delete-account-wrap">
+          <button class="btn-delete-account" [disabled]="!isDeleteConfirmed" (click)="confirmDeleteAccount()">Delete Account</button>
+        </div>
       </div>
 
     </ng-container>
@@ -132,42 +147,45 @@
           <div class="faq-section-group">
             <h4 class="group-title">Pertanyaan Sering Diajukan (FAQ)</h4>
 
-            <ion-accordion-group>
-              <ion-accordion value="first" class="faq-accordion-item">
-                <ion-item slot="header">
-                  <ion-label class="faq-question">Bagaimana cara memulai belajar?</ion-label>
-                </ion-item>
-                <div class="faq-answer-pane" slot="content">
-                  Pilih materi/kelas yang telah Anda beli dari dashboard atau riwayat (history), klik tombol "Lanjutkan
-                  Belajar" atau "Memulai" untuk masuk ke pemutar materi.
+            <div class="custom-accordion-group">
+              <!-- FAQ 1 -->
+              <div class="custom-accordion-item" [class.expanded]="expandedFaq === 'faq1'">
+                <button class="custom-accordion-header" (click)="toggleFaq('faq1')">
+                  <span class="faq-question">Bagaimana cara memulai belajar?</span>
+                  <ion-icon [name]="expandedFaq === 'faq1' ? 'chevron-up-outline' : 'chevron-down-outline'" class="faq-icon"></ion-icon>
+                </button>
+                <div class="custom-accordion-content" *ngIf="expandedFaq === 'faq1'">
+                  Pilih materi/kelas yang telah Anda beli dari dashboard atau riwayat (history), klik tombol "Lanjutkan Belajar" atau "Memulai" untuk masuk ke pemutar materi.
                 </div>
-              </ion-accordion>
+              </div>
 
-              <ion-accordion value="second" class="faq-accordion-item">
-                <ion-item slot="header">
-                  <ion-label class="faq-question">Apakah sertifikat berbayar?</ion-label>
-                </ion-item>
-                <div class="faq-answer-pane" slot="content">
-                  Tidak. Semua sertifikat kelulusan kelas di A2SHI Academy dapat diunduh secara gratis dalam format PDF
-                  setelah progres belajar mencapai 100%.
+              <!-- FAQ 2 -->
+              <div class="custom-accordion-item" [class.expanded]="expandedFaq === 'faq2'">
+                <button class="custom-accordion-header" (click)="toggleFaq('faq2')">
+                  <span class="faq-question">Apakah sertifikat berbayar?</span>
+                  <ion-icon [name]="expandedFaq === 'faq2' ? 'chevron-up-outline' : 'chevron-down-outline'" class="faq-icon"></ion-icon>
+                </button>
+                <div class="custom-accordion-content" *ngIf="expandedFaq === 'faq2'">
+                  Tidak. Semua sertifikat kelulusan kelas di A2SHI Academy dapat diunduh secara gratis dalam format PDF setelah progres belajar mencapai 100%.
                 </div>
-              </ion-accordion>
+              </div>
 
-              <ion-accordion value="third" class="faq-accordion-item">
-                <ion-item slot="header">
-                  <ion-label class="faq-question">Metode pembayaran apa saja yang tersedia?</ion-label>
-                </ion-item>
-                <div class="faq-answer-pane" slot="content">
-                  Kami mendukung pembayaran menggunakan berbagai e-Wallet populer (Dana, GoPay, OVO, ShopeePay) serta
-                  Virtual Account bank terkemuka di Indonesia (BCA, Mandiri, BNI, BRI).
+              <!-- FAQ 3 -->
+              <div class="custom-accordion-item" [class.expanded]="expandedFaq === 'faq3'">
+                <button class="custom-accordion-header" (click)="toggleFaq('faq3')">
+                  <span class="faq-question">Metode pembayaran apa saja yang tersedia?</span>
+                  <ion-icon [name]="expandedFaq === 'faq3' ? 'chevron-up-outline' : 'chevron-down-outline'" class="faq-icon"></ion-icon>
+                </button>
+                <div class="custom-accordion-content" *ngIf="expandedFaq === 'faq3'">
+                  Kami mendukung pembayaran menggunakan berbagai e-Wallet populer (Dana, GoPay, OVO, ShopeePay) serta Virtual Account bank terkemuka di Indonesia (BCA, Mandiri, BNI, BRI).
                 </div>
-              </ion-accordion>
-            </ion-accordion-group>
+              </div>
+            </div>
           </div>
 
           <div class="direct-contact-channels">
             <h4 class="group-title">Butuh Bantuan Lebih Lanjut?</h4>
-            <button class="contact-btn-email">
+            <button class="contact-btn-email" (click)="sendEmailSupport()">
               <ion-icon name="mail-outline"></ion-icon>
               <span>Kirim Email Bantuan</span>
             </button>

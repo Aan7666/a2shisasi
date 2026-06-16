@@ -50,9 +50,9 @@ export class CourseService {
         console.log('[CourseService] Raw response:', response);
         // ApiResponse wrapper format: { success, message, data }
         if (response?.success && response?.data) return response.data as CourseDetail;
-        if (response?.data)                        return response.data as CourseDetail;
+        if (response?.data) return response.data as CourseDetail;
         // Jika backend mengembalikan objek course langsung (tanpa wrapper)
-        if (response?.id)                          return response as CourseDetail;
+        if (response?.id) return response as CourseDetail;
         throw new Error('Format response tidak dikenali dari server');
       }),
       catchError((err: HttpErrorResponse) => {
@@ -105,7 +105,7 @@ export class CourseService {
    */
   searchCourses(paramsInput: { q?: string; category_id?: number; sort?: string; limit?: number }): Observable<Course[]> {
     let params = new HttpParams();
-    
+
     if (paramsInput.q) {
       params = params.set('q', paramsInput.q);
     }
@@ -211,7 +211,7 @@ export class CourseService {
    */
   markComplete(courseId: number, lessonId: number): Observable<any> {
     return this.http.post<ApiResponse<any>>(
-      `${this.apiUrl}/student/courses/${courseId}/lessons/${lessonId}/complete`, 
+      `${this.apiUrl}/student/courses/${courseId}/lessons/${lessonId}/complete`,
       {}
     ).pipe(
       map(response => response.data || (response as any)),

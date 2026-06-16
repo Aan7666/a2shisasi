@@ -210,6 +210,36 @@
             </div>
           </div>
         </div>
+
+        <!-- Quizzes List -->
+        <div class="lessons-list" *ngIf="quizzes && quizzes.length > 0" style="margin-top: 16px; border-top: 1.5px solid rgba(255, 255, 255, 0.15); padding-top: 20px;">
+          <h3 style="color: #ffffff; font-size: 15px; font-weight: 700; margin: 0 0 16px 0;">Quiz</h3>
+          
+          <div class="lesson-card-item"
+               *ngFor="let quiz of quizzes"
+               (click)="goToQuiz(quiz)">
+
+            <!-- Completed check or help icon -->
+            <div class="lesson-number">
+              <ion-icon name="checkmark-circle" class="done-icon" *ngIf="quiz.isAttempted"></ion-icon>
+              <ion-icon name="help-circle-outline" style="color: rgba(255,255,255,0.6); font-size: 18px;" *ngIf="!quiz.isAttempted"></ion-icon>
+            </div>
+
+            <div class="lesson-body">
+              <h4 class="lesson-name">{{ quiz.title }}</h4>
+              <div class="lesson-meta">
+                <span class="cc-badge text-badge" style="background-color: rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.8); display: inline-flex; align-items: center; justify-content: center;">
+                  <ion-icon name="time-outline"></ion-icon>
+                </span>
+                <span class="meta-desc">
+                  Quiz
+                  <span *ngIf="quiz.totalQuestions"> · {{ quiz.totalQuestions }} Soal</span>
+                  <span *ngIf="quiz.score !== undefined && quiz.score !== null"> · Nilai: {{ quiz.score }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>

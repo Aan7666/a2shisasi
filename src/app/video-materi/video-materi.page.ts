@@ -5,6 +5,8 @@ import { IonicModule, ToastController } from '@ionic/angular';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CourseService, Lesson, LessonDetail } from '../services/course.service';
 import { ProgressService } from '../services/progress.service';
+import { QuizService } from '../services/quiz.service';
+import { Quiz } from '../models/index';
 
 @Component({
   selector: 'app-video-materi',
@@ -21,9 +23,11 @@ export class VideoMateriPage implements OnInit, OnDestroy {
 
   // ── State ──
   lessons: Lesson[] = [];
+  quizzes: Quiz[] = [];
   activeLesson: LessonDetail | null = null;
   isLoadingList: boolean = true;
   isLoadingLesson: boolean = false;
+  isLoadingQuizzes: boolean = false;
   hasError: boolean = false;
 
   // ── Video playback ──
@@ -40,6 +44,7 @@ export class VideoMateriPage implements OnInit, OnDestroy {
     private router: Router,
     private courseService: CourseService,
     private progressService: ProgressService,
+    private quizService: QuizService,
     private toastController: ToastController
   ) {}
 
@@ -82,6 +87,22 @@ export class VideoMateriPage implements OnInit, OnDestroy {
         console.error('Gagal memuat lessons', err);
         this.hasError = true;
         this.isLoadingList = false;
+      }
+    });
+
+    this.loadQuizzes();
+  }
+
+  loadQuizzes() {
+    this.isLoadingQuizzes = true;
+    this.quizService.getStudentQuizzes(this.courseId).subscribe({
+      next: (data) => {
+        this.quizzes = data;
+        this.isLoadingQuizzes = false;
+      },
+      error: (err) => {
+        console.error('Failed to load quizzes', err);
+        this.isLoadingQuizzes = false;
       }
     });
   }
@@ -194,8 +215,14 @@ export class VideoMateriPage implements OnInit, OnDestroy {
     return lesson.id === this.activeLesson?.id;
   }
 
+  goToQuiz(quiz: Quiz) {
+    this.router.navigate(['/quiz-attempt', quiz.id], { queryParams: { course_id: this.courseId } }).catch(() => {
+      this.showToast('Halaman Quiz belum tersedia/dibuat di frontend.');
+    });
+  }
+
   goBack() {
-    this.router.navigate(['/detail-course', this.courseId]);
+    window.history.back();
   }
 
   async showToast(msg: string) {

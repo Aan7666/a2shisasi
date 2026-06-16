@@ -66,6 +66,10 @@ const routes: Routes = [
   {
     path: 'help-and-support',
     loadChildren: () => import('./help-and-support/help-and-support.module').then( m => m.HelpAndSupportPageModule)
+  },
+  {
+    path: 'quiz-attempt/:id',
+    loadChildren: () => import('./quiz-attempt/quiz-attempt.module').then( m => m.QuizAttemptPageModule)
   }
 ];
 

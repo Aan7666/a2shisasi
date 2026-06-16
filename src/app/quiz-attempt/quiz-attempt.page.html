@@ -1,0 +1,222 @@
+<ion-content [fullscreen]="true" class="quiz-attempt-content">
+
+  <!-- ── COMMON RED HEADER (Except during Active Playing) ── -->
+  <div class="red-header" *ngIf="state !== 'playing'">
+    <button class="back-btn" (click)="goBack()" aria-label="Back">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+    </button>
+    <h1 class="header-title" *ngIf="quiz">{{ quiz.title }}</h1>
+    <h1 class="header-title" *ngIf="!quiz">Kuis</h1>
+  </div>
+
+  <!-- ── LOADING STATE ── -->
+  <ng-container *ngIf="state === 'loading'">
+    <div class="main-container loading-container">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p class="loading-text">Memuat detail kuis...</p>
+    </div>
+  </ng-container>
+
+  <!-- ── ERROR STATE ── -->
+  <ng-container *ngIf="state === 'error'">
+    <div class="main-container error-container">
+      <ion-icon name="alert-circle-outline" class="error-icon"></ion-icon>
+      <h2>Oops! Terjadi Kesalahan</h2>
+      <p class="error-message">{{ errorMessage }}</p>
+      <button class="btn-primary" (click)="loadQuiz()">Coba Lagi</button>
+    </div>
+  </ng-container>
+
+  <!-- ── INTRO / START STATE ── -->
+  <ng-container *ngIf="state === 'intro' && quiz">
+    <div class="main-container intro-container">
+      <div class="quiz-info-card">
+        <div class="quiz-card-header">
+          <ion-icon name="reader-outline" class="quiz-badge-icon"></ion-icon>
+          <div class="quiz-card-title-group">
+            <h3>{{ quiz.title }}</h3>
+            <p *ngIf="quiz.description">{{ quiz.description }}</p>
+          </div>
+        </div>
+
+        <div class="quiz-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Batas Waktu</span>
+            <span class="meta-val">
+              <ion-icon name="time-outline"></ion-icon>
+              {{ quiz.time_limit ? quiz.time_limit + ' Menit' : 'Tidak ada batasan' }}
+            </span>
+          </div>
+
+          <div class="meta-item">
+            <span class="meta-label">Batas Kelulusan</span>
+            <span class="meta-val text-success">
+              <ion-icon name="ribbon-outline"></ion-icon>
+              {{ quiz.passing_score }}% Skor
+            </span>
+          </div>
+
+          <div class="meta-item" *ngIf="questions.length > 0">
+            <span class="meta-label">Jumlah Soal</span>
+            <span class="meta-val">
+              <ion-icon name="help-circle-outline"></ion-icon>
+              {{ questions.length }} Butir
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="intro-action-box">
+        <!-- If can attempt, show big start button -->
+        <button *ngIf="getCanAttempt()" class="btn-start animate-pulse" (click)="startQuiz()">
+          <ion-icon name="play-outline"></ion-icon> Mulai Kuis
+        </button>
+
+        <!-- If cannot attempt anymore -->
+        <div *ngIf="!getCanAttempt()" class="cannot-attempt-warning">
+          <ion-icon name="ban-outline"></ion-icon>
+          <p>{{ getCanAttemptMessage() }}</p>
+          <button class="btn-outline" (click)="loadPreviousResult()" *ngIf="quiz.isAttempted">
+            <ion-icon name="eye-outline"></ion-icon> Lihat Hasil Terakhir
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── ACTIVE PLAYING STATE ── -->
+  <ng-container *ngIf="state === 'playing' && quiz && activeQuestion">
+    <!-- Active Quiz Header -->
+    <div class="quiz-active-header">
+      <div class="header-top-row">
+        <button class="close-btn" (click)="goBack()" aria-label="Exit Quiz">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+        <div class="question-progress">
+          Soal <span>{{ currentIndex + 1 }}</span> dari {{ questions.length }}
+        </div>
+        <div class="quiz-timer" [class.timer-warning]="timeLeftSeconds < 120" *ngIf="quiz.time_limit && quiz.time_limit > 0">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>{{ getFormattedTime() }}</span>
+        </div>
+      </div>
+
+      <!-- Linear progress bar -->
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" [style.width.%]="((currentIndex + 1) / questions.length) * 100"></div>
+      </div>
+    </div>
+
+    <!-- Active Question Container -->
+    <div class="main-container playing-container">
+      <div class="question-box">
+        <div class="question-text" [innerHTML]="activeQuestion.question"></div>
+      </div>
+
+      <div class="options-list">
+        <div 
+          *ngFor="let option of activeQuestion.options; let idx = index" 
+          class="option-card"
+          [class.selected]="isOptionSelected(activeQuestion.id, option.id)"
+          (click)="selectOption(activeQuestion.id, option.id)">
+          <div class="option-index">{{ idx === 0 ? 'A' : idx === 1 ? 'B' : idx === 2 ? 'C' : idx === 3 ? 'D' : 'E' }}</div>
+          <div class="option-text">{{ option.text }}</div>
+          <div class="option-check">
+            <ion-icon *ngIf="isOptionSelected(activeQuestion.id, option.id)" name="checkmark-circle" class="checked-icon"></ion-icon>
+            <div *ngIf="!isOptionSelected(activeQuestion.id, option.id)" class="unchecked-circle"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Grid for Quick Jumps -->
+      <div class="navigation-grid-title">Daftar Pertanyaan</div>
+      <div class="question-grid">
+        <button 
+          *ngFor="let q of questions; let idx = index"
+          class="grid-item"
+          [class.active]="idx === currentIndex"
+          [class.answered]="isQuestionAnswered(q.id)"
+          (click)="goToQuestion(idx)">
+          {{ idx + 1 }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Active Playing Footer Navigation -->
+    <div class="quiz-active-footer">
+      <button class="btn-nav btn-prev" [disabled]="currentIndex === 0" (click)="prevQuestion()">
+        <ion-icon name="chevron-back-outline"></ion-icon> Sebelumnya
+      </button>
+      
+      <button *ngIf="currentIndex < questions.length - 1" class="btn-nav btn-next" (click)="nextQuestion()">
+        Berikutnya <ion-icon name="chevron-forward-outline"></ion-icon>
+      </button>
+
+      <button *ngIf="currentIndex === questions.length - 1" class="btn-nav btn-submit" (click)="confirmSubmit()">
+        Kumpulkan <ion-icon name="cloud-upload-outline"></ion-icon>
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- ── SUBMITTING STATE ── -->
+  <ng-container *ngIf="state === 'submitting'">
+    <div class="main-container submitting-container">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <h2>Memproses Hasil...</h2>
+      <p>Jawaban kuis sedang diperiksa dan nilai sedang dikalkulasi.</p>
+    </div>
+  </ng-container>
+
+  <!-- ── RESULT STATE ── -->
+  <ng-container *ngIf="state === 'result' && quizResult">
+    <div class="main-container result-container">
+      
+      <!-- Circular Gauge representation -->
+      <div class="result-score-gauge" [class.success]="quizResult.isPassed" [class.fail]="!quizResult.isPassed">
+        <div class="score-circle">
+          <div class="score-num">{{ quizResult.score }}</div>
+          <div class="score-label">Skor Akhir</div>
+        </div>
+        <div class="status-badge" [class.success]="quizResult.isPassed" [class.fail]="!quizResult.isPassed">
+          <ion-icon [name]="quizResult.isPassed ? 'checkmark-circle-outline' : 'close-circle-outline'"></ion-icon>
+          <span>{{ quizResult.isPassed ? 'LULUS' : 'TIDAK LULUS' }}</span>
+        </div>
+      </div>
+
+      <!-- Verdict description -->
+      <div class="result-verdict-card">
+        <h3 *ngIf="quizResult.isPassed">Selamat! Anda Lulus Kuis</h3>
+        <h3 *ngIf="!quizResult.isPassed">Belum Berhasil Lulus</h3>
+        
+        <p *ngIf="quizResult.isPassed">Anda berhasil melewati ambang batas kelulusan {{ quiz?.passing_score }}%.</p>
+        <p *ngIf="!quizResult.isPassed">Ambang batas kelulusan untuk kuis ini adalah {{ quiz?.passing_score }}%. Silakan pelajari kembali materi dan coba lagi.</p>
+        
+        <div class="details-row" *ngIf="quizResult.correctAnswersCount !== undefined && quizResult.totalQuestions !== undefined">
+          <span>Jawaban Benar:</span>
+          <strong>{{ quizResult.correctAnswersCount }} dari {{ quizResult.totalQuestions }} soal</strong>
+        </div>
+
+        <div class="certificate-info-box" *ngIf="quizResult.certificateGenerated">
+          <ion-icon name="ribbon-sharp"></ion-icon>
+          <div>
+            <h4>Sertifikat Tersedia!</h4>
+            <p>Sertifikat kelulusan course ini telah diterbitkan. Kamu bisa mengunduhnya di tab Riwayat.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result actions -->
+      <div class="result-actions-box">
+        <button class="btn-primary" (click)="goBack()">
+          <ion-icon name="arrow-back-outline"></ion-icon> Kembali ke Course
+        </button>
+        
+        <button *ngIf="!quizResult.isPassed && getCanAttempt()" class="btn-secondary" (click)="retryQuiz()">
+          <ion-icon name="refresh-outline"></ion-icon> Coba Kuis Lagi
+        </button>
+      </div>
+
+    </div>
+  </ng-container>
+
+</ion-content>

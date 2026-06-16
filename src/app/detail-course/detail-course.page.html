@@ -151,8 +151,10 @@
               *ngFor="let lesson of course.lessons; let i = index"
               (click)="course.has_access ? goToVideoMateri(lesson.id) : null"
               [class.locked]="!course.has_access">
-
-              <div class="lesson-index">{{ i + 1 }}</div>
+              <div class="lesson-index">
+                <ion-icon *ngIf="lesson.is_completed" name="checkmark-circle" class="completed-lesson-icon"></ion-icon>
+                <span *ngIf="!lesson.is_completed">{{ i + 1 }}</span>
+              </div>
 
               <div class="lesson-details">
                 <div class="lesson-title">{{ lesson.title }}</div>
@@ -166,6 +168,42 @@
               <button class="lesson-play-btn">
                 <ion-icon
                   [name]="course.has_access ? 'play-circle' : 'lock-closed-outline'"
+                  class="play-icon"
+                  [class.locked-icon]="!course.has_access">
+                </ion-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quizzes from API -->
+          <div class="curriculum-summary" *ngIf="quizzes && quizzes.length > 0" style="margin-top: 24px;">
+            <span class="main-label">Quiz</span>
+            <span class="sub-label">{{ quizzes.length }} Quiz</span>
+          </div>
+
+          <div class="curriculum-list" *ngIf="quizzes && quizzes.length > 0">
+            <div class="lesson-item quiz-item"
+              *ngFor="let quiz of quizzes; let i = index"
+              (click)="goToQuiz(quiz)"
+              [class.locked]="!course.has_access">
+              <div class="lesson-index">
+                <ion-icon *ngIf="quiz.isAttempted" name="checkmark-circle" class="completed-quiz-icon"></ion-icon>
+                <ion-icon *ngIf="!quiz.isAttempted" name="help-circle-outline"></ion-icon>
+              </div>
+
+              <div class="lesson-details">
+                <div class="lesson-title">{{ quiz.title }}</div>
+                <div class="lesson-duration">
+                  <ion-icon name="time-outline"></ion-icon>
+                  Quiz
+                  <span *ngIf="quiz.totalQuestions"> &middot; {{ quiz.totalQuestions }} Soal</span>
+                  <span *ngIf="quiz.score !== undefined && quiz.score !== null"> &middot; Nilai: {{ quiz.score }}</span>
+                </div>
+              </div>
+
+              <button class="lesson-play-btn">
+                <ion-icon
+                  [name]="course.has_access ? 'arrow-forward-circle' : 'lock-closed-outline'"
                   class="play-icon"
                   [class.locked-icon]="!course.has_access">
                 </ion-icon>

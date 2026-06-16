@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IonicModule, ToastController, AlertController } from '@ionic/angular';
+import { IonicModule, ToastController, AlertController, ActionSheetController } from '@ionic/angular';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { CourseService, Course } from '../../services/course.service';
+import { CourseService, Course, Category } from '../../services/course.service';
 import { InstructorService, InstructorDashboard } from '../../services/instructor.service';
 import { environment } from '../../../environments/environment';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-courses',
@@ -23,6 +25,9 @@ export class CoursesPage implements OnInit {
 
   // ── Student state ──────────────────────────────────────────
   enrolledCourses: Course[] = [];
+  filteredCourses: Course[] = [];
+  categories: Category[] = [];
+  selectedCategoryId: number | null = null;
   isLoadingCourses: boolean = false;
 
   // ── Instructor state ───────────────────────────────────────
@@ -44,7 +49,8 @@ export class CoursesPage implements OnInit {
     private router: Router,
     private toastController: ToastController,
     private alertController: AlertController,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private actionSheetController: ActionSheetController
   ) {}
 
   ngOnInit() {
@@ -77,6 +83,7 @@ export class CoursesPage implements OnInit {
         this.loadInstructorData();
       } else {
         this.loadEnrolledCourses();
+        this.loadCategories();
       }
     }
   }
@@ -85,12 +92,93 @@ export class CoursesPage implements OnInit {
   loadEnrolledCourses() {
     this.isLoadingCourses = true;
     this.courseService.getMyLearning().subscribe({
-      next: (data) => {
-        this.enrolledCourses = data;
-        this.isLoadingCourses = false;
+      next: (courses) => {
+        if (!courses.length) {
+          this.enrolledCourses = [];
+          this.filteredCourses = [];
+          this.isLoadingCourses = false;
+          return;
+        }
+
+        // Fetch detailed course details for each course to get accurate lessons & instructor
+        const detailRequests = courses.map(course =>
+          this.courseService.getCourseDetail(course.id).pipe(
+            catchError(() => of(course)) // Fallback to shallow course if call fails
+          )
+        );
+
+        forkJoin(detailRequests).subscribe({
+          next: (detailedCourses) => {
+            this.enrolledCourses = detailedCourses;
+            this.applyFilter();
+            this.isLoadingCourses = false;
+          },
+          error: () => {
+            this.enrolledCourses = courses;
+            this.applyFilter();
+            this.isLoadingCourses = false;
+          }
+        });
       },
       error: () => { this.isLoadingCourses = false; }
     });
+  }
+
+  loadCategories() {
+    this.courseService.getCategories().subscribe({
+      next: (cats) => {
+        this.categories = cats;
+      },
+      error: (err) => {
+        console.error('Gagal memuat kategori', err);
+      }
+    });
+  }
+
+  applyFilter() {
+    if (this.selectedCategoryId === null) {
+      this.filteredCourses = this.enrolledCourses;
+    } else {
+      this.filteredCourses = this.enrolledCourses.filter(course => 
+        course.category && course.category.id === this.selectedCategoryId
+      );
+    }
+  }
+
+  async openFilterOptions() {
+    // Buat daftar buttons secara dinamis dari categories yang di-load
+    const buttons: any[] = this.categories.map(cat => ({
+      text: cat.name,
+      handler: () => {
+        this.selectedCategoryId = cat.id;
+        this.applyFilter();
+        this.showToast(`Memfilter berdasarkan: ${cat.name}`);
+      }
+    }));
+
+    // Tambahkan opsi untuk menampilkan semua kelas (Reset Filter)
+    buttons.unshift({
+      text: 'Semua Kategori',
+      icon: 'list-outline',
+      handler: () => {
+        this.selectedCategoryId = null;
+        this.applyFilter();
+        this.showToast('Menampilkan semua kelas');
+      }
+    });
+
+    // Cancel button
+    buttons.push({
+      text: 'Batal',
+      role: 'cancel',
+      icon: 'close-outline'
+    });
+
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Filter Kategori',
+      buttons: buttons
+    });
+    await actionSheet.present();
   }
 
   getCourseImage(course: Course): string {
@@ -100,6 +188,13 @@ export class CoursesPage implements OnInit {
     if (!p) return 'https://placehold.co/600x400?text=No+Image';
     if (p.startsWith('http')) return p;
     return `${environment.apiUrl.replace('/api', '/storage/')}${p.startsWith('/') ? p.substring(1) : p}`;
+  }
+
+  getInstructorAvatar(course: Course): string {
+    const avatar = course.instructor?.avatar;
+    if (!avatar) return 'assets/default-avatar.png';
+    if (avatar.startsWith('http')) return avatar;
+    return `${environment.apiUrl.replace('/api', '/storage/')}${avatar.startsWith('/') ? avatar.substring(1) : avatar}`;
   }
 
   goToCourse(id: number) {

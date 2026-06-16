@@ -137,15 +137,21 @@
             <!-- Password -->
             <div class="input-group">
               <span class="material-symbols-outlined input-icon">password</span>
-              <input type="password" [(ngModel)]="password" name="password" placeholder="Password" class="custom-input"
+              <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password" placeholder="Password" class="custom-input"
                 required />
+              <button type="button" class="toggle-password-btn" (click)="togglePassword()" aria-label="Toggle password visibility">
+                <span class="material-symbols-outlined">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+              </button>
             </div>
 
             <!-- Confirm Password -->
             <div class="input-group">
               <span class="material-symbols-outlined input-icon">password</span>
-              <input type="password" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm Password"
+              <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm Password"
                 class="custom-input" required />
+              <button type="button" class="toggle-password-btn" (click)="togglePassword()" aria-label="Toggle password visibility">
+                <span class="material-symbols-outlined">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+              </button>
             </div>
 
             <button type="submit" class="btn-primary">

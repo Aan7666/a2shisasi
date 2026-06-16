@@ -2,7 +2,7 @@
 
   <!-- ── HEADER SECTION ── -->
   <div class="red-header" [class.instructor-header]="userRole === 'instructor'">
-    <div class="header-button filter-btn" *ngIf="userRole !== 'instructor'">
+    <div class="header-button filter-btn" (click)="openFilterOptions()" *ngIf="userRole !== 'instructor'">
       <ion-icon name="funnel-outline"></ion-icon>
     </div>
     <h1 class="header-title">{{ userRole === 'instructor' ? 'Instructor Panel' : 'My Learning' }}</h1>
@@ -29,7 +29,7 @@
       </div>
 
       <!-- EMPTY STATE -->
-      <div class="empty-state animate-fade-in" *ngIf="!isLoadingCourses && enrolledCourses.length === 0">
+      <div class="empty-state animate-fade-in" *ngIf="!isLoadingCourses && filteredCourses.length === 0">
         <div class="illustration-container">
           <div class="icon-wrapper desktop-wrapper">
             <ion-icon name="desktop-outline" class="empty-icon"></ion-icon>
@@ -50,8 +50,8 @@
       </div>
 
       <!-- COURSE LIST -->
-      <div class="courses-grid animate-fade-in" *ngIf="!isLoadingCourses && enrolledCourses.length > 0">
-        <div class="course-card" *ngFor="let course of enrolledCourses" (click)="goToCourse(course.id)">
+      <div class="courses-grid animate-fade-in" *ngIf="!isLoadingCourses && filteredCourses.length > 0">
+        <div class="course-card" *ngFor="let course of filteredCourses" (click)="goToCourse(course.id)">
           <div class="course-thumb-wrapper">
             <img [src]="getCourseImage(course)" [alt]="course.title" class="course-thumb" />
             <div class="category-badge" *ngIf="course.category">
@@ -63,14 +63,14 @@
             <h3 class="course-title">{{ course.title }}</h3>
             
             <div class="instructor-row">
-              <img [src]="course.instructor?.avatar || 'assets/default-avatar.png'" class="instructor-avatar" />
+              <img [src]="getInstructorAvatar(course)" class="instructor-avatar" />
               <span class="instructor-name">{{ course.instructor?.name || 'Instructor' }}</span>
             </div>
 
             <!-- Progress Bar Mock/Placeholder since API doesn't return progress directly here, or dynamic placeholder -->
             <div class="progress-container">
               <div class="progress-info">
-                <span class="lesson-count">{{ course.lessons_count || 0 }} Lessons</span>
+                <span class="lesson-count">{{ course.lessons?.length || course.lessons_count || 0 }} Lessons</span>
                 <span class="progress-percent">Enrolled</span>
               </div>
               <div class="progress-bar-bg">

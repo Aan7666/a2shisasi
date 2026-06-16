@@ -50,10 +50,52 @@ ion-content {
     justify-content: center;
     align-items: center;
     margin-bottom: 12px;
+    position: relative;
+    cursor: pointer;
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    
+    &.updating {
+      opacity: 0.7;
+    }
 
     .avatar-icon {
       font-size: 96px;
       color: #1a1a1a;
+    }
+    
+    .avatar-image {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #852920;
+    }
+    
+    .avatar-spinner {
+      color: #852920;
+      position: absolute;
+      transform: scale(1.5);
+    }
+    
+    .edit-badge {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      background-color: #852920;
+      color: white;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid #f7f5f5;
+      
+      ion-icon {
+        font-size: 16px;
+      }
     }
   }
 
@@ -422,35 +464,57 @@ ion-content {
   }
 }
 
-.faq-accordion-item {
+.custom-accordion-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.custom-accordion-item {
+  background-color: #852920;
   border-radius: 14px;
   overflow: hidden;
-  margin-bottom: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
 
-  ion-item {
-    --background: #852920;
-    --color: #ffffff;
-    --padding-start: 14px;
-    --inner-padding-end: 14px;
+  &.expanded {
+    background-color: #852920;
   }
+}
 
+.custom-accordion-header {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+  color: #ffffff;
+  font-family: inherit;
+  
   .faq-question {
     font-size: 12.5px;
     font-weight: 600;
-    color: #ffffff;
-    white-space: normal;
     line-height: 1.4;
+    padding-right: 12px;
   }
 
-  .faq-answer-pane {
-    background-color: #faf9f9;
-    padding: 14px 16px;
-    font-size: 12px;
-    color: #56423f;
-    line-height: 1.5;
-    border-top: 1px solid #f1f0f0;
+  .faq-icon {
+    font-size: 20px;
+    flex-shrink: 0;
   }
+}
+
+.custom-accordion-content {
+  background-color: #faf9f9;
+  padding: 14px 16px;
+  font-size: 12px;
+  color: #56423f;
+  line-height: 1.5;
+  border-top: 1px solid #f1f0f0;
 }
 
 .direct-contact-channels {
@@ -511,7 +575,41 @@ ion-content {
   }
 }
 
-/* --- DELETE ACCOUNT BUTTON --- */
+/* --- DELETE ACCOUNT SECTION --- */
+.delete-account-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 24px;
+  width: 100%;
+}
+
+.confirm-checkbox-wrapper {
+  margin-bottom: 8px;
+  max-width: 320px;
+  padding: 0 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .delete-checkbox {
+    --size: 16px;
+    --border-color: #e74c3c;
+    --border-color-checked: #e74c3c;
+    --checkbox-background-checked: #e74c3c;
+    font-family: 'Lexend', sans-serif;
+    
+    .checkbox-lbl-text {
+      font-size: 11px;
+      color: #666;
+      line-height: 1.4;
+      display: inline-block;
+      margin-left: 8px;
+      text-align: left;
+    }
+  }
+}
+
 .delete-account-wrap {
   margin-top: 10px !important;
 }
@@ -529,13 +627,21 @@ ion-content {
   letter-spacing: 0.5px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
-  &:hover {
+  &:hover:not([disabled]) {
     background-color: rgba(231, 76, 60, 0.08);
   }
 
-  &:active {
+  &:active:not([disabled]) {
     transform: scale(0.94);
     background-color: rgba(231, 76, 60, 0.15);
+  }
+
+  &[disabled] {
+    opacity: 0.4;
+    border-color: #999;
+    color: #999;
+    cursor: not-allowed;
+    background-color: transparent;
   }
 }
 

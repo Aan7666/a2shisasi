@@ -1,9 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController } from '@ionic/angular';
+import { IonicModule, ToastController, LoadingController } from '@ionic/angular';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CourseService, CourseDetail } from '../services/course.service';
+import { EnrollmentService } from '../services/enrollment.service';
+import { QuizService } from '../services/quiz.service';
+import { Quiz } from '../models/index';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -28,6 +31,8 @@ export class DetailCoursePage implements OnInit {
   hasError: boolean = false;
   errorMessage: string = '';
   courseId: number = 0;
+  quizzes: Quiz[] = [];
+  isLoadingQuizzes: boolean = false;
 
   private readonly storageBaseUrl = environment.apiUrl.replace('/api', '/storage/');
 
@@ -35,7 +40,10 @@ export class DetailCoursePage implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private courseService: CourseService,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private enrollmentService: EnrollmentService,
+    private loadingController: LoadingController,
+    private quizService: QuizService
   ) { }
 
   ngOnInit() {
@@ -46,6 +54,15 @@ export class DetailCoursePage implements OnInit {
     } else {
       this.hasError = true;
       this.isLoading = false;
+    }
+  }
+
+  ionViewWillEnter() {
+    if (this.courseId && this.course) {
+      if (this.course.has_access) {
+        this.loadQuizzes(this.courseId);
+        this.loadLessonsProgress(this.courseId);
+      }
     }
   }
 
@@ -68,6 +85,11 @@ export class DetailCoursePage implements OnInit {
         if (savedCart) {
           const cItems = JSON.parse(savedCart);
           this.isAddedToCart = !!cItems.find((item: any) => item.id === this.courseId);
+        }
+
+        if (this.course?.has_access) {
+          this.loadQuizzes(id);
+          this.loadLessonsProgress(id);
         }
       },
       error: (err) => {
@@ -192,7 +214,38 @@ export class DetailCoursePage implements OnInit {
       // User already enrolled — go directly to first lesson
       this.goToVideoMateri();
     } else {
-      this.router.navigate(['/checkout'], { queryParams: { course_id: this.courseId } });
+      const loading = await this.loadingController.create({
+        message: 'Memproses pembelian...',
+      });
+      await loading.present();
+
+      this.enrollmentService.enrollCourse(this.courseId).subscribe({
+        next: async (res) => {
+          await loading.dismiss();
+          const toast = await this.toastController.create({
+            message: 'Berhasil membeli course!',
+            duration: 2000,
+            color: 'success',
+            position: 'bottom'
+          });
+          await toast.present();
+          
+          if (this.course) {
+            this.course.has_access = true;
+          }
+          this.goToVideoMateri();
+        },
+        error: async (err) => {
+          await loading.dismiss();
+          const toast = await this.toastController.create({
+            message: err.message || 'Gagal membeli course',
+            duration: 3000,
+            color: 'danger',
+            position: 'bottom'
+          });
+          await toast.present();
+        }
+      });
     }
   }
 
@@ -200,6 +253,54 @@ export class DetailCoursePage implements OnInit {
     const params: any = { course_id: this.courseId };
     if (lessonId) params['lesson_id'] = lessonId;
     this.router.navigate(['/video-materi'], { queryParams: params });
+  }
+
+  loadQuizzes(courseId: number) {
+    this.isLoadingQuizzes = true;
+    this.quizService.getStudentQuizzes(courseId).subscribe({
+      next: (data) => {
+        this.quizzes = data;
+        this.isLoadingQuizzes = false;
+      },
+      error: (err) => {
+        console.error('Failed to load quizzes', err);
+        this.isLoadingQuizzes = false;
+      }
+    });
+  }
+
+  loadLessonsProgress(courseId: number) {
+    this.courseService.getLessons(courseId).subscribe({
+      next: (lessons) => {
+        if (this.course) {
+          this.course.lessons = lessons;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load lessons progress', err);
+      }
+    });
+  }
+
+  goToQuiz(quiz: Quiz) {
+    if (!this.course?.has_access) {
+      this.showToast('Kamu harus membeli course ini terlebih dahulu');
+      return;
+    }
+    // Asumsi route ke halaman quiz
+    this.router.navigate(['/quiz-attempt', quiz.id], { queryParams: { course_id: this.courseId } }).catch(() => {
+        this.showToast('Halaman Quiz belum tersedia/dibuat di frontend.');
+    });
+  }
+
+  async showToast(msg: string) {
+    const toast = await this.toastController.create({
+      message: msg,
+      duration: 2000,
+      color: 'dark',
+      position: 'bottom'
+    });
+    await toast.present();
   }
 }
 
