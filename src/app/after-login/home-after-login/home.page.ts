@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { CourseService, Course } from '../../services/course.service';
+import { CourseService, Course, Category } from '../../services/course.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -14,7 +14,11 @@ export class HomePage implements OnInit {
   isLoggedIn: boolean = false;
   userName: string = 'User';
   courses: Course[] = [];
+  categories: Category[] = [];
+  selectedCategory: Category | null = null;
+  categoryCourses: Course[] = [];
   isLoadingCourses: boolean = false;
+  isLoadingCategoryCourses: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -25,11 +29,13 @@ export class HomePage implements OnInit {
   ngOnInit() {
     this.checkLoginStatus();
     this.loadCourses();
+    this.loadCategories();
   }
 
   ionViewWillEnter() {
     this.checkLoginStatus();
     this.loadCourses();
+    this.loadCategories();
   }
 
   checkLoginStatus() {
@@ -54,6 +60,41 @@ export class HomePage implements OnInit {
         this.isLoadingCourses = false;
       }
     });
+  }
+
+  loadCategories() {
+    this.courseService.getCategories().subscribe({
+      next: (cats) => {
+        this.categories = cats;
+      },
+      error: (err) => {
+        console.error('Gagal mengambil daftar kategori:', err);
+      }
+    });
+  }
+
+  toggleCategory(cat: Category) {
+    if (this.selectedCategory && this.selectedCategory.id === cat.id) {
+      // Deselect if clicked again
+      this.selectedCategory = null;
+      this.categoryCourses = [];
+    } else {
+      // Select category and fetch courses
+      this.selectedCategory = cat;
+      this.isLoadingCategoryCourses = true;
+      this.categoryCourses = [];
+
+      this.courseService.searchCourses({ category_id: cat.id }).subscribe({
+        next: (data) => {
+          this.categoryCourses = data;
+          this.isLoadingCategoryCourses = false;
+        },
+        error: (err) => {
+          console.error('Gagal mengambil course kategori:', err);
+          this.isLoadingCategoryCourses = false;
+        }
+      });
+    }
   }
 
   getCourseImageUrl(course: any): string {

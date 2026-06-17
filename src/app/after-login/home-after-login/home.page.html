@@ -20,18 +20,16 @@
       </div>
 
       <!-- No courses message -->
-      <div *ngIf="!isLoadingCourses && courses.length === 0" style="text-align: center; width: 100%; padding: 20px 0; color: #757575;">
+      <div *ngIf="!isLoadingCourses && courses.length === 0"
+        style="text-align: center; width: 100%; padding: 20px 0; color: #757575;">
         Tidak ada course saat ini.
       </div>
 
       <!-- Dynamic Course Cards -->
-      <div *ngFor="let course of courses"
-           class="mini-course-card"
-           button
-           tappable
-           (click)="goToCourse(course.id)">
+      <div *ngFor="let course of courses" class="mini-course-card" button tappable (click)="goToCourse(course.id)">
         <div class="card-img-placeholder">
-          <img [src]="getCourseImageUrl(course)" alt="{{ course.title }}" style="width: 100%; height: 100%; object-fit: cover;" />
+          <img [src]="getCourseImageUrl(course)" alt="{{ course.title }}"
+            style="width: 100%; height: 100%; object-fit: cover;" />
         </div>
         <div class="card-body">
           <h3 class="course-title">{{ course.title }}</h3>
@@ -51,7 +49,7 @@
       </div>
     </div>
 
-    <h2 class="section-title">Top Courses in IT</h2>
+    <h2 class="section-title">Pelajaran yang mungkin anda minati</h2>
     <div class="horizontal-scroll">
 
       <!-- Loading indicator -->
@@ -60,18 +58,16 @@
       </div>
 
       <!-- No courses message -->
-      <div *ngIf="!isLoadingCourses && courses.length === 0" style="text-align: center; width: 100%; padding: 20px 0; color: #757575;">
+      <div *ngIf="!isLoadingCourses && courses.length === 0"
+        style="text-align: center; width: 100%; padding: 20px 0; color: #757575;">
         Tidak ada course saat ini.
       </div>
 
       <!-- Dynamic Course Cards -->
-      <div *ngFor="let course of courses"
-           class="mini-course-card"
-           button
-           tappable
-           (click)="goToCourse(course.id)">
+      <div *ngFor="let course of courses" class="mini-course-card" button tappable (click)="goToCourse(course.id)">
         <div class="card-img-placeholder">
-          <img [src]="getCourseImageUrl(course)" alt="{{ course.title }}" style="width: 100%; height: 100%; object-fit: cover;" />
+          <img [src]="getCourseImageUrl(course)" alt="{{ course.title }}"
+            style="width: 100%; height: 100%; object-fit: cover;" />
         </div>
         <div class="card-body">
           <h3 class="course-title">{{ course.title }}</h3>
@@ -93,11 +89,59 @@
 
     <h2 class="section-title">Category</h2>
     <div class="categories-wrap">
-      <div class="category-pill">word</div>
-      <div class="category-pill">excel</div>
-      <div class="category-pill">desain</div>
-      <div class="category-pill">musik</div>
-      <div class="category-pill">c#</div>
+      <div 
+        *ngFor="let cat of categories" 
+        class="category-pill"
+        [class.active]="selectedCategory?.id === cat.id"
+        (click)="toggleCategory(cat)"
+      >
+        {{ cat.name }}
+      </div>
+    </div>
+
+    <!-- Selected Category Courses Section -->
+    <div *ngIf="selectedCategory" class="category-courses-section">
+      <h2 class="section-title">Course di kategori: {{ selectedCategory.name }}</h2>
+      
+      <!-- Spinner -->
+      <div *ngIf="isLoadingCategoryCourses" class="loader-container">
+        <ion-spinner name="crescent" color="danger"></ion-spinner>
+      </div>
+
+      <!-- No course state -->
+      <div *ngIf="!isLoadingCategoryCourses && categoryCourses.length === 0" class="no-courses-msg">
+        Tidak ada course di kategori ini saat ini.
+      </div>
+
+      <!-- Category courses list -->
+      <div *ngIf="!isLoadingCategoryCourses && categoryCourses.length > 0" class="category-courses-list">
+        <div 
+          *ngFor="let course of categoryCourses" 
+          class="category-course-card" 
+          button 
+          tappable 
+          (click)="goToCourse(course.id)"
+        >
+          <div class="card-thumb">
+            <img [src]="getCourseImageUrl(course)" alt="{{ course.title }}" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div class="card-info">
+            <h3 class="course-title">{{ course.title }}</h3>
+            <p class="course-instructor">{{ course.instructor?.name || 'Unknown' }}</p>
+            <div class="card-meta-row">
+              <span class="meta-rating">
+                <ion-icon name="star"></ion-icon>
+                {{ course.rating ?? '—' }}
+              </span>
+              <span class="meta-students">
+                <ion-icon name="people-outline"></ion-icon>
+                {{ course.total_students ?? 0 }}
+              </span>
+            </div>
+            <p class="course-price">Rp{{ course.price | number:'1.0-0' }}</p>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>

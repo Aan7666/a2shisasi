@@ -5,6 +5,12 @@
       <div class="search-input-wrapper">
         <ion-icon name="search-outline" class="search-icon"></ion-icon>
         <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" placeholder="Search" class="search-input" />
+        <ion-icon
+          *ngIf="searchQuery"
+          name="close-circle-outline"
+          class="clear-icon"
+          (click)="searchQuery = ''; onSearch()"
+        ></ion-icon>
       </div>
       <button class="filter-btn" id="open-filter-modal">
         <ion-icon name="funnel"></ion-icon>
@@ -15,24 +21,70 @@
   <!-- Main Container -->
   <div class="main-container">
     
-    <!-- Top Searches Section -->
-    <h2 class="section-title">Top Searches</h2>
-    <div class="top-searches-container">
-      <button class="search-pill" *ngFor="let term of topSearches" (click)="selectSearch(term)">
-        {{ term }}
-      </button>
+    <!-- ── LOADING INDICATOR ── -->
+    <div *ngIf="isSearching" class="loading-state">
+      <ion-spinner name="crescent" color="danger"></ion-spinner>
+      <p>Searching courses...</p>
     </div>
 
-    <!-- Browse Categories Section -->
-    <h2 class="section-title browse-title">Browse categories</h2>
-    <div class="categories-grid">
-      <div class="category-card" *ngFor="let cat of categories" [ngStyle]="{'background-color': cat.background}">
-        <div class="category-icon-wrapper" [ngStyle]="{'color': cat.color, 'border-color': cat.color}">
-          <ion-icon [name]="cat.icon"></ion-icon>
-        </div>
-        <span class="category-name">{{ cat.title }}</span>
+    <!-- ── SEARCH RESULTS ── -->
+    <ng-container *ngIf="!isSearching && hasSearched">
+      <h2 class="section-title">
+        Results for "<strong>{{ searchQuery }}</strong>"
+        <span class="result-count">({{ searchResults.length }} courses)</span>
+      </h2>
+
+      <!-- No results found -->
+      <div *ngIf="searchResults.length === 0" class="empty-state-search">
+        <ion-icon name="search-outline" class="empty-search-icon"></ion-icon>
+        <p class="empty-search-title">No matching courses found</p>
+        <p class="empty-search-subtitle">Try using different keywords or browse categories below.</p>
       </div>
-    </div>
+
+      <!-- Results list -->
+      <div class="results-list" *ngIf="searchResults.length > 0">
+        <div
+          class="course-card"
+          *ngFor="let course of searchResults"
+          (click)="goToCourse(course.id)"
+        >
+          <div class="course-thumb">
+            <img
+              *ngIf="getThumbnail(course)"
+              [src]="getThumbnail(course)!"
+              [alt]="course.title"
+            />
+            <div *ngIf="!getThumbnail(course)" class="thumb-placeholder">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+          </div>
+          <div class="course-info">
+            <h3 class="course-title">{{ course.title }}</h3>
+            <p class="course-instructor">{{ course.instructor?.name || 'Instructor' }}</p>
+            <p class="course-price">{{ formatPrice(course.price) }}</p>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ── BROWSE CATEGORIES ── -->
+    <ng-container *ngIf="!hasSearched && !isSearching">
+      <h2 class="section-title browse-title">Browse categories</h2>
+      
+      <!-- Loading categories spinner -->
+      <div *ngIf="isLoadingCats" class="loading-state">
+        <ion-spinner name="crescent" color="danger"></ion-spinner>
+      </div>
+
+      <div *ngIf="!isLoadingCats" class="categories-grid">
+        <div class="category-card" *ngFor="let cat of categories" [ngStyle]="{'background-color': cat.background}" (click)="selectCategory(cat)">
+          <div class="category-icon-wrapper" [ngStyle]="{'color': cat.color, 'border-color': cat.color}">
+            <ion-icon [name]="cat.icon"></ion-icon>
+          </div>
+          <span class="category-name">{{ cat.title }}</span>
+        </div>
+      </div>
+    </ng-container>
 
   </div>
 </ion-content>

@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { IonicModule, ToastController, AlertController, ActionSheetController } from '@ionic/angular';
+import { FormsModule } from '@angular/forms';
+import { IonicModule, ToastController, ActionSheetController } from '@ionic/angular';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CourseService, Course, Category } from '../../services/course.service';
-import { InstructorService, InstructorDashboard } from '../../services/instructor.service';
 import { environment } from '../../../environments/environment';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -15,46 +14,31 @@ import { catchError } from 'rxjs/operators';
   templateUrl: './courses.page.html',
   styleUrls: ['./courses.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule, ReactiveFormsModule, RouterModule]
+  imports: [IonicModule, CommonModule, FormsModule, RouterModule]
 })
 export class CoursesPage implements OnInit {
 
   isLoggedIn: boolean = false;
-  userRole: string = 'student';   // 'student' | 'instructor'
+  userRole: string = 'student';
   userName: string = 'User';
 
-  // ── Student state ──────────────────────────────────────────
   enrolledCourses: Course[] = [];
   filteredCourses: Course[] = [];
   categories: Category[] = [];
   selectedCategoryId: number | null = null;
   isLoadingCourses: boolean = false;
-
-  // ── Instructor state ───────────────────────────────────────
-  dashboard: InstructorDashboard | null = null;
-  instructorCourses: Course[] = [];
-  isLoadingDashboard: boolean = false;
-  isLoadingInstructorCourses: boolean = false;
-
-  // ── Create/Edit modal ──────────────────────────────────────
-  showCourseModal: boolean = false;
-  editingCourse: Course | null = null;
-  courseForm!: FormGroup;
-  isSaving: boolean = false;
+  isSearchBarOpen: boolean = false;
+  searchQuery: string = '';
 
   constructor(
     private authService: AuthService,
     private courseService: CourseService,
-    private instructorService: InstructorService,
     private router: Router,
     private toastController: ToastController,
-    private alertController: AlertController,
-    private fb: FormBuilder,
     private actionSheetController: ActionSheetController
   ) {}
 
   ngOnInit() {
-    this.initForm();
     this.checkLoginStatus();
   }
 
@@ -62,33 +46,18 @@ export class CoursesPage implements OnInit {
     this.checkLoginStatus();
   }
 
-  initForm() {
-    this.courseForm = this.fb.group({
-      title:       ['', [Validators.required, Validators.maxLength(255)]],
-      description: ['', Validators.required],
-      price:       [0, [Validators.required, Validators.min(0)]],
-      thumbnail:   [''],
-      status:      ['draft']
-    });
-  }
-
   checkLoginStatus() {
     this.isLoggedIn = this.authService.isLoggedIn();
     if (this.isLoggedIn) {
       const user = this.authService.getCurrentUser();
-      this.userRole = user?.role ?? 'student';
+      this.userRole = 'student'; // Force student role to show student view for all roles
       this.userName = user?.name ?? 'User';
 
-      if (this.userRole === 'instructor') {
-        this.loadInstructorData();
-      } else {
-        this.loadEnrolledCourses();
-        this.loadCategories();
-      }
+      this.loadEnrolledCourses();
+      this.loadCategories();
     }
   }
 
-  // ── STUDENT: load enrolled courses ────────────────────────
   loadEnrolledCourses() {
     this.isLoadingCourses = true;
     this.courseService.getMyLearning().subscribe({
@@ -100,10 +69,9 @@ export class CoursesPage implements OnInit {
           return;
         }
 
-        // Fetch detailed course details for each course to get accurate lessons & instructor
         const detailRequests = courses.map(course =>
           this.courseService.getCourseDetail(course.id).pipe(
-            catchError(() => of(course)) // Fallback to shallow course if call fails
+            catchError(() => of(course))
           )
         );
 
@@ -120,7 +88,9 @@ export class CoursesPage implements OnInit {
           }
         });
       },
-      error: () => { this.isLoadingCourses = false; }
+      error: () => { 
+        this.isLoadingCourses = false; 
+      }
     });
   }
 
@@ -135,18 +105,35 @@ export class CoursesPage implements OnInit {
     });
   }
 
-  applyFilter() {
-    if (this.selectedCategoryId === null) {
-      this.filteredCourses = this.enrolledCourses;
-    } else {
-      this.filteredCourses = this.enrolledCourses.filter(course => 
-        course.category && course.category.id === this.selectedCategoryId
-      );
+  toggleSearchBar() {
+    this.isSearchBarOpen = !this.isSearchBarOpen;
+    if (!this.isSearchBarOpen) {
+      this.searchQuery = '';
+      this.applyFilter();
     }
   }
 
+  applyFilter() {
+    let temp = this.enrolledCourses;
+
+    if (this.selectedCategoryId !== null) {
+      temp = temp.filter(course => 
+        course.category && course.category.id === this.selectedCategoryId
+      );
+    }
+
+    const query = this.searchQuery.toLowerCase().trim();
+    if (query) {
+      temp = temp.filter(course =>
+        course.title.toLowerCase().includes(query) ||
+        (course.instructor?.name && course.instructor.name.toLowerCase().includes(query))
+      );
+    }
+
+    this.filteredCourses = temp;
+  }
+
   async openFilterOptions() {
-    // Buat daftar buttons secara dinamis dari categories yang di-load
     const buttons: any[] = this.categories.map(cat => ({
       text: cat.name,
       handler: () => {
@@ -156,7 +143,6 @@ export class CoursesPage implements OnInit {
       }
     }));
 
-    // Tambahkan opsi untuk menampilkan semua kelas (Reset Filter)
     buttons.unshift({
       text: 'Semua Kategori',
       icon: 'list-outline',
@@ -167,7 +153,6 @@ export class CoursesPage implements OnInit {
       }
     });
 
-    // Cancel button
     buttons.push({
       text: 'Batal',
       role: 'cancel',
@@ -207,117 +192,6 @@ export class CoursesPage implements OnInit {
 
   redirectToLogin() {
     this.router.navigate(['/login']);
-  }
-
-  // ── INSTRUCTOR: dashboard + courses ───────────────────────
-  loadInstructorData() {
-    this.loadDashboard();
-    this.loadInstructorCourses();
-  }
-
-  loadDashboard() {
-    this.isLoadingDashboard = true;
-    this.instructorService.getDashboard().subscribe({
-      next: (data) => {
-        this.dashboard = data;
-        this.isLoadingDashboard = false;
-      },
-      error: () => { this.isLoadingDashboard = false; }
-    });
-  }
-
-  loadInstructorCourses() {
-    this.isLoadingInstructorCourses = true;
-    this.instructorService.getCourses().subscribe({
-      next: (data) => {
-        this.instructorCourses = data;
-        this.isLoadingInstructorCourses = false;
-      },
-      error: () => { this.isLoadingInstructorCourses = false; }
-    });
-  }
-
-  // ── Create Course ─────────────────────────────────────────
-  openCreateModal() {
-    this.editingCourse = null;
-    this.courseForm.reset({ status: 'draft', price: 0 });
-    this.showCourseModal = true;
-  }
-
-  // ── Edit Course ───────────────────────────────────────────
-  openEditModal(course: Course) {
-    this.editingCourse = course;
-    this.courseForm.patchValue({
-      title:       course.title,
-      description: course.description ?? '',
-      price:       course.price,
-      thumbnail:   course.thumbnail ?? '',
-      status:      course.status
-    });
-    this.showCourseModal = true;
-  }
-
-  closeModal() {
-    this.showCourseModal = false;
-    this.editingCourse = null;
-    this.courseForm.reset({ status: 'draft', price: 0 });
-  }
-
-  saveCourse() {
-    if (this.courseForm.invalid) return;
-    this.isSaving = true;
-    const payload = this.courseForm.value;
-
-    const obs = this.editingCourse
-      ? this.instructorService.updateCourse(this.editingCourse.id, payload)
-      : this.instructorService.createCourse(payload);
-
-    obs.subscribe({
-      next: () => {
-        this.isSaving = false;
-        this.closeModal();
-        this.loadInstructorCourses();
-        this.loadDashboard();
-        this.showToast(this.editingCourse ? 'Course berhasil diupdate' : 'Course berhasil dibuat!');
-      },
-      error: (err) => {
-        this.isSaving = false;
-        const msg = err?.error?.message ?? 'Gagal menyimpan course';
-        this.showToast(msg);
-      }
-    });
-  }
-
-  // ── Delete Course ─────────────────────────────────────────
-  async confirmDelete(course: Course) {
-    const alert = await this.alertController.create({
-      header: 'Hapus Course',
-      message: `Hapus "${course.title}"? Tindakan ini tidak bisa dibatalkan.`,
-      buttons: [
-        { text: 'Batal', role: 'cancel' },
-        {
-          text: 'Hapus',
-          role: 'destructive',
-          handler: () => this.deleteCourse(course.id)
-        }
-      ]
-    });
-    await alert.present();
-  }
-
-  deleteCourse(id: number) {
-    this.instructorService.deleteCourse(id).subscribe({
-      next: () => {
-        this.instructorCourses = this.instructorCourses.filter(c => c.id !== id);
-        this.loadDashboard();
-        this.showToast('Course berhasil dihapus');
-      },
-      error: () => this.showToast('Gagal menghapus course')
-    });
-  }
-
-  getStatusColor(status: string): string {
-    return status === 'published' ? 'success' : status === 'archived' ? 'medium' : 'warning';
   }
 
   async showToast(msg: string) {

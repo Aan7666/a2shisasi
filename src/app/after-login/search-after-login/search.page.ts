@@ -2,8 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { CourseService, Course } from '../../services/course.service';
+import { environment } from '../../../environments/environment';
 
 interface Category {
+  id?: number;
   title: string;
   icon: string;
   color: string;
@@ -19,20 +23,8 @@ interface Category {
 })
 export class SearchPage implements OnInit {
   searchQuery: string = '';
-  
-  topSearches: string[] = [
-    'word', 'excel', 'desain', 'musik', 'c#',
-    'sql', 'python', 'php', 'cyber security'
-  ];
-
-  categories: Category[] = [
-    { title: 'Web Development', icon: 'code-slash-outline', color: '#852920', background: 'rgba(133, 41, 32, 0.08)' },
-    { title: 'Mobile Development', icon: 'phone-portrait-outline', color: '#2980b9', background: 'rgba(41, 128, 185, 0.08)' },
-    { title: 'Cyber Security', icon: 'shield-checkmark-outline', color: '#27ae60', background: 'rgba(39, 174, 96, 0.08)' },
-    { title: 'Graphic Design', icon: 'color-palette-outline', color: '#8e44ad', background: 'rgba(142, 68, 173, 0.08)' },
-    { title: 'Music & Audio', icon: 'musical-notes-outline', color: '#d35400', background: 'rgba(211, 84, 0, 0.08)' },
-    { title: 'Office Productivity', icon: 'briefcase-outline', color: '#2c3e50', background: 'rgba(44, 62, 80, 0.08)' }
-  ];
+  categories: Category[] = [];
+  isLoadingCats: boolean = true;
 
   // Filter States
   selectedSort: string = 'Top Rating';
@@ -47,18 +39,123 @@ export class SearchPage implements OnInit {
     { value: 1, label: '≥ 1', checked: false }
   ];
 
-  constructor() { }
+  searchResults: Course[] = [];
+  isSearching: boolean = false;
+  hasSearched: boolean = false;
+  private readonly storageBaseUrl = environment.apiUrl.replace('/api', '/storage/');
+
+  private readonly iconMap: Record<string, string> = {
+    'teknologi': 'code-slash-outline',
+    'pemrograman': 'code-slash-outline',
+    'web development': 'code-slash-outline',
+    'mobile development': 'phone-portrait-outline',
+    'desain': 'color-palette-outline',
+    'kreatif': 'color-palette-outline',
+    'graphic design': 'color-palette-outline',
+    'bisnis': 'briefcase-outline',
+    'entrepreneurship': 'briefcase-outline',
+    'office': 'briefcase-outline',
+    'data': 'analytics-outline',
+    'analitik': 'analytics-outline',
+    'data science': 'analytics-outline',
+    'bahasa': 'language-outline',
+    'pengembangan': 'trending-up-outline',
+    'diri': 'trending-up-outline',
+  };
+
+  private readonly colorMap: string[] = [
+    '#2980b9', '#8e44ad', '#2c3e50', '#27ae60', '#e67e22', '#852920'
+  ];
+
+  constructor(
+    private courseService: CourseService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
+    this.loadCategories();
+  }
+
+  loadCategories() {
+    this.isLoadingCats = true;
+    this.courseService.getCategories().subscribe({
+      next: (cats) => {
+        this.categories = cats.map((cat, index) => ({
+          id: cat.id,
+          title: cat.name,
+          icon: this.getCategoryIcon(cat.name),
+          color: this.getCategoryColor(index),
+          background: this.getCategoryColor(index) + '14' // hex 8% opacity
+        }));
+        this.isLoadingCats = false;
+      },
+      error: () => {
+        this.isLoadingCats = false;
+      }
+    });
+  }
+
+  getCategoryIcon(name: string): string {
+    const key = Object.keys(this.iconMap).find(k =>
+      name.toLowerCase().includes(k)
+    );
+    return key ? this.iconMap[key] : 'book-outline';
+  }
+
+  getCategoryColor(index: number): string {
+    return this.colorMap[index % this.colorMap.length];
   }
 
   onSearch() {
-    console.log('Searching for:', this.searchQuery);
+    const q = this.searchQuery.trim();
+    if (!q) {
+      this.searchResults = [];
+      this.hasSearched = false;
+      return;
+    }
+    this.doSearch(q);
   }
 
-  selectSearch(term: string) {
-    this.searchQuery = term;
-    this.onSearch();
+  selectCategory(cat: Category) {
+    this.searchQuery = cat.title;
+    this.doSearch('', cat.id);
+  }
+
+  goToCourse(courseId: number) {
+    this.router.navigate(['/detail-course', courseId]);
+  }
+
+  private doSearch(keyword: string, categoryId?: number) {
+    this.isSearching = true;
+    this.hasSearched = true;
+
+    this.courseService.searchCourses({
+      q: keyword || undefined,
+      category_id: categoryId,
+      sort: 'rating',
+      limit: 20
+    }).subscribe({
+      next: (results) => {
+        this.searchResults = results;
+        this.isSearching = false;
+      },
+      error: () => {
+        this.searchResults = [];
+        this.isSearching = false;
+      }
+    });
+  }
+
+  getThumbnail(course: Course): string | null {
+    const raw = course.thumbnail || course.image || course.cover_image;
+    if (!raw) return null;
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    return this.storageBaseUrl + raw.replace(/^\//, '');
+  }
+
+  formatPrice(price: number): string {
+    if (!price || price === 0) return 'Gratis';
+    return 'Rp' + price.toLocaleString('id-ID');
   }
 
   // Filter Methods

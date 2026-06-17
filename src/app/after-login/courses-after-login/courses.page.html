@@ -1,262 +1,108 @@
 <ion-content [fullscreen]="true" class="courses-content">
 
   <!-- ── HEADER SECTION ── -->
-  <div class="red-header" [class.instructor-header]="userRole === 'instructor'">
-    <div class="header-button filter-btn" (click)="openFilterOptions()" *ngIf="userRole !== 'instructor'">
+  <div class="red-header">
+    <!-- Search Button (Left) -->
+    <div class="header-button search-btn" [style.display]="isSearchBarOpen ? 'none' : 'flex'" (click)="toggleSearchBar()">
+      <ion-icon name="search-outline"></ion-icon>
+    </div>
+    
+    <h1 class="header-title" *ngIf="!isSearchBarOpen">My Learning</h1>
+
+    <!-- Filter/Sort Button (Right) -->
+    <div class="header-button filter-btn" [style.display]="isSearchBarOpen ? 'none' : 'flex'" (click)="openFilterOptions()">
       <ion-icon name="funnel-outline"></ion-icon>
     </div>
-    <h1 class="header-title">{{ userRole === 'instructor' ? 'Instructor Panel' : 'My Learning' }}</h1>
-    <div class="header-button search-btn" (click)="goToSearch()" *ngIf="userRole !== 'instructor'">
-      <ion-icon name="search-outline"></ion-icon>
+
+    <!-- Inline Search Bar Header -->
+    <div class="search-bar-container-header" *ngIf="isSearchBarOpen">
+      <ion-icon name="search-outline" class="search-icon-header"></ion-icon>
+      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()"
+        placeholder="Search courses..." class="search-input-header" autofocus />
+      <button class="clear-search-btn" (click)="toggleSearchBar()">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
     </div>
   </div>
 
   <div class="main-container">
 
-    <!-- ── 1. STUDENT VIEW ── -->
-    <ng-container *ngIf="userRole !== 'instructor'">
-      
-      <!-- SKELETON LOADING -->
-      <div class="courses-skeleton-list" *ngIf="isLoadingCourses">
-        <div class="skeleton-card" *ngFor="let i of [1, 2, 3]">
-          <div class="skeleton-thumb"></div>
-          <div class="skeleton-details">
-            <div class="skeleton-line title"></div>
-            <div class="skeleton-line text"></div>
-            <div class="skeleton-line progress"></div>
-          </div>
+    <!-- SKELETON LOADING -->
+    <div class="courses-skeleton-list" *ngIf="isLoadingCourses">
+      <div class="skeleton-card" *ngFor="let i of [1, 2, 3]">
+        <div class="skeleton-thumb"></div>
+        <div class="skeleton-details">
+          <div class="skeleton-line title"></div>
+          <div class="skeleton-line text"></div>
+          <div class="skeleton-line progress"></div>
         </div>
       </div>
+    </div>
 
-      <!-- EMPTY STATE -->
-      <div class="empty-state animate-fade-in" *ngIf="!isLoadingCourses && filteredCourses.length === 0">
-        <div class="illustration-container">
-          <div class="icon-wrapper desktop-wrapper">
-            <ion-icon name="desktop-outline" class="empty-icon"></ion-icon>
-          </div>
-          <div class="icon-wrapper medal-wrapper">
-            <ion-icon name="medal-outline" class="empty-icon"></ion-icon>
-          </div>
-          <div class="icon-wrapper book-wrapper">
-            <ion-icon name="book-outline" class="empty-icon"></ion-icon>
+    <!-- EMPTY STATE (No Enrolled Courses) -->
+    <div class="empty-state animate-fade-in" *ngIf="!isLoadingCourses && enrolledCourses.length === 0">
+      <div class="illustration-container">
+        <div class="icon-wrapper desktop-wrapper">
+          <ion-icon name="desktop-outline" class="empty-icon"></ion-icon>
+        </div>
+        <div class="icon-wrapper medal-wrapper">
+          <ion-icon name="medal-outline" class="empty-icon"></ion-icon>
+        </div>
+        <div class="icon-wrapper book-wrapper">
+          <ion-icon name="book-outline" class="empty-icon"></ion-icon>
+        </div>
+      </div>
+      <h2 class="empty-title">Start learning something new</h2>
+      <p class="empty-subtitle">The courses you purchase will show up here. Explore our course list to start learning.</p>
+      <ion-button expand="block" fill="solid" class="explore-btn" (click)="goToSearch()">
+        <ion-icon name="compass-outline" slot="start"></ion-icon>
+        Explore Courses
+      </ion-button>
+    </div>
+
+    <!-- NO RESULTS STATE (Search Query Returned Nothing) -->
+    <div class="empty-state animate-fade-in" *ngIf="!isLoadingCourses && isSearchBarOpen && filteredCourses.length === 0 && enrolledCourses.length > 0">
+      <div class="illustration-container">
+        <div class="icon-wrapper medal-wrapper" style="left: 70px; bottom: 0px;">
+          <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+        </div>
+      </div>
+      <h2 class="empty-title">No matching results</h2>
+      <p class="empty-subtitle">We couldn't find anything matching your search.</p>
+    </div>
+
+    <!-- COURSE LIST -->
+    <div class="courses-grid animate-fade-in" *ngIf="!isLoadingCourses && filteredCourses.length > 0">
+      <div class="course-card" *ngFor="let course of filteredCourses" (click)="goToCourse(course.id)">
+        <div class="course-thumb-wrapper">
+          <img [src]="getCourseImage(course)" [alt]="course.title" class="course-thumb" />
+          <div class="category-badge" *ngIf="course.category">
+            {{ course.category.name }}
           </div>
         </div>
-        <h2 class="empty-title">Start learning something new</h2>
-        <p class="empty-subtitle">The courses you purchase will show up here. Explore our course list to start learning.</p>
-        <ion-button expand="block" fill="solid" class="explore-btn" (click)="goToSearch()">
-          <ion-icon name="compass-outline" slot="start"></ion-icon>
-          Explore Courses
-        </ion-button>
-      </div>
-
-      <!-- COURSE LIST -->
-      <div class="courses-grid animate-fade-in" *ngIf="!isLoadingCourses && filteredCourses.length > 0">
-        <div class="course-card" *ngFor="let course of filteredCourses" (click)="goToCourse(course.id)">
-          <div class="course-thumb-wrapper">
-            <img [src]="getCourseImage(course)" [alt]="course.title" class="course-thumb" />
-            <div class="category-badge" *ngIf="course.category">
-              {{ course.category.name }}
-            </div>
-          </div>
+        
+        <div class="course-info">
+          <h3 class="course-title">{{ course.title }}</h3>
           
-          <div class="course-info">
-            <h3 class="course-title">{{ course.title }}</h3>
-            
-            <div class="instructor-row">
-              <img [src]="getInstructorAvatar(course)" class="instructor-avatar" />
-              <span class="instructor-name">{{ course.instructor?.name || 'Instructor' }}</span>
-            </div>
+          <div class="instructor-row">
+            <img [src]="getInstructorAvatar(course)" class="instructor-avatar" />
+            <span class="instructor-name">{{ course.instructor?.name || 'Instructor' }}</span>
+          </div>
 
-            <!-- Progress Bar Mock/Placeholder since API doesn't return progress directly here, or dynamic placeholder -->
-            <div class="progress-container">
-              <div class="progress-info">
-                <span class="lesson-count">{{ course.lessons?.length || course.lessons_count || 0 }} Lessons</span>
-                <span class="progress-percent">Enrolled</span>
-              </div>
-              <div class="progress-bar-bg">
-                <div class="progress-bar-fill" style="width: 100%;"></div>
-              </div>
+          <!-- Progress Bar Mock/Placeholder since API doesn't return progress directly here, or dynamic placeholder -->
+          <div class="progress-container">
+            <div class="progress-info">
+              <span class="lesson-count">{{ course.lessons?.length || course.lessons_count || 0 }} Lessons</span>
+              <span class="progress-percent">Enrolled</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" style="width: 100%;"></div>
             </div>
           </div>
         </div>
       </div>
-    </ng-container>
-
-    <!-- ── 2. INSTRUCTOR VIEW ── -->
-    <ng-container *ngIf="userRole === 'instructor'">
-      
-      <!-- STATS DASHBOARD -->
-      <div class="instructor-dashboard-stats animate-fade-in" *ngIf="dashboard">
-        <div class="stat-card">
-          <div class="stat-icon-wrapper courses-color">
-            <ion-icon name="book-outline"></ion-icon>
-          </div>
-          <div class="stat-text">
-            <span class="stat-val">{{ dashboard.totalCourses }}</span>
-            <span class="stat-lbl">Total Courses</span>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon-wrapper students-color">
-            <ion-icon name="people-outline"></ion-icon>
-          </div>
-          <div class="stat-text">
-            <span class="stat-val">{{ dashboard.totalStudents }}</span>
-            <span class="stat-lbl">Total Students</span>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon-wrapper published-color">
-            <ion-icon name="checkmark-circle-outline"></ion-icon>
-          </div>
-          <div class="stat-text">
-            <span class="stat-val">{{ dashboard.totalPublished }}</span>
-            <span class="stat-lbl">Published</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- INSTRUCTOR ACTIONS -->
-      <div class="instructor-actions-bar">
-        <div class="bar-title-section">
-          <h2>My Created Courses</h2>
-          <p>Manage and create your courses here</p>
-        </div>
-        <ion-button class="create-btn" (click)="openCreateModal()">
-          <ion-icon name="add-outline" slot="start"></ion-icon>
-          New Course
-        </ion-button>
-      </div>
-
-      <!-- INSTRUCTOR SKELETON -->
-      <div class="courses-skeleton-list" *ngIf="isLoadingInstructorCourses">
-        <div class="skeleton-card" *ngFor="let i of [1, 2]">
-          <div class="skeleton-thumb"></div>
-          <div class="skeleton-details">
-            <div class="skeleton-line title"></div>
-            <div class="skeleton-line text"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- INSTRUCTOR EMPTY STATE -->
-      <div class="empty-state animate-fade-in" *ngIf="!isLoadingInstructorCourses && instructorCourses.length === 0">
-        <div class="illustration-container">
-          <div class="icon-wrapper desktop-wrapper">
-            <ion-icon name="create-outline" class="empty-icon"></ion-icon>
-          </div>
-          <div class="icon-wrapper medal-wrapper">
-            <ion-icon name="school-outline" class="empty-icon"></ion-icon>
-          </div>
-          <div class="icon-wrapper book-wrapper">
-            <ion-icon name="library-outline" class="empty-icon"></ion-icon>
-          </div>
-        </div>
-        <h2 class="empty-title">Create your first course</h2>
-        <p class="empty-subtitle">Share your knowledge with the world. Click the button below to publish your first course.</p>
-        <ion-button expand="block" fill="solid" class="explore-btn" (click)="openCreateModal()">
-          <ion-icon name="add-outline" slot="start"></ion-icon>
-          Create Course
-        </ion-button>
-      </div>
-
-      <!-- INSTRUCTOR COURSE LIST -->
-      <div class="instructor-courses-list animate-fade-in" *ngIf="!isLoadingInstructorCourses && instructorCourses.length > 0">
-        <div class="instructor-course-card" *ngFor="let course of instructorCourses">
-          <img [src]="getCourseImage(course)" class="ins-course-thumb" />
-          
-          <div class="ins-course-info">
-            <div class="ins-title-row">
-              <h3 class="ins-course-title">{{ course.title }}</h3>
-              <span class="ins-price">{{ course.price === 0 ? 'Free' : (course.price | currency:'IDR':'symbol':'1.0-0') }}</span>
-            </div>
-            
-            <div class="ins-meta-row">
-              <span class="ins-lessons">{{ course.lessons?.length || 0 }} Lessons</span>
-              <ion-badge [color]="getStatusColor(course.status)" class="status-badge">
-                {{ course.status | uppercase }}
-              </ion-badge>
-            </div>
-          </div>
-
-          <div class="ins-actions">
-            <button class="ins-action-btn edit-btn" (click)="openEditModal(course)" title="Edit Course">
-              <ion-icon name="pencil-outline"></ion-icon>
-            </button>
-            <button class="ins-action-btn delete-btn" (click)="confirmDelete(course)" title="Delete Course">
-              <ion-icon name="trash-outline"></ion-icon>
-            </button>
-          </div>
-        </div>
-      </div>
-
-    </ng-container>
+    </div>
 
   </div>
-
-  <!-- ── 3. CREATE/EDIT COURSE MODAL ── -->
-  <ion-modal [isOpen]="showCourseModal" (didDismiss)="closeModal()" class="course-modal">
-    <ng-template>
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>{{ editingCourse ? 'Edit Course' : 'Create New Course' }}</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="closeModal()">Cancel</ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-
-      <ion-content class="ion-padding modal-form-content">
-        <form [formGroup]="courseForm" (ngSubmit)="saveCourse()">
-          
-          <div class="form-group">
-            <label for="title">Course Title</label>
-            <input id="title" type="text" formControlName="title" placeholder="e.g. Master Angular in 30 Days" />
-            <div class="validation-error" *ngIf="courseForm.get('title')?.touched && courseForm.get('title')?.hasError('required')">
-              Title is required.
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" formControlName="description" rows="5" placeholder="Describe what students will learn..."></textarea>
-            <div class="validation-error" *ngIf="courseForm.get('description')?.touched && courseForm.get('description')?.hasError('required')">
-              Description is required.
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="price">Price (IDR)</label>
-            <input id="price" type="number" formControlName="price" placeholder="e.g. 150000" />
-            <div class="validation-error" *ngIf="courseForm.get('price')?.touched && courseForm.get('price')?.hasError('min')">
-              Price cannot be negative.
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="thumbnail">Thumbnail URL</label>
-            <input id="thumbnail" type="text" formControlName="thumbnail" placeholder="URL of the thumbnail image" />
-          </div>
-
-          <div class="form-group">
-            <label for="status">Status</label>
-            <select id="status" formControlName="status">
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="archived" *ngIf="editingCourse">Archived</option>
-            </select>
-          </div>
-
-          <ion-button type="submit" expand="block" class="submit-btn" [disabled]="courseForm.invalid || isSaving">
-            <ion-spinner *ngIf="isSaving" name="crescent"></ion-spinner>
-            <span *ngIf="!isSaving">{{ editingCourse ? 'Save Changes' : 'Create Course' }}</span>
-          </ion-button>
-
-        </form>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
 
 </ion-content>
