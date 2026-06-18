@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { CourseService } from './course.service';
 
 export interface User {
   id: number;
@@ -23,7 +24,7 @@ export class AuthService {
   private readonly USER_KEY = 'a2shi_user';
   private readonly apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private courseService: CourseService) { }
 
   // ── LOGIN ─────────────────────────────────────────────────
   // POST /api/auth/login
@@ -115,6 +116,7 @@ export class AuthService {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem('token');
     localStorage.removeItem(this.USER_KEY);
+    this.courseService.clearCache();
   }
 
   // ── PROFILE ──────────────────────────────────────────────

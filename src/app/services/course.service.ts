@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import {
@@ -22,16 +22,42 @@ export * from './course.interfaces';
 export class CourseService {
   private readonly apiUrl = environment.apiUrl;
 
+  private coursesCache: Course[] | null = null;
+  private categoriesCache: Category[] | null = null;
+  private myLearningCache: Course[] | null = null;
+  private courseDetailsCache = new Map<number, CourseDetail>();
+
   constructor(private http: HttpClient) { }
+
+  clearCache(): void {
+    this.coursesCache = null;
+    this.categoriesCache = null;
+    this.myLearningCache = null;
+    this.courseDetailsCache.clear();
+  }
+
+  clearMyLearningCache(): void {
+    this.myLearningCache = null;
+  }
+
+  clearCourseDetailCache(id: number): void {
+    this.courseDetailsCache.delete(id);
+  }
 
   /**
    * 1. GET /courses
    * Public, tanpa auth
    * Returns: Course[]
    */
-  getCourses(): Observable<Course[]> {
+  getCourses(forceRefresh = false): Observable<Course[]> {
+    if (this.coursesCache && !forceRefresh) {
+      return of(this.coursesCache);
+    }
     return this.http.get<ApiResponse<Course[]>>(`${this.apiUrl}/courses`).pipe(
-      map(response => response.data),
+      map(response => {
+        this.coursesCache = response.data;
+        return response.data;
+      }),
       catchError(this.handleError)
     );
   }
@@ -41,19 +67,26 @@ export class CourseService {
    * Public, JWT opsional. Jika user login, token disertakan oleh interceptor.
    * Returns: CourseDetail
    */
-  getCourseDetail(id: number): Observable<CourseDetail> {
+  getCourseDetail(id: number, forceRefresh = false): Observable<CourseDetail> {
+    if (this.courseDetailsCache.has(id) && !forceRefresh) {
+      return of(this.courseDetailsCache.get(id)!);
+    }
     const url = `${this.apiUrl}/courses/${id}`;
     console.log('[CourseService] Fetching course detail from:', url);
 
     return this.http.get<any>(url).pipe(
       map(response => {
         console.log('[CourseService] Raw response:', response);
+        let detail: CourseDetail;
         // ApiResponse wrapper format: { success, message, data }
-        if (response?.success && response?.data) return response.data as CourseDetail;
-        if (response?.data) return response.data as CourseDetail;
+        if (response?.success && response?.data) detail = response.data as CourseDetail;
+        else if (response?.data) detail = response.data as CourseDetail;
         // Jika backend mengembalikan objek course langsung (tanpa wrapper)
-        if (response?.id) return response as CourseDetail;
-        throw new Error('Format response tidak dikenali dari server');
+        else if (response?.id) detail = response as CourseDetail;
+        else throw new Error('Format response tidak dikenali dari server');
+
+        this.courseDetailsCache.set(id, detail);
+        return detail;
       }),
       catchError((err: HttpErrorResponse) => {
         console.error('[CourseService] ❌ HTTP Error:', err.status, err.statusText);
@@ -130,9 +163,15 @@ export class CourseService {
    * Public
    * Returns: Category[] dengan courses_count
    */
-  getCategories(): Observable<Category[]> {
+  getCategories(forceRefresh = false): Observable<Category[]> {
+    if (this.categoriesCache && !forceRefresh) {
+      return of(this.categoriesCache);
+    }
     return this.http.get<ApiResponse<Category[]>>(`${this.apiUrl}/categories`).pipe(
-      map(response => response.data),
+      map(response => {
+        this.categoriesCache = response.data;
+        return response.data;
+      }),
       catchError(this.handleError)
     );
   }
@@ -175,9 +214,15 @@ export class CourseService {
    * AUTH REQUIRED
    * Returns: Course[]
    */
-  getMyLearning(): Observable<Course[]> {
+  getMyLearning(forceRefresh = false): Observable<Course[]> {
+    if (this.myLearningCache && !forceRefresh) {
+      return of(this.myLearningCache);
+    }
     return this.http.get<ApiResponse<Course[]>>(`${this.apiUrl}/my-learning`).pipe(
-      map(response => response.data),
+      map(response => {
+        this.myLearningCache = response.data;
+        return response.data;
+      }),
       catchError(this.handleError)
     );
   }

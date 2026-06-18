@@ -27,9 +27,6 @@ export class SearchPage implements OnInit {
   isLoadingCats: boolean = true;
 
   // Filter States
-  selectedSort: string = 'Top Rating';
-  isSortDropdownOpen: boolean = false;
-  sortOptions: string[] = ['Top Rating', 'Newest', 'Lowest Price', 'Highest Price'];
   selectedPrice: string = 'Paid';
   ratingFilters = [
     { value: 5, label: '5', checked: false },
@@ -158,15 +155,7 @@ export class SearchPage implements OnInit {
     return 'Rp' + price.toLocaleString('id-ID');
   }
 
-  // Filter Methods
-  toggleSortDropdown() {
-    this.isSortDropdownOpen = !this.isSortDropdownOpen;
-  }
 
-  selectSortOption(option: string) {
-    this.selectedSort = option;
-    this.isSortDropdownOpen = false;
-  }
 
   selectPrice(price: string) {
     this.selectedPrice = this.selectedPrice === price ? '' : price;
@@ -177,15 +166,12 @@ export class SearchPage implements OnInit {
   }
 
   resetFilters() {
-    this.selectedSort = 'Top Rating';
-    this.isSortDropdownOpen = false;
     this.selectedPrice = 'Paid';
     this.ratingFilters.forEach(r => r.checked = false);
   }
 
   applyFilters() {
     console.log('Applying Filters:', {
-      sort: this.selectedSort,
       price: this.selectedPrice,
       ratings: this.ratingFilters.filter(r => r.checked).map(r => r.value)
     });

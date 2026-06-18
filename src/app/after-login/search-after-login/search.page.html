@@ -108,24 +108,7 @@
     </div>
 
     <ion-content class="filter-modal-content" scroll-y="true">
-      <!-- Sort By Section -->
-      <div class="filter-section">
-        <h3 class="section-label">Sort by</h3>
-        <div class="dropdown-trigger" (click)="toggleSortDropdown()">
-          <span>{{ selectedSort }}</span>
-          <ion-icon name="chevron-down-outline" class="chevron-icon"></ion-icon>
-        </div>
-        <div class="sort-options-list" *ngIf="isSortDropdownOpen">
-          <div 
-            class="sort-option-item" 
-            *ngFor="let option of sortOptions" 
-            [class.active]="selectedSort === option"
-            (click)="selectSortOption(option)"
-          >
-            {{ option }}
-          </div>
-        </div>
-      </div>
+
 
       <!-- Price Section -->
       <div class="filter-section">

@@ -87,4 +87,12 @@ export class LoginPage implements OnInit {
       alert('Terjadi kesalahan. Coba lagi.');
     }
   }
+
+  async openTerms() {
+    await Browser.open({ url: 'https://sites.google.com/view/a2shi-terms/halaman-muka' });
+  }
+
+  async openPrivacy() {
+    await Browser.open({ url: 'https://sites.google.com/view/a2shi-academy-privacy-policy/halaman-muka' });
+  }
 }

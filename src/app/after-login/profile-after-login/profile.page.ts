@@ -5,6 +5,7 @@ import { IonicModule, ModalController, AlertController, ToastController } from '
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { environment } from '../../../environments/environment';
+import { Browser } from '@capacitor/browser';
 
 @Component({
   selector: 'app-profile',
@@ -100,6 +101,14 @@ export class ProfilePage implements OnInit {
   onHelpSupport() {
     console.log('Navigating to /help-and-support page...');
     this.router.navigate(['/help-and-support']);
+  }
+
+  async openTerms() {
+    await Browser.open({ url: 'https://sites.google.com/view/a2shi-terms/halaman-muka' });
+  }
+
+  async openPrivacy() {
+    await Browser.open({ url: 'https://sites.google.com/view/a2shi-academy-privacy-policy/halaman-muka' });
   }
 
   closeHelp() {

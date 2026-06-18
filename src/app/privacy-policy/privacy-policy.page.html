@@ -10,50 +10,41 @@
 
   <div class="background-layer">
     <div class="brand-area">
-      <span class="brand-title">E-LEARNING</span>
-      <span class="brand-subtitle">Marketplace Course</span>
+      <span class="brand-title">A2SHI ACADEMY</span>
+      <span class="brand-subtitle">Learn without limits</span>
     </div>
   </div>
 
   <div class="main-content">
     <div class="privacy-card animate-slide-up" id="privacyCard">
       <div class="card-header">
-        <h1>Kebijakan Privasi</h1>
-        <p>Silakan tinjau dan setujui Kebijakan Privasi untuk melanjutkan menggunakan aplikasi.</p>
+        <h1>Kebijakan & Persetujuan</h1>
+        <p>Silakan tinjau dan setujui dokumen hukum berikut untuk melanjutkan menggunakan aplikasi.</p>
       </div>
 
-      <!-- Policy Text Scrollbox -->
-      <div class="policy-content" id="policyTextContainer">
-        <h3>1. Pengenalan</h3>
-        <p>Selamat datang di E-LEARNING Marketplace Course. Kami sangat menghargai privasi Anda dan berkomitmen untuk melindungi data pribadi Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi Anda.</p>
+      <!-- Policy Links Cards -->
+      <div class="policy-links-container">
+        <button class="policy-link-card" (click)="openTerms()">
+          <div class="card-left">
+            <span class="material-symbols-outlined doc-icon">description</span>
+            <div class="card-text">
+              <h3>Syarat & Ketentuan</h3>
+              <p>Ketentuan penggunaan layanan A2shi Academy</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined arrow-icon">open_in_new</span>
+        </button>
 
-        <h3>2. Informasi yang Kami Kumpulkan</h3>
-        <p>Kami mengumpulkan informasi untuk memberikan layanan yang lebih baik kepada seluruh pengguna kami. Informasi yang kami kumpulkan meliputi:</p>
-        <ul>
-          <li><strong>Data Akun:</strong> Nama lengkap, alamat email, nomor telepon, dan password saat pendaftaran.</li>
-          <li><strong>Informasi Pembelajaran:</strong> Riwayat pembelian kursus, kemajuan kursus, video yang ditonton, serta wishlist.</li>
-          <li><strong>Informasi Perangkat:</strong> Jenis perangkat, sistem operasi, dan alamat IP Anda.</li>
-        </ul>
-
-        <h3>3. Cara Kami Menggunakan Informasi</h3>
-        <p>Kami menggunakan data yang dikumpulkan untuk tujuan berikut:</p>
-        <ul>
-          <li>Menyediakan, memelihara, dan meningkatkan kualitas layanan kursus kami.</li>
-          <li>Memproses transaksi pembayaran kursus secara aman.</li>
-          <li>Mengirimkan notifikasi pembaruan materi pembelajaran, info kursus baru, atau komunikasi dukungan teknis.</li>
-          <li>Menyesuaikan rekomendasi kursus yang sesuai dengan preferensi Anda.</li>
-        </ul>
-
-        <h3>4. Keamanan dan Perlindungan Data</h3>
-        <p>Kami menerapkan langkah-langkah keamanan teknis dan organisasi yang ketat untuk mencegah akses, perubahan, pengungkapan, atau penghancuran data tanpa izin. Seluruh transaksi pembayaran diproses melalui gateway pembayaran yang terenkripsi aman.</p>
-
-        <h3>5. Hak-Hak Anda</h3>
-        <p>Anda memiliki hak untuk mengakses, memperbarui, atau menghapus informasi pribadi Anda langsung melalui menu Profil di dalam aplikasi. Anda juga dapat menghubungi layanan dukungan kami untuk bantuan terkait pengelolaan data Anda.</p>
-
-        <h3>6. Perubahan Kebijakan</h3>
-        <p>Kami dapat memperbarui Kebijakan Privasi ini dari waktu ke waktu. Setiap perubahan akan diinformasikan secara langsung melalui aplikasi ini beserta tanggal pembaruan terakhir.</p>
-        
-        <p class="last-updated">Terakhir diperbarui: Juni 2026</p>
+        <button class="policy-link-card" (click)="openPrivacy()">
+          <div class="card-left">
+            <span class="material-symbols-outlined doc-icon">shield</span>
+            <div class="card-text">
+              <h3>Kebijakan Privasi</h3>
+              <p>Cara kami mengelola dan melindungi data Anda</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined arrow-icon">open_in_new</span>
+        </button>
       </div>
 
       <!-- Consent Controls -->
@@ -68,7 +59,7 @@
             <span class="material-symbols-outlined check-icon">check</span>
           </span>
           <span class="label-text">
-            Saya telah membaca dan menyetujui syarat & ketentuan serta Kebijakan Privasi.
+            Saya menyatakan telah membaca dan menyetujui Syarat & Ketentuan serta Kebijakan Privasi yang berlaku.
           </span>
         </label>
       </div>

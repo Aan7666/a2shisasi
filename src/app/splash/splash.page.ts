@@ -23,6 +23,13 @@ export class SplashPage implements OnInit {
         return;
       }
 
+      // Cek apakah baru pertama kali membuka aplikasi (belum pernah melewati Welcome)
+      const hasSeenWelcome = localStorage.getItem('has_seen_welcome');
+      if (hasSeenWelcome !== 'true') {
+        this.router.navigateByUrl('/welcome', { replaceUrl: true });
+        return;
+      }
+
       // Belum login: cek apakah sudah accept privacy policy
       const accepted = localStorage.getItem('privacy_policy_accepted');
       if (accepted === 'true') {

@@ -1,0 +1,247 @@
+<ion-content [fullscreen]="true">
+  <div class="welcome-wrapper">
+    <!-- Top Action Bar -->
+    <header class="app-header">
+      <div class="header-logo-container">
+        <img alt="A2shi Logo" class="header-logo"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDduszmxaEl8ehTb68Bvhe8yULBRwgeeaG669BbHpKupUnELcBT6vOwWL5HoK3ZSuqaNfvLg8YCYm662gDc6fQA4Q61GvvqfC9Qh0NsmPoLKeYHikYLXjauXUQsgNKCr4H-dJ_vizS-fE3hSozKOVH67TbU3G-xcx9M_5CpUiocdX8AuoGUzFU6dCNU6MS0Uw3yqPr5jo5ahXSgqdGbjVYLmw1uBjbnBe5Lq0UCOBjJF8FVesrDNFSTxcDfNcVvpA3e7jRIiTpZuO4" />
+        <div class="header-text">
+          <span class="title-bold">A2SHI</span>
+          <span class="title-sub">Academy</span>
+        </div>
+      </div>
+      <button class="btn-skip" (click)="finishWelcome()">Skip</button>
+    </header>
+
+    <!-- Scrollable Slides Container -->
+    <div class="slides-container" (scroll)="onScroll($event)" #slidesContainer>
+      <div class="slide-item" *ngFor="let slide of slides; let i = index">
+        
+        <!-- Premium Visual Container -->
+        <div class="carousel-card">
+          <!-- Vector Phone Mockup -->
+          <div class="phone-mockup-wrapper">
+            <div class="phone-frame">
+              
+              <!-- Status bar -->
+              <div class="status-bar">
+                <span class="time">12:25</span>
+                <span class="icons">📶 🔋 100%</span>
+              </div>
+              
+              <!-- Phone Screen CONTENT based on SLIDE ID -->
+              <div class="phone-screen">
+                
+                <!-- SLIDE 1 (ID 4): Dashboard / Explore -->
+                <ng-container *ngIf="slide.id === 4">
+                  <div class="mock-home-header">
+                    <span class="mock-welcome-title">Hallo, AAN123!</span>
+                    <span class="mock-cart-icon">🛒</span>
+                  </div>
+                  
+                  <div class="mock-banner-card">
+                    <span class="banner-title">Welcome</span>
+                    <span class="banner-subtitle">A2SHI ACADEMY</span>
+                  </div>
+                  
+                  <div class="mock-section-title">Trending Courses</div>
+                  
+                  <div class="mock-course-row">
+                    <div class="mock-mini-card">
+                      <div class="card-thumb red-gradient"></div>
+                      <div class="card-details">
+                        <span class="m-title">asakjnsa</span>
+                        <span class="m-instructor">Maman Racing</span>
+                        <span class="m-price">Rp0</span>
+                      </div>
+                    </div>
+                    
+                    <div class="mock-mini-card">
+                      <div class="card-thumb dark-gradient"></div>
+                      <div class="card-details">
+                        <span class="m-title">Sdn&lt;dn</span>
+                        <span class="m-instructor">Maman Racing</span>
+                        <span class="m-price">Rp1,000</span>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+
+                <!-- SLIDE 2 (ID 2): Wishlist -->
+                <ng-container *ngIf="slide.id === 2">
+                  <div class="mock-header">
+                    <span class="mock-header-title">Wishlist</span>
+                    <span class="mock-header-icons">🔍 ⋮</span>
+                  </div>
+                  
+                  <div class="mock-wishlist-list">
+                    <div class="mock-wishlist-card">
+                      <div class="wishlist-thumb"><span class="heart-icon">❤️</span></div>
+                      <div class="wishlist-details">
+                        <span class="w-title">asakjnsa</span>
+                        <span class="w-instructor">Maman Racing</span>
+                        <span class="w-price">Rp0.00</span>
+                      </div>
+                      <div class="wishlist-action">🗑️</div>
+                    </div>
+                    
+                    <div class="mock-wishlist-card">
+                      <div class="wishlist-thumb"><span class="heart-icon">❤️</span></div>
+                      <div class="wishlist-details">
+                        <span class="w-title">Sdn&lt;dn</span>
+                        <span class="w-instructor">Maman Racing</span>
+                        <span class="w-price">Rp1000.00</span>
+                      </div>
+                      <div class="wishlist-action">🗑️</div>
+                    </div>
+                  </div>
+                </ng-container>
+
+                <!-- SLIDE 3 (ID 5): My Learning -->
+                <ng-container *ngIf="slide.id === 5">
+                  <div class="mock-header">
+                    <span class="mock-header-title">My Learning</span>
+                    <span class="mock-header-icons">🔍 🎛️</span>
+                  </div>
+                  
+                  <div class="mock-learning-list">
+                    <div class="mock-learning-card">
+                      <div class="learning-thumb orange-gradient">
+                        <span class="thumb-badge">Bisnis</span>
+                      </div>
+                      <div class="learning-details">
+                        <span class="l-title">Sdn&lt;dn</span>
+                        <span class="l-instructor">Maman Racing</span>
+                        <span class="l-lessons">3 Lessons</span>
+                        <div class="l-progress-bar"><div class="bar-fill" style="width: 50%;"></div></div>
+                      </div>
+                    </div>
+                    
+                    <div class="mock-learning-card">
+                      <div class="learning-thumb red-gradient">
+                        <span class="thumb-badge">Desain</span>
+                      </div>
+                      <div class="learning-details">
+                        <span class="l-title">asakjnsa</span>
+                        <span class="l-instructor">Maman Racing</span>
+                        <span class="l-lessons">3 Lessons</span>
+                        <div class="l-progress-bar"><div class="bar-fill" style="width: 100%;"></div></div>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+
+                <!-- SLIDE 4 (ID 3): History / Progress -->
+                <ng-container *ngIf="slide.id === 3">
+                  <div class="mock-header dark-red">
+                    <span class="back-arrow">←</span>
+                    <span class="mock-header-title">History</span>
+                  </div>
+                  
+                  <div class="mock-progress-tabs">
+                    <span class="p-tab">Trans</span>
+                    <span class="p-tab active">Progress</span>
+                  </div>
+                  
+                  <div class="mock-progress-content">
+                    <div class="mock-progress-card">
+                      <div class="card-head">
+                        <span class="c-title">Sdn&lt;dn</span>
+                        <span class="c-percentage">50%</span>
+                      </div>
+                      <div class="card-progress-bar"><div class="bar-fill red" style="width: 50%;"></div></div>
+                      <button class="btn-continue-learning">Lanjutkan</button>
+                    </div>
+
+                    <div class="mock-progress-card">
+                      <div class="card-head">
+                        <span class="c-title">asakjnsa</span>
+                        <span class="c-percentage green">100%</span>
+                      </div>
+                      <div class="card-progress-bar"><div class="bar-fill green" style="width: 100%;"></div></div>
+                      <button class="btn-cert">🏅 Sertifikat</button>
+                    </div>
+                  </div>
+                </ng-container>
+
+                <!-- SLIDE 5 (ID 1): Lesson Detail / Study -->
+                <ng-container *ngIf="slide.id === 1">
+                  <div class="mock-lesson-container red-orange-bg">
+                    <div class="lesson-top">
+                      <span class="close-btn">✕</span>
+                      <span class="lesson-num">LESSON 1</span>
+                      <h3 class="lesson-title">kmlnkn</h3>
+                      <button class="btn-done">Selesai ✓</button>
+                    </div>
+                    
+                    <div class="lesson-card">
+                      <h4>kmlnkn</h4>
+                      <p class="lesson-desc-text">jkbkjb</p>
+                    </div>
+                    
+                    <div class="lesson-nav">
+                      <button class="btn-nav prev disabled">Prev</button>
+                      <button class="btn-nav next">Next ❯</button>
+                    </div>
+
+                    <div class="lesson-curriculum">
+                      <span class="curriculum-title">Pelajaran</span>
+                      <div class="curr-list">
+                        <div class="curr-item active"><span class="check-icon">✓</span> kmlnkn</div>
+                        <div class="curr-item active"><span class="check-icon">✓</span> jnkjjnk</div>
+                        <div class="curr-item"><span class="num-icon">3</span> knjnjn</div>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+
+              </div>
+              
+              <!-- Tab Bar Mockup (Selected item matches the slide ID) -->
+              <div class="phone-tabs-mock">
+                <span [class.active]="slide.id === 4">🏠</span>
+                <span [class.active]="slide.id === 2">❤️</span>
+                <span [class.active]="slide.id === 5">📖</span>
+                <span [class.active]="slide.id === 3">👤</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Carousel Text Content -->
+          <div class="carousel-text-area">
+            <div class="slide-badge">{{ slide.badge }}</div>
+            <h2 class="slide-title">{{ slide.title }}</h2>
+            <p class="slide-desc">{{ slide.description }}</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Carousel Footer Controls -->
+    <div class="carousel-footer">
+      <!-- Indicators (Dots) -->
+      <div class="carousel-indicators">
+        <span 
+          *ngFor="let slide of slides; let idx = index" 
+          class="dot" 
+          [class.active]="idx === activeSlide"
+          (click)="selectSlide(idx)"
+        ></span>
+      </div>
+
+      <!-- Action Button -->
+      <div class="actions-wrapper">
+        <button class="btn-primary" (click)="nextOrFinish()">
+          <span>{{ activeSlide === slides.length - 1 ? 'MULAI SEKARANG' : 'LANJUT' }}</span>
+        </button>
+      </div>
+
+      <!-- Progress text label -->
+      <div class="slide-counter-label">
+        {{ activeSlide + 1 }} dari {{ slides.length }}
+      </div>
+    </div>
+
+  </div>
+</ion-content>

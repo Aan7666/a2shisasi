@@ -626,3 +626,25 @@ ion-content {
     height: 44px !important;
   }
 }
+
+// ---- Privacy Disclaimer ----
+.privacy-disclaimer {
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  color: $on-surface-variant;
+  line-height: 1.5;
+  margin-top: 16px;
+  opacity: 0.85;
+
+  .disclaimer-link {
+    color: $primary;
+    text-decoration: underline;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      color: $primary-container;
+    }
+  }
+}

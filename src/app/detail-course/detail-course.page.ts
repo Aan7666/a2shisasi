@@ -233,6 +233,8 @@ export class DetailCoursePage implements OnInit {
           if (this.course) {
             this.course.has_access = true;
           }
+          this.courseService.clearMyLearningCache();
+          this.courseService.clearCourseDetailCache(this.courseId);
           this.goToVideoMateri();
         },
         error: async (err) => {

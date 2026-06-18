@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { Browser } from '@capacitor/browser';
 
 @Component({
   selector: 'app-privacy-policy',
@@ -14,6 +15,14 @@ import { Router } from '@angular/router';
 export class PrivacyPolicyPage {
   isAccepted = false;
   private router = inject(Router);
+
+  async openTerms() {
+    await Browser.open({ url: 'https://sites.google.com/view/a2shi-terms/halaman-muka' });
+  }
+
+  async openPrivacy() {
+    await Browser.open({ url: 'https://sites.google.com/view/a2shi-academy-privacy-policy/halaman-muka' });
+  }
 
   onAgree() {
     if (this.isAccepted) {
