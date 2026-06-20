@@ -26,6 +26,7 @@ export class ProfilePage implements OnInit {
   isSavingName: boolean = false;
   isDeleteConfirmed: boolean = false;
   isPopUpShowing: boolean = false;
+  isInstructorModalOpen: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -50,7 +51,7 @@ export class ProfilePage implements OnInit {
       if (currentUser) {
         this.userName = currentUser.name;
         this.userEmail = currentUser.email;
-        
+
         // Resolve relative avatar URL from backend
         const avatarPath = currentUser.avatar || null;
         if (avatarPath) {
@@ -96,6 +97,10 @@ export class ProfilePage implements OnInit {
   onAboutUs() {
     console.log('Navigating to /about-us page...');
     this.router.navigate(['/about-us']);
+  }
+
+  openInstructorModal() {
+    this.isInstructorModalOpen = true;
   }
 
   onHelpSupport() {
@@ -202,7 +207,7 @@ export class ProfilePage implements OnInit {
 
   async onCheckboxChange(event: any) {
     const isChecked = event.detail.checked;
-    
+
     // Hanya picu alert jika dicentang (checked === true) dan popup sedang tidak muncul
     if (isChecked && !this.isPopUpShowing) {
       this.isPopUpShowing = true;
@@ -283,7 +288,7 @@ export class ProfilePage implements OnInit {
       this.authService.updateProfile({ name: this.userName, avatar: base64String }).subscribe({
         next: (response) => {
           this.isUpdatingAvatar = false;
-          
+
           // Resolve newly uploaded avatar path if returned, otherwise fallback to local base64 preview
           if (response?.data?.avatar) {
             const avatarPath = response.data.avatar;
@@ -296,7 +301,7 @@ export class ProfilePage implements OnInit {
           } else {
             this.profileImageUrl = base64String;
           }
-          
+
           this.showToast('Foto profil berhasil diperbarui.');
         },
         error: (err) => {

@@ -20,16 +20,20 @@ export interface Transaction {
   id: number;
   user_id: number;
   course_id: number;
-  /** Nomor invoice, contoh: INV-20240520-001 */
+  /** Nomor order, contoh: ORD-20240520-A1B2C3 */
+  order_id?: string;
+  /** Legacy: nomor invoice lama */
   invoice_number?: string;
   amount?: number;
   price?: number;
+  payment_method?: string;
   status: TransactionStatus;
   proof_image: string | null;
   created_at: string;
   updated_at: string;
   course?: TransactionCourse;
 }
+
 
 export interface UploadProofResult {
   transactionId: number;

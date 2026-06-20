@@ -11,6 +11,7 @@
   <div class="main-container">
     <div class="hero-banner"></div>
 
+    <!-- ── TRENDING COURSES ── -->
     <h2 class="section-title">Trending Courses</h2>
     <div class="horizontal-scroll">
 
@@ -20,13 +21,13 @@
       </div>
 
       <!-- No courses message -->
-      <div *ngIf="!isLoadingCourses && courses.length === 0"
+      <div *ngIf="!isLoadingCourses && trendingCourses.length === 0"
         style="text-align: center; width: 100%; padding: 20px 0; color: #757575;">
         Tidak ada course saat ini.
       </div>
 
-      <!-- Dynamic Course Cards -->
-      <div *ngFor="let course of courses" class="mini-course-card" button tappable (click)="goToCourse(course.id)">
+      <!-- Dynamic Course Cards (random, max 6) -->
+      <div *ngFor="let course of trendingCourses" class="mini-course-card" button tappable (click)="goToCourse(course.id)">
         <div class="card-img-placeholder">
           <img [src]="getCourseImageUrl(course)" alt="{{ course.title }}"
             style="width: 100%; height: 100%; object-fit: cover;" />
@@ -49,6 +50,7 @@
       </div>
     </div>
 
+    <!-- ── SUGGESTED COURSES ── -->
     <h2 class="section-title">Pelajaran yang mungkin anda minati</h2>
     <div class="horizontal-scroll">
 
@@ -58,13 +60,13 @@
       </div>
 
       <!-- No courses message -->
-      <div *ngIf="!isLoadingCourses && courses.length === 0"
+      <div *ngIf="!isLoadingCourses && suggestedCourses.length === 0"
         style="text-align: center; width: 100%; padding: 20px 0; color: #757575;">
         Tidak ada course saat ini.
       </div>
 
-      <!-- Dynamic Course Cards -->
-      <div *ngFor="let course of courses" class="mini-course-card" button tappable (click)="goToCourse(course.id)">
+      <!-- Dynamic Course Cards (different random subset, max 6) -->
+      <div *ngFor="let course of suggestedCourses" class="mini-course-card" button tappable (click)="goToCourse(course.id)">
         <div class="card-img-placeholder">
           <img [src]="getCourseImageUrl(course)" alt="{{ course.title }}"
             style="width: 100%; height: 100%; object-fit: cover;" />
@@ -87,6 +89,7 @@
       </div>
     </div>
 
+    <!-- ── CATEGORIES ── -->
     <h2 class="section-title">Category</h2>
     <div class="categories-wrap">
       <div 

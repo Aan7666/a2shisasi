@@ -56,6 +56,19 @@
             <ion-icon name="shield-checkmark-outline" class="item-icon"></ion-icon>
             <span class="item-text">Privacy Policy</span>
           </button>
+
+          <!-- Instructor Banner -->
+          <div class="instructor-banner" (click)="openInstructorModal()">
+            <div class="instructor-banner-left">
+              <ion-icon name="megaphone-outline" class="instructor-banner-icon"></ion-icon>
+              <div class="instructor-banner-text">
+                <span class="instructor-banner-title">Ayo Sebarkan Pelajaranmu!</span>
+                <span class="instructor-banner-sub">Jadilah instruktur di A2Shi Academy</span>
+              </div>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="instructor-banner-arrow"></ion-icon>
+          </div>
+
         </div>
       </div>
 
@@ -66,12 +79,14 @@
 
       <!-- Profile Avatar Card -->
       <div class="profile-header-card">
-        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/png, image/jpeg, image/jpg" style="display: none;">
+        <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/png, image/jpeg, image/jpg"
+          style="display: none;">
         <div class="avatar-wrapper" (click)="fileInput.click()" [class.updating]="isUpdatingAvatar">
-          <img *ngIf="profileImageUrl && !isUpdatingAvatar" [src]="profileImageUrl" class="avatar-image" alt="Profile Photo">
+          <img *ngIf="profileImageUrl && !isUpdatingAvatar" [src]="profileImageUrl" class="avatar-image"
+            alt="Profile Photo">
           <ion-icon *ngIf="!profileImageUrl && !isUpdatingAvatar" name="person-circle" class="avatar-icon"></ion-icon>
           <ion-spinner *ngIf="isUpdatingAvatar" name="crescent" class="avatar-spinner"></ion-spinner>
-          
+
           <div class="edit-badge">
             <ion-icon name="camera-outline"></ion-icon>
           </div>
@@ -121,6 +136,19 @@
             <ion-icon name="shield-checkmark-outline" class="item-icon"></ion-icon>
             <span class="item-text">Privacy Policy</span>
           </button>
+
+          <!-- Instructor Banner -->
+          <div class="instructor-banner" (click)="openInstructorModal()">
+            <div class="instructor-banner-left">
+              <ion-icon name="megaphone-outline" class="instructor-banner-icon"></ion-icon>
+              <div class="instructor-banner-text">
+                <span class="instructor-banner-title">Ayo Sebarkan Pelajaranmu!</span>
+                <span class="instructor-banner-sub">Jadilah instruktur di A2Shi Academy</span>
+              </div>
+            </div>
+            <ion-icon name="chevron-forward-outline" class="instructor-banner-arrow"></ion-icon>
+          </div>
+
         </div>
       </div>
 
@@ -136,9 +164,10 @@
             <span class="checkbox-lbl-text">Saya mengerti tindakan ini permanen <br>& tidak dapat dibatalkan</span>
           </ion-checkbox>
         </div>
-        
+
         <div class="action-container delete-account-wrap">
-          <button class="btn-delete-account" [disabled]="!isDeleteConfirmed" (click)="confirmDeleteAccount()">Delete Account</button>
+          <button class="btn-delete-account" [disabled]="!isDeleteConfirmed" (click)="confirmDeleteAccount()">Delete
+            Account</button>
         </div>
       </div>
 
@@ -172,10 +201,12 @@
               <div class="custom-accordion-item" [class.expanded]="expandedFaq === 'faq1'">
                 <button class="custom-accordion-header" (click)="toggleFaq('faq1')">
                   <span class="faq-question">Bagaimana cara memulai belajar?</span>
-                  <ion-icon [name]="expandedFaq === 'faq1' ? 'chevron-up-outline' : 'chevron-down-outline'" class="faq-icon"></ion-icon>
+                  <ion-icon [name]="expandedFaq === 'faq1' ? 'chevron-up-outline' : 'chevron-down-outline'"
+                    class="faq-icon"></ion-icon>
                 </button>
                 <div class="custom-accordion-content" *ngIf="expandedFaq === 'faq1'">
-                  Pilih materi/kelas yang telah Anda beli dari dashboard atau riwayat (history), klik tombol "Lanjutkan Belajar" atau "Memulai" untuk masuk ke pemutar materi.
+                  Pilih materi/kelas yang telah Anda beli dari dashboard atau riwayat (history), klik tombol "Lanjutkan
+                  Belajar" atau "Memulai" untuk masuk ke pemutar materi.
                 </div>
               </div>
 
@@ -183,10 +214,12 @@
               <div class="custom-accordion-item" [class.expanded]="expandedFaq === 'faq2'">
                 <button class="custom-accordion-header" (click)="toggleFaq('faq2')">
                   <span class="faq-question">Apakah sertifikat berbayar?</span>
-                  <ion-icon [name]="expandedFaq === 'faq2' ? 'chevron-up-outline' : 'chevron-down-outline'" class="faq-icon"></ion-icon>
+                  <ion-icon [name]="expandedFaq === 'faq2' ? 'chevron-up-outline' : 'chevron-down-outline'"
+                    class="faq-icon"></ion-icon>
                 </button>
                 <div class="custom-accordion-content" *ngIf="expandedFaq === 'faq2'">
-                  Tidak. Semua sertifikat kelulusan kelas di A2SHI Academy dapat diunduh secara gratis dalam format PDF setelah progres belajar mencapai 100%.
+                  Tidak. Semua sertifikat kelulusan kelas di A2SHI Academy dapat diunduh secara gratis dalam format PDF
+                  setelah progres belajar mencapai 100%.
                 </div>
               </div>
 
@@ -194,10 +227,12 @@
               <div class="custom-accordion-item" [class.expanded]="expandedFaq === 'faq3'">
                 <button class="custom-accordion-header" (click)="toggleFaq('faq3')">
                   <span class="faq-question">Metode pembayaran apa saja yang tersedia?</span>
-                  <ion-icon [name]="expandedFaq === 'faq3' ? 'chevron-up-outline' : 'chevron-down-outline'" class="faq-icon"></ion-icon>
+                  <ion-icon [name]="expandedFaq === 'faq3' ? 'chevron-up-outline' : 'chevron-down-outline'"
+                    class="faq-icon"></ion-icon>
                 </button>
                 <div class="custom-accordion-content" *ngIf="expandedFaq === 'faq3'">
-                  Kami mendukung pembayaran menggunakan berbagai e-Wallet populer (Dana, GoPay, OVO, ShopeePay) serta Virtual Account bank terkemuka di Indonesia (BCA, Mandiri, BNI, BRI).
+                  Kami mendukung pembayaran menggunakan berbagai e-Wallet populer (Dana, GoPay, OVO, ShopeePay) serta
+                  Virtual Account bank terkemuka di Indonesia (BCA, Mandiri, BNI, BRI).
                 </div>
               </div>
             </div>
@@ -239,7 +274,8 @@
           <div class="input-section">
             <label class="input-lbl">Your name</label>
             <div class="name-input-box">
-              <input type="text" [(ngModel)]="tempName" name="tempName" class="name-text-input" placeholder="Enter your name" />
+              <input type="text" [(ngModel)]="tempName" name="tempName" class="name-text-input"
+                placeholder="Enter your name" />
             </div>
             <span class="subtext-info">change your name here.</span>
           </div>
@@ -255,3 +291,75 @@
     </ng-template>
   </ion-modal>
 </ion-content>
+
+<!-- ══════════ INSTRUCTOR MODAL ══════════ -->
+<ion-modal #instructorModal [isOpen]="isInstructorModalOpen" (didDismiss)="isInstructorModalOpen = false"
+  [initialBreakpoint]="0.85" [breakpoints]="[0, 0.85, 1]" handleBehavior="cycle" class="instructor-sheet-modal">
+  <ng-template>
+    <div class="instructor-modal-wrapper">
+
+      <div class="modal-handle-bar"></div>
+
+      <div class="instructor-hero">
+        <div class="instructor-hero-icon-wrap">
+          <ion-icon name="school-outline" class="instructor-hero-icon"></ion-icon>
+        </div>
+        <h2 class="instructor-hero-title">Jadilah Instruktur!</h2>
+        <p class="instructor-hero-sub">Sebarkan ilmu, raih penghasilan.</p>
+      </div>
+
+      <ion-content class="instructor-modal-body" scroll-y="true">
+        <div class="instructor-info-list">
+
+          <div class="instructor-info-item">
+            <div class="info-icon-wrap"><ion-icon name="bulb-outline"></ion-icon></div>
+            <div class="info-text">
+              <strong>Apakah kamu ingin jadi instruktur?</strong>
+              <p>Di A2Shi Academy, siapa pun yang memiliki keahlian bisa berbagi ilmu dan menginspirasi ribuan pelajar
+                di seluruh Indonesia.</p>
+            </div>
+          </div>
+
+          <div class="instructor-info-item">
+            <div class="info-icon-wrap"><ion-icon name="create-outline"></ion-icon></div>
+            <div class="info-text">
+              <strong>Buat kursusmu sendiri</strong>
+              <p>Rancang materi pembelajaran sesuai bidang keahlianmu — mulai dari teknologi, desain, bisnis, hingga
+                seni dan kreativitas.</p>
+            </div>
+          </div>
+
+          <div class="instructor-info-item">
+            <div class="info-icon-wrap"><ion-icon name="people-outline"></ion-icon></div>
+            <div class="info-text">
+              <strong>Jangkau lebih banyak pelajar</strong>
+              <p>Kursusmu akan dapat diakses oleh ribuan pengguna aktif yang haus akan ilmu baru setiap harinya.</p>
+            </div>
+          </div>
+
+          <div class="instructor-info-item">
+            <div class="info-icon-wrap"><ion-icon name="cash-outline"></ion-icon></div>
+            <div class="info-text">
+              <strong>Dapatkan penghasilan tambahan</strong>
+              <p>Setiap kursus yang terjual akan memberikanmu komisi. Semakin banyak pelajar, semakin besar
+                penghasilanmu!</p>
+            </div>
+          </div>
+
+          <div class="instructor-cta-box">
+            <p class="instructor-cta-text">
+              Siap memulai perjalananmu sebagai instruktur?<br />
+              Daftar sekarang melalui website resmi kami:
+            </p>
+            <a href="https://a2shi.com" target="_blank" class="btn-register-instructor">
+              <ion-icon name="globe-outline"></ion-icon>
+              Daftar di a2shi.com
+            </a>
+          </div>
+
+        </div>
+      </ion-content>
+
+    </div>
+  </ng-template>
+</ion-modal>

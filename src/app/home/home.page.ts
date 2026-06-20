@@ -21,6 +21,9 @@ export class HomePage implements OnInit {
   isLoading: boolean = true;
   hasError: boolean = false;
 
+  /** Max courses shown per section on home */
+  private readonly SECTION_LIMIT = 6;
+
   private readonly storageBaseUrl = environment.apiUrl.replace('/api', '/storage/');
 
   constructor(
@@ -52,11 +55,15 @@ export class HomePage implements OnInit {
     this.isLoading = true;
     this.hasError = false;
 
-    this.courseService.getHomeData(8).subscribe({
+    this.courseService.getHomeData(20).subscribe({
       next: (data) => {
-        this.trendingCourses = data.trending;
-        this.categorySections = data.category_sections;
-        this.newestCourses = data.newest;
+        // Shuffle & limit each section for a fresh random look every visit
+        this.trendingCourses = this.shuffleAndLimit(data.trending, this.SECTION_LIMIT);
+        this.newestCourses   = this.shuffleAndLimit(data.newest,   this.SECTION_LIMIT);
+        this.categorySections = (data.category_sections || []).map(section => ({
+          ...section,
+          courses: this.shuffleAndLimit(section.courses, this.SECTION_LIMIT)
+        }));
         this.isLoading = false;
       },
       error: (err) => {
@@ -109,6 +116,17 @@ export class HomePage implements OnInit {
 
   goToCart() {
     this.router.navigate(['/keranjang']);
+  }
+
+  /** Fisher-Yates shuffle, returns a randomly ordered copy limited to `limit` items */
+  private shuffleAndLimit<T>(arr: T[], limit: number): T[] {
+    if (!arr || arr.length === 0) return [];
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy.slice(0, limit);
   }
 }
 

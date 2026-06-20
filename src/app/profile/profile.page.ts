@@ -16,6 +16,7 @@ export class ProfilePage implements OnInit {
   isLoggedIn: boolean = false;
   userName: string = 'Bruno Fernando';
   userEmail: string = 'brunofernando21@gmail.com';
+  isInstructorModalOpen: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -56,6 +57,10 @@ export class ProfilePage implements OnInit {
         this.router.navigate(['/login']);
       }
     });
+  }
+
+  openInstructorModal() {
+    this.isInstructorModalOpen = true;
   }
 
   async confirmDeleteAccount() {

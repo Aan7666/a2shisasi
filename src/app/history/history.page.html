@@ -13,18 +13,10 @@
 
     <!-- Segment / Tabs -->
     <div class="custom-tabs-segment">
-      <div
-        class="tab-segment-btn"
-        [class.active]="activeTab === 'transactions'"
-        (click)="setActiveTab('transactions')"
-      >
+      <div class="tab-segment-btn" [class.active]="activeTab === 'transactions'" (click)="setActiveTab('transactions')">
         Transactions
       </div>
-      <div
-        class="tab-segment-btn"
-        [class.active]="activeTab === 'progress'"
-        (click)="setActiveTab('progress')"
-      >
+      <div class="tab-segment-btn" [class.active]="activeTab === 'progress'" (click)="setActiveTab('progress')">
         Learning Progress
       </div>
     </div>
@@ -32,9 +24,7 @@
     <!-- Dynamic Tab Content -->
     <div class="tab-content-container">
 
-      <!-- ══════════════════════════════════════════ -->
-      <!-- TRANSACTIONS TAB                           -->
-      <!-- ══════════════════════════════════════════ -->
+      <!-- ══════════════════════════ TRANSACTIONS TAB ══════════════════════════ -->
       <div class="tab-pane animate-fade-in" *ngIf="activeTab === 'transactions'">
 
         <!-- Loading state -->
@@ -56,16 +46,12 @@
 
         <!-- Transaction List -->
         <div class="transaction-list" *ngIf="!isLoadingTx && !txError && transactions.length > 0">
-          <div
-            class="transaction-card"
-            *ngFor="let tx of transactions"
-          >
+          <div class="transaction-card" *ngFor="let tx of transactions">
+
             <!-- Card Header -->
             <div class="tx-header" (click)="showInvoiceDetail(tx)">
               <span class="tx-date">{{ formatDate(tx.created_at) }}</span>
-              <span class="status-badge" [ngClass]="statusClass(tx.status)">
-                {{ statusLabel(tx.status) }}
-              </span>
+              <span class="status-badge" [ngClass]="statusClass(tx.status)">{{ statusLabel(tx.status) }}</span>
             </div>
 
             <!-- Course Thumbnail + Title -->
@@ -78,7 +64,7 @@
               </div>
               <div class="tx-course-info">
                 <h3 class="tx-title">{{ tx.course?.title ?? 'Kursus #' + tx.course_id }}</h3>
-                <p class="tx-invoice">{{ tx.invoice_number ?? '#TRX-' + tx.id }}</p>
+                <p class="tx-invoice">{{ tx.order_id ?? '#TRX-' + tx.id }}</p>
               </div>
             </div>
 
@@ -89,24 +75,15 @@
                 <span class="price-value">{{ formatPrice(tx) }}</span>
               </div>
 
-              <!-- Upload proof button (only when PENDING & no proof yet, or re-upload) -->
-              <button
-                *ngIf="tx.status === 'PENDING'"
-                class="btn-upload-proof"
+              <button *ngIf="tx.status === 'PENDING'" class="btn-upload-proof"
                 [class.has-proof]="tx.proof_image"
                 [disabled]="uploadingTxId === tx.id"
-                (click)="openProofUpload(tx)"
-              >
+                (click)="openProofUpload(tx)">
                 <ion-icon [name]="tx.proof_image ? 'cloud-upload-outline' : 'camera-outline'"></ion-icon>
                 <span>{{ tx.proof_image ? 'Upload Ulang' : 'Upload Bukti' }}</span>
               </button>
 
-              <!-- Detail button for non-PENDING -->
-              <button
-                *ngIf="tx.status !== 'PENDING'"
-                class="btn-invoice-detail"
-                (click)="showInvoiceDetail(tx)"
-              >
+              <button *ngIf="tx.status !== 'PENDING'" class="btn-invoice-detail" (click)="showInvoiceDetail(tx)">
                 <ion-icon name="document-text-outline"></ion-icon>
                 <span>Detail</span>
               </button>
@@ -121,14 +98,6 @@
         </div>
 
         <!-- Empty state -->
-        <ng-template #noTx>
-          <div class="empty-state">
-            <ion-icon name="receipt-outline" class="empty-icon"></ion-icon>
-            <h3>Belum ada transaksi</h3>
-            <p>Anda belum melakukan pembelian kelas apa pun.</p>
-          </div>
-        </ng-template>
-
         <div *ngIf="!isLoadingTx && !txError && transactions.length === 0" class="empty-state">
           <ion-icon name="receipt-outline" class="empty-icon"></ion-icon>
           <h3>Belum ada transaksi</h3>
@@ -137,12 +106,9 @@
 
       </div>
 
-      <!-- ══════════════════════════════════════════ -->
-      <!-- LEARNING PROGRESS TAB                      -->
-      <!-- ══════════════════════════════════════════ -->
+      <!-- ══════════════════════════ LEARNING PROGRESS TAB ══════════════════════════ -->
       <div class="tab-pane animate-fade-in" *ngIf="activeTab === 'progress'">
 
-        <!-- Loading state -->
         <div *ngIf="isLoadingCourses" class="loading-state">
           <ion-spinner name="crescent" color="danger"></ion-spinner>
           <p>Memuat data belajar...</p>
@@ -152,55 +118,37 @@
           <div class="progress-card" *ngFor="let course of myCourses">
             <div class="progress-header">
               <h3 class="course-title" (click)="goToDetail(course)" style="cursor: pointer;">{{ course.title }}</h3>
-              <span
-                class="completion-percent"
-                [class.completed]="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100"
-              >
+              <span class="completion-percent"
+                [class.completed]="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100">
                 {{ getProgressForCourse(course.id)?.percentage || 0 }}%
                 {{ (getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100) ? 'Selesai' : '' }}
               </span>
             </div>
-
-            <!-- Progress Bar -->
             <div class="progress-bar-container">
-              <div
-                class="progress-bar-fill"
+              <div class="progress-bar-fill"
                 [style.width.%]="getProgressForCourse(course.id)?.percentage || 0"
-                [class.completed]="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100"
-              ></div>
+                [class.completed]="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100">
+              </div>
             </div>
-
             <p class="last-lesson-info">
-              <ion-icon
-                name="play-outline"
-                class="lesson-icon"
-                *ngIf="!(getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100)"
-              ></ion-icon>
-              <ion-icon
-                name="checkmark-circle-outline"
-                class="lesson-icon completed"
-                *ngIf="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100"
-              ></ion-icon>
+              <ion-icon name="play-outline" class="lesson-icon"
+                *ngIf="!(getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100)">
+              </ion-icon>
+              <ion-icon name="checkmark-circle-outline" class="lesson-icon completed"
+                *ngIf="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100">
+              </ion-icon>
               <span>
                 {{ (getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100)
-                    ? 'Kelas Selesai'
-                    : 'Lanjutkan ke materi berikutnya' }}
+                    ? 'Kelas Selesai' : 'Lanjutkan ke materi berikutnya' }}
               </span>
             </p>
-
             <div class="progress-actions">
-              <button
-                *ngIf="!(getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100)"
-                class="btn-continue-learning"
-                (click)="continueCourse(course)"
-              >
+              <button *ngIf="!(getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100)"
+                class="btn-continue-learning" (click)="continueCourse(course)">
                 Lanjutkan Belajar
               </button>
-              <button
-                *ngIf="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100"
-                class="btn-claim-cert"
-                (click)="claimCertificate(course)"
-              >
+              <button *ngIf="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100"
+                class="btn-claim-cert" (click)="claimCertificate(course)">
                 <ion-icon name="ribbon-outline"></ion-icon>
                 <span>Unduh Sertifikat</span>
               </button>
@@ -219,3 +167,70 @@
     </div><!-- /tab-content-container -->
   </div><!-- /main-container -->
 </ion-content>
+
+<!-- ══════════════════════════ INVOICE DETAIL MODAL ══════════════════════════ -->
+<ion-modal #invoiceModal [isOpen]="isInvoiceModalOpen" (didDismiss)="isInvoiceModalOpen = false"
+  [initialBreakpoint]="0.75" [breakpoints]="[0, 0.75, 1]" handleBehavior="cycle"
+  class="invoice-sheet-modal">
+  <ng-template>
+    <div class="invoice-modal-wrapper" *ngIf="selectedTx">
+
+      <!-- Header -->
+      <div class="invoice-modal-header">
+        <button class="invoice-close-btn" (click)="isInvoiceModalOpen = false">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+        <h2 class="invoice-modal-title">Detail Transaksi</h2>
+        <div style="width: 36px;"></div>
+      </div>
+
+      <!-- Body -->
+      <ion-content class="invoice-modal-content" scroll-y="true">
+        <div class="invoice-body">
+
+          <div class="invoice-row">
+            <span class="invoice-label">No. Transaksi</span>
+            <span class="invoice-value mono">{{ selectedTx.order_id ?? '#TRX-' + selectedTx.id }}</span>
+          </div>
+
+          <div class="invoice-row">
+            <span class="invoice-label">Kelas</span>
+            <span class="invoice-value">{{ selectedTx.course?.title ?? '-' }}</span>
+          </div>
+
+          <div class="invoice-row">
+            <span class="invoice-label">Tanggal</span>
+            <span class="invoice-value">{{ formatDate(selectedTx.created_at) }}</span>
+          </div>
+
+          <div class="invoice-row">
+            <span class="invoice-label">Total Bayar</span>
+            <span class="invoice-value price">{{ formatPrice(selectedTx) }}</span>
+          </div>
+
+          <div class="invoice-row">
+            <span class="invoice-label">Status</span>
+            <span class="status-badge-modal" [ngClass]="statusClass(selectedTx.status)">
+              {{ statusLabel(selectedTx.status) }}
+            </span>
+          </div>
+
+          <div class="invoice-proof-wrap" *ngIf="resolveProofImage(selectedTx)">
+            <span class="invoice-label">Bukti Transfer</span>
+            <img [src]="resolveProofImage(selectedTx)!" alt="Bukti Transfer" class="invoice-proof-img" />
+          </div>
+
+        </div>
+      </ion-content>
+
+      <!-- Footer (upload bukti, hanya saat PENDING) -->
+      <div class="invoice-modal-footer" *ngIf="selectedTx.status === 'PENDING'">
+        <button class="btn-upload-modal" (click)="openProofUpload(selectedTx); isInvoiceModalOpen = false">
+          <ion-icon [name]="selectedTx.proof_image ? 'cloud-upload-outline' : 'camera-outline'"></ion-icon>
+          {{ selectedTx.proof_image ? 'Upload Ulang Bukti' : 'Upload Bukti Transfer' }}
+        </button>
+      </div>
+
+    </div>
+  </ng-template>
+</ion-modal>

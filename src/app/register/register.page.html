@@ -30,7 +30,7 @@
 
     <!-- Close Button -->
     <button class="close-btn" (click)="prevStep()" aria-label="Back">
-      <span class="material-symbols-outlined">close</span>
+      <ion-icon name="close-outline"></ion-icon>
     </button>
 
     <!-- Brand Area -->
@@ -57,7 +57,7 @@
 
           <form class="login-form" (ngSubmit)="nextStep()">
             <div class="input-group">
-              <span class="material-symbols-outlined input-icon">mail</span>
+              <ion-icon name="mail-outline" class="input-icon"></ion-icon>
               <input type="email" [(ngModel)]="email" name="email" placeholder="Email Address" class="custom-input"
                 required />
             </div>
@@ -92,7 +92,7 @@
 
           <form class="login-form" (ngSubmit)="nextStep()">
             <div class="input-group">
-              <span class="material-symbols-outlined input-icon">lock</span>
+              <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
               <input type="text" [(ngModel)]="otpCode" name="otpCode" placeholder="OTP Code" class="custom-input"
                 maxlength="6" required />
             </div>
@@ -104,12 +104,10 @@
 
           <div class="resend-container">
             Didn't get a code?
-            <a href="#"
-               (click)="$event.preventDefault(); onResendOtp()"
-               class="text-link"
-               [class.disabled]="resendCooldown > 0 || isLoading"
-               [style.pointer-events]="resendCooldown > 0 || isLoading ? 'none' : 'auto'"
-               [style.opacity]="resendCooldown > 0 || isLoading ? '0.45' : '1'">
+            <a href="#" (click)="$event.preventDefault(); onResendOtp()" class="text-link"
+              [class.disabled]="resendCooldown > 0 || isLoading"
+              [style.pointer-events]="resendCooldown > 0 || isLoading ? 'none' : 'auto'"
+              [style.opacity]="resendCooldown > 0 || isLoading ? '0.45' : '1'">
               {{ resendCooldown > 0 ? 'Send again (' + resendCooldown + 's)' : 'Send again' }}
             </a>
           </div>
@@ -129,28 +127,30 @@
           <form class="login-form" (ngSubmit)="nextStep()">
             <!-- Full Name -->
             <div class="input-group">
-              <span class="material-symbols-outlined input-icon">person</span>
+              <ion-icon name="person-outline" class="input-icon"></ion-icon>
               <input type="text" [(ngModel)]="fullName" name="fullName" placeholder="Full Name" class="custom-input"
                 required />
             </div>
 
             <!-- Password -->
             <div class="input-group">
-              <span class="material-symbols-outlined input-icon">password</span>
-              <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password" placeholder="Password" class="custom-input"
-                required />
-              <button type="button" class="toggle-password-btn" (click)="togglePassword()" aria-label="Toggle password visibility">
-                <span class="material-symbols-outlined">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+              <ion-icon name="key-outline" class="input-icon"></ion-icon>
+              <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password"
+                placeholder="Password" class="custom-input" required />
+              <button type="button" class="toggle-password-btn" (click)="togglePassword()"
+                aria-label="Toggle password visibility">
+                <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
               </button>
             </div>
 
             <!-- Confirm Password -->
             <div class="input-group">
-              <span class="material-symbols-outlined input-icon">password</span>
-              <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Confirm Password"
-                class="custom-input" required />
-              <button type="button" class="toggle-password-btn" (click)="togglePassword()" aria-label="Toggle password visibility">
-                <span class="material-symbols-outlined">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+              <ion-icon name="key-outline" class="input-icon"></ion-icon>
+              <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="confirmPassword" name="confirmPassword"
+                placeholder="Confirm Password" class="custom-input" required />
+              <button type="button" class="toggle-password-btn" (click)="togglePassword()"
+                aria-label="Toggle password visibility">
+                <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
               </button>
             </div>
 

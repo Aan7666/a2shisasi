@@ -24,19 +24,23 @@ export class HistoryPage implements OnInit {
   activeTab: 'transactions' | 'progress' = 'transactions';
 
   // ── Transactions ─────────────────────────────────────────
-  transactions: Transaction[]        = [];
-  isLoadingTx: boolean               = false;
-  txError: boolean                   = false;
+  transactions: Transaction[] = [];
+  isLoadingTx: boolean = false;
+  txError: boolean = false;
 
   // Upload proof state
-  uploadingTxId: number | null       = null;
+  uploadingTxId: number | null = null;
+
+  // Invoice modal state
+  isInvoiceModalOpen: boolean = false;
+  selectedTx: Transaction | null = null;
 
   // ── My Learning ──────────────────────────────────────────
-  myCourses: Course[]                = [];
-  progressList: ProgressSummary[]    = [];
-  isLoadingCourses: boolean          = false;
-  isLoadingProgress: boolean         = false;
-  hasError: boolean                  = false;
+  myCourses: Course[] = [];
+  progressList: ProgressSummary[] = [];
+  isLoadingCourses: boolean = false;
+  isLoadingProgress: boolean = false;
+  hasError: boolean = false;
 
   private readonly storageBaseUrl = environment.apiUrl.replace('/api', '/storage/');
 
@@ -50,7 +54,7 @@ export class HistoryPage implements OnInit {
     private certificateService: CertificateService,
     private quizService: QuizService,
     private transactionService: TransactionService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadMyLearning();
@@ -58,6 +62,8 @@ export class HistoryPage implements OnInit {
   }
 
   ionViewWillEnter() {
+    // Clear cache agar kursus yang baru di-approve langsung muncul
+    this.courseService.clearMyLearningCache();
     this.loadMyLearning();
     this.loadTransactions();
   }
@@ -69,17 +75,17 @@ export class HistoryPage implements OnInit {
   /** GET /api/student/transactions */
   loadTransactions() {
     this.isLoadingTx = true;
-    this.txError     = false;
+    this.txError = false;
 
     this.transactionService.getTransactions().subscribe({
       next: (data) => {
         this.transactions = data;
-        this.isLoadingTx  = false;
+        this.isLoadingTx = false;
       },
       error: (err) => {
         console.error('Gagal memuat transaksi:', err);
         this.isLoadingTx = false;
-        this.txError     = true;
+        this.txError = true;
       }
     });
   }
@@ -87,7 +93,7 @@ export class HistoryPage implements OnInit {
   /** Membuka file picker lalu upload bukti transfer */
   async openProofUpload(tx: Transaction) {
     const input = document.createElement('input');
-    input.type   = 'file';
+    input.type = 'file';
     input.accept = 'image/jpg,image/jpeg,image/png';
 
     input.onchange = async (event: Event) => {
@@ -123,7 +129,7 @@ export class HistoryPage implements OnInit {
         // Update status lokal agar UI langsung berubah
         const idx = this.transactions.findIndex(t => t.id === tx.id);
         if (idx > -1) {
-          this.transactions[idx].status      = result.status;
+          this.transactions[idx].status = result.status;
           this.transactions[idx].proof_image = result.proofImage;
         }
 
@@ -140,54 +146,15 @@ export class HistoryPage implements OnInit {
     });
   }
 
-  /** Tampilkan detail transaksi dalam alert */
-  async showInvoiceDetail(tx: Transaction) {
-    const statusMap: Record<TransactionStatus, { label: string; color: string }> = {
-      PAID:      { label: 'LUNAS',                 color: '#27ae60' },
-      PENDING:   { label: 'MENUNGGU KONFIRMASI',   color: '#d35400' },
-      CANCELLED: { label: 'DIBATALKAN',             color: '#c0392b' },
-      FAILED:    { label: 'GAGAL',                  color: '#c0392b' },
-    };
+  /** Tampilkan detail transaksi dalam modal */
+  showInvoiceDetail(tx: Transaction) {
+    this.selectedTx = tx;
+    this.isInvoiceModalOpen = true;
+  }
 
-    const { label, color } = statusMap[tx.status] ?? { label: tx.status, color: '#7f8c8d' };
-    const price = tx.amount ?? tx.price ?? tx.course?.price ?? 0;
-    const formattedPrice = new Intl.NumberFormat('id-ID', {
-      style: 'currency', currency: 'IDR', minimumFractionDigits: 0
-    }).format(price);
-    const date = tx.created_at
-      ? new Date(tx.created_at).toLocaleDateString('id-ID', {
-          day: '2-digit', month: 'long', year: 'numeric'
-        })
-      : '-';
-
-    const proofUrl = this.transactionService.resolveProofUrl(tx.proof_image);
-    const proofHtml = proofUrl
-      ? `<p><strong>Bukti Transfer:</strong><br/><img src="${proofUrl}" style="width:100%;border-radius:8px;margin-top:6px;" /></p>`
-      : '';
-
-    const alert = await this.alertController.create({
-      header: 'Detail Transaksi',
-      subHeader: tx.invoice_number ?? `#TRX-${tx.id}`,
-      message: `
-        <div style="text-align: left; font-size: 13px; line-height: 1.5; color: #333;">
-          <p><strong>Kelas:</strong><br/>${tx.course?.title ?? '-'}</p>
-          <p><strong>Tanggal:</strong><br/>${date}</p>
-          <p><strong>Total Bayar:</strong><br/><span style="font-size: 15px; font-weight: 700; color: #852920;">${formattedPrice}</span></p>
-          <p><strong>Status:</strong><br/><span style="color: ${color}; font-weight: 700;">${label}</span></p>
-          ${proofHtml}
-        </div>
-      `,
-      buttons: [
-        { text: 'Tutup', role: 'cancel' },
-        ...(tx.status === 'PENDING' ? [{
-          text: tx.proof_image ? 'Upload Ulang' : 'Upload Bukti',
-          handler: () => { this.openProofUpload(tx); }
-        }] : [])
-      ],
-      cssClass: 'invoice-alert'
-    });
-
-    await alert.present();
+  /** Resolve URL gambar bukti dari path relatif storage */
+  resolveProofImage(tx: Transaction): string | null {
+    return this.transactionService.resolveProofUrl(tx.proof_image);
   }
 
   // ── UI helpers ───────────────────────────────────────────
@@ -195,10 +162,10 @@ export class HistoryPage implements OnInit {
   /** Label status bahasa Indonesia */
   statusLabel(status: TransactionStatus): string {
     const map: Record<TransactionStatus, string> = {
-      PAID:      'Lunas',
-      PENDING:   'Pending',
+      PAID: 'Lunas',
+      PENDING: 'Pending',
       CANCELLED: 'Batal',
-      FAILED:    'Gagal',
+      FAILED: 'Gagal',
     };
     return map[status] ?? status;
   }
@@ -206,10 +173,10 @@ export class HistoryPage implements OnInit {
   /** CSS class untuk badge status */
   statusClass(status: TransactionStatus): string {
     const map: Record<TransactionStatus, string> = {
-      PAID:      'paid',
-      PENDING:   'pending',
+      PAID: 'paid',
+      PENDING: 'pending',
       CANCELLED: 'cancelled',
-      FAILED:    'cancelled',
+      FAILED: 'cancelled',
     };
     return map[status] ?? 'pending';
   }
@@ -242,18 +209,19 @@ export class HistoryPage implements OnInit {
   /** GET /api/my-learning — kursus yang sudah dibeli/enrolled */
   loadMyLearning() {
     this.isLoadingCourses = true;
-    this.hasError         = false;
+    this.hasError = false;
 
-    this.courseService.getMyLearning().subscribe({
+    // forceRefresh = true agar selalu ambil data terbaru dari server
+    this.courseService.getMyLearning(true).subscribe({
       next: (courses) => {
-        this.myCourses        = courses;
+        this.myCourses = courses;
         this.isLoadingCourses = false;
         this.loadProgress(courses);
       },
       error: (err) => {
         console.error('Gagal memuat my-learning:', err);
         this.isLoadingCourses = false;
-        this.hasError         = true;
+        this.hasError = true;
       }
     });
   }
@@ -274,31 +242,31 @@ export class HistoryPage implements OnInit {
             summaries.forEach((summary) => {
               const courseIndex = courses.findIndex(c => c.id === summary.courseId || c.id === summary.course?.id);
               if (courseIndex > -1) {
-                const quizzes         = allQuizzes[courseIndex] || [];
-                const totalQuizzes    = quizzes.length;
+                const quizzes = allQuizzes[courseIndex] || [];
+                const totalQuizzes = quizzes.length;
                 const completedQuizzes = quizzes.filter((q: any) => q.isAttempted).length;
 
                 if (totalQuizzes > 0) {
-                  const totalItems     = summary.totalLessons + totalQuizzes;
+                  const totalItems = summary.totalLessons + totalQuizzes;
                   const completedItems = summary.completedLessons + completedQuizzes;
-                  summary.percentage   = Math.floor((completedItems / totalItems) * 100);
+                  summary.percentage = Math.floor((completedItems / totalItems) * 100);
 
                   if (completedQuizzes < totalQuizzes) {
                     summary.percentage = Math.min(99, summary.percentage);
-                    summary.status     = 'in_progress';
+                    summary.status = 'in_progress';
                   } else if (summary.completedLessons === summary.totalLessons) {
                     summary.percentage = 100;
-                    summary.status     = 'completed';
+                    summary.status = 'completed';
                   }
                 }
               }
             });
 
-            this.progressList      = summaries;
+            this.progressList = summaries;
             this.isLoadingProgress = false;
           },
           error: () => {
-            this.progressList      = summaries;
+            this.progressList = summaries;
             this.isLoadingProgress = false;
           }
         });

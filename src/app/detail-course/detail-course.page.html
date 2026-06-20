@@ -267,4 +267,57 @@
     </div>
   </ng-container>
 
+
+  <!-- ── CUSTOM PAYMENT MODAL ── -->
+  <div class="payment-modal-overlay" *ngIf="showPaymentModal" (click)="closePaymentModal()">
+    <div class="payment-modal-card" (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="payment-modal-header">
+        <div class="payment-modal-icon">💳</div>
+        <h2 class="payment-modal-title">Informasi Pembayaran</h2>
+        <p class="payment-modal-subtitle">{{ course?.title }}</p>
+        <button class="payment-modal-close" (click)="closePaymentModal()">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+      </div>
+
+      <!-- Bank Account Info -->
+      <div class="payment-modal-body">
+        <p class="payment-label">Transfer ke rekening berikut:</p>
+
+        <div class="rekening-box">
+          <div class="bank-name">Dana / Bank BSI</div>
+          <div class="rekening-number">901268770803</div>
+          <div class="atas-nama">a.n. <strong>Aan Ripandi</strong></div>
+        </div>
+
+        <div class="payment-amount-row">
+          <span class="amount-label">Total Pembayaran</span>
+          <span class="amount-value">{{ formatPrice(course?.price) }}</span>
+        </div>
+
+        <div class="payment-note-box">
+          <ion-icon name="information-circle-outline" class="note-icon"></ion-icon>
+          <p class="payment-note-text">
+            Kami masih belum bisa pakai Midtrans, untuk itu kami pakai nomor rekening ini sebagai
+            transaksi atas pembelian course <strong>"{{ course?.title }}"</strong>.
+            Setelah transfer, upload foto bukti pembayaran agar admin dapat memverifikasi.
+            Course akan aktif setelah pembayaran dikonfirmasi.
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="payment-modal-footer">
+        <button class="modal-btn-cancel" (click)="closePaymentModal()">Batal</button>
+        <button class="modal-btn-confirm" (click)="confirmPayment()">
+          <ion-icon name="arrow-forward-outline"></ion-icon>
+          Lanjut &amp; Upload Bukti
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 </ion-content>

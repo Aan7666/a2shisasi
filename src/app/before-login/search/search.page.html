@@ -6,9 +6,6 @@
         <ion-icon name="search-outline" class="search-icon"></ion-icon>
         <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" placeholder="Search" class="search-input" />
       </div>
-      <button class="filter-btn" id="open-filter-modal">
-        <ion-icon name="funnel"></ion-icon>
-      </button>
     </div>
   </div>
 
@@ -35,88 +32,4 @@
     </div>
 
   </div>
-</ion-content>
-
-<!-- Filter Modal Bottom Sheet -->
-<ion-modal 
-  #filterModal 
-  trigger="open-filter-modal" 
-  [initialBreakpoint]="0.65" 
-  [breakpoints]="[0, 0.65, 0.9]" 
-  handleBehavior="cycle"
-  class="filter-sheet-modal"
->
-  <ng-template>
-    <div class="filter-modal-header">
-      <button class="header-action-btn close-action" (click)="filterModal.dismiss()">
-        <ion-icon name="close-outline"></ion-icon>
-      </button>
-      <h2 class="modal-title">Filters</h2>
-      <button class="header-action-btn reset-action" (click)="resetFilters()">Reset</button>
-    </div>
-
-    <ion-content class="filter-modal-content" scroll-y="true">
-      <!-- Sort By Section -->
-      <div class="filter-section">
-        <h3 class="section-label">Sort by</h3>
-        <div class="dropdown-trigger" (click)="toggleSortDropdown()">
-          <span>{{ selectedSort }}</span>
-          <ion-icon name="chevron-down-outline" class="chevron-icon"></ion-icon>
-        </div>
-        <div class="sort-options-list" *ngIf="isSortDropdownOpen">
-          <div 
-            class="sort-option-item" 
-            *ngFor="let option of sortOptions" 
-            [class.active]="selectedSort === option"
-            (click)="selectSortOption(option)"
-          >
-            {{ option }}
-          </div>
-        </div>
-      </div>
-
-      <!-- Price Section -->
-      <div class="filter-section">
-        <h3 class="section-label">Price</h3>
-        <div class="pill-group">
-          <button 
-            class="pill-btn" 
-            [class.active]="selectedPrice === 'Paid'" 
-            (click)="selectPrice('Paid')"
-          >
-            Paid
-          </button>
-          <button 
-            class="pill-btn" 
-            [class.active]="selectedPrice === 'Free'" 
-            (click)="selectPrice('Free')"
-          >
-            Free
-          </button>
-        </div>
-      </div>
-
-      <!-- Rated Section -->
-      <div class="filter-section">
-        <h3 class="section-label">Rated</h3>
-        <div class="rating-checkbox-list">
-          <label class="checkbox-row" *ngFor="let rate of ratingFilters" (click)="$event.preventDefault(); toggleRatingFilter(rate)">
-            <span class="custom-checkbox" [class.checked]="rate.checked">
-              <ion-icon name="checkmark" *ngIf="rate.checked"></ion-icon>
-            </span>
-            <span class="checkbox-label">
-              {{ rate.label }}
-              <ion-icon name="star" class="star-icon"></ion-icon>
-            </span>
-          </label>
-        </div>
-      </div>
-    </ion-content>
-
-    <div class="filter-modal-footer">
-      <button class="apply-btn" (click)="applyFilters(); filterModal.dismiss()">
-        Apply
-      </button>
-    </div>
-  </ng-template>
-</ion-modal>
+</ion-content>

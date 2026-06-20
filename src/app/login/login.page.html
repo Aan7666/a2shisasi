@@ -30,7 +30,7 @@
     
     <!-- Close Button -->
     <button class="close-btn" routerLink="/tabs" aria-label="Back">
-      <span class="material-symbols-outlined">close</span>
+      <ion-icon name="close-outline"></ion-icon>
     </button>
     <!-- Brand Area -->
     <div class="brand-area">
@@ -50,15 +50,15 @@
         <h2 class="form-title">Sign In to your Account</h2>
         <form class="login-form" (ngSubmit)="onLogin()">
           <div class="input-group">
-            <span class="material-symbols-outlined input-icon">email</span>
+            <ion-icon name="mail-outline" class="input-icon"></ion-icon>
             <input type="email" [(ngModel)]="email" name="email" placeholder="Email" class="custom-input" required />
           </div>
           <div class="input-group">
-            <span class="material-symbols-outlined input-icon">lock</span>
+            <ion-icon name="lock-closed-outline" class="input-icon"></ion-icon>
             <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="password" name="password"
               placeholder="Password" class="custom-input" required />
             <button type="button" class="toggle-password-btn" (click)="togglePassword()" aria-label="Toggle password visibility">
-              <span class="material-symbols-outlined">{{ showPassword ? 'visibility_off' : 'visibility' }}</span>
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
             </button>
           </div>
           <div class="forgot-password">

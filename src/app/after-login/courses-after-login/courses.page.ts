@@ -46,13 +46,15 @@ export class CoursesPage implements OnInit {
     private router: Router,
     private toastController: ToastController,
     private actionSheetController: ActionSheetController
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.checkLoginStatus();
   }
 
   ionViewWillEnter() {
+    // Force refresh saat kembali ke halaman, agar kursus yang baru di-approve langsung muncul
+    this.courseService.clearMyLearningCache();
     this.checkLoginStatus();
   }
 
@@ -70,7 +72,8 @@ export class CoursesPage implements OnInit {
 
   loadEnrolledCourses() {
     this.isLoadingCourses = true;
-    this.courseService.getMyLearning().subscribe({
+    // forceRefresh = true agar selalu ambil data terbaru dari API, tidak pakai cache lama
+    this.courseService.getMyLearning(true).subscribe({
       next: (courses) => {
         if (!courses.length) {
           this.enrolledCourses = [];
@@ -100,8 +103,8 @@ export class CoursesPage implements OnInit {
           }
         });
       },
-      error: () => { 
-        this.isLoadingCourses = false; 
+      error: () => {
+        this.isLoadingCourses = false;
       }
     });
   }
@@ -132,7 +135,7 @@ export class CoursesPage implements OnInit {
                   // Adjust percentage based on both lessons and quizzes
                   const totalItems = summary.totalLessons + totalQuizzes;
                   const completedItems = summary.completedLessons + completedQuizzes;
-                  
+
                   summary.percentage = Math.floor((completedItems / totalItems) * 100);
 
                   // If there is any uncompleted quiz, it shouldn't show 100% or completed
@@ -159,11 +162,11 @@ export class CoursesPage implements OnInit {
               }
             });
 
-            this.progressList      = summaries;
+            this.progressList = summaries;
             this.isLoadingProgress = false;
           },
           error: () => {
-            this.progressList      = summaries;
+            this.progressList = summaries;
             this.isLoadingProgress = false;
           }
         });
@@ -239,7 +242,7 @@ export class CoursesPage implements OnInit {
     let temp = this.enrolledCourses;
 
     if (this.selectedCategoryId !== null) {
-      temp = temp.filter(course => 
+      temp = temp.filter(course =>
         course.category && course.category.id === this.selectedCategoryId
       );
     }
@@ -290,8 +293,8 @@ export class CoursesPage implements OnInit {
 
   getCourseImage(course: Course): string {
     const p = course.thumbnail || course.image || course.cover_image
-           || course.cover || course.image_path || course.thumbnail_path
-           || course.image_url;
+      || course.cover || course.image_path || course.thumbnail_path
+      || course.image_url;
     if (!p) return 'https://placehold.co/600x400?text=No+Image';
     if (p.startsWith('http')) return p;
     return `${environment.apiUrl.replace('/api', '/storage/')}${p.startsWith('/') ? p.substring(1) : p}`;

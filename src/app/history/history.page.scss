@@ -590,3 +590,182 @@ ion-content.history-content {
     line-height: 1.45;
   }
 }
+
+/* ─── INVOICE MODAL (bottom sheet) ─────────────────────────── */
+.invoice-sheet-modal {
+  --border-radius: 24px 24px 0 0;
+  --box-shadow: 0 -4px 32px rgba(0, 0, 0, 0.12);
+}
+
+.invoice-modal-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+  font-family: 'Lexend', sans-serif;
+}
+
+.invoice-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0eded;
+  flex-shrink: 0;
+
+  .invoice-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+  }
+
+  .invoice-close-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background-color: #f7f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    ion-icon {
+      font-size: 20px;
+      color: #555;
+    }
+
+    &:active {
+      background-color: #eae8e8;
+    }
+  }
+}
+
+.invoice-modal-content {
+  --background: #fff;
+  flex: 1;
+  overflow: auto;
+}
+
+.invoice-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.invoice-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f7f5f5;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .invoice-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #7f8c8d;
+    flex-shrink: 0;
+  }
+
+  .invoice-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1a1a;
+    text-align: right;
+    flex: 1;
+    line-height: 1.4;
+
+    &.mono {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #555;
+      background-color: #f7f5f5;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    &.price {
+      font-size: 15px;
+      font-weight: 800;
+      color: #852920;
+    }
+  }
+
+  .status-badge-modal {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+
+    &.paid    { color: #27ae60; background-color: rgba(39,174,96,0.1); }
+    &.success { color: #27ae60; background-color: rgba(39,174,96,0.1); }
+    &.pending { color: #d35400; background-color: rgba(211,84,0,0.1); }
+    &.cancelled, &.failed { color: #c0392b; background-color: rgba(192,57,43,0.1); }
+  }
+}
+
+.invoice-proof-wrap {
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .invoice-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #7f8c8d;
+  }
+
+  .invoice-proof-img {
+    width: 100%;
+    border-radius: 12px;
+    object-fit: cover;
+    max-height: 220px;
+    border: 1px solid #f0eded;
+  }
+}
+
+.invoice-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #f0eded;
+  flex-shrink: 0;
+
+  .btn-upload-modal {
+    width: 100%;
+    height: 46px;
+    background-color: #852920;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Lexend', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(133, 41, 32, 0.2);
+
+    ion-icon { font-size: 18px; }
+
+    &:active {
+      transform: scale(0.98);
+      background-color: #722018;
+    }
+  }
+}
+

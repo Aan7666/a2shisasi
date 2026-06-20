@@ -30,7 +30,7 @@
       <!-- Section: Informations -->
       <div class="menu-group">
         <span class="section-label">Informations</span>
-        
+
         <div class="menu-item-box clickable">
           <ion-icon name="information-circle-outline" class="item-icon"></ion-icon>
           <span class="item-text">About Us</span>
@@ -40,6 +40,19 @@
           <ion-icon name="help-circle-outline" class="item-icon"></ion-icon>
           <span class="item-text">Help and Support</span>
         </div>
+
+        <!-- Instructor Banner Button -->
+        <div class="instructor-banner" (click)="openInstructorModal()">
+          <div class="instructor-banner-left">
+            <ion-icon name="megaphone-outline" class="instructor-banner-icon"></ion-icon>
+            <div class="instructor-banner-text">
+              <span class="instructor-banner-title">Ayo Sebarkan Pelajaranmu!</span>
+              <span class="instructor-banner-sub">Jadilah instruktur di A2Shi Academy</span>
+            </div>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="instructor-banner-arrow"></ion-icon>
+        </div>
+
       </div>
     </div>
 
@@ -51,3 +64,86 @@
 
   </div>
 </ion-content>
+
+<!-- ══════════ INSTRUCTOR MODAL ══════════ -->
+<ion-modal #instructorModal [isOpen]="isInstructorModalOpen"
+  (didDismiss)="isInstructorModalOpen = false"
+  [initialBreakpoint]="0.85" [breakpoints]="[0, 0.85, 1]"
+  handleBehavior="cycle" class="instructor-sheet-modal">
+  <ng-template>
+    <div class="instructor-modal-wrapper">
+
+      <!-- Handle bar -->
+      <div class="modal-handle-bar"></div>
+
+      <!-- Illustration area -->
+      <div class="instructor-hero">
+        <div class="instructor-hero-icon-wrap">
+          <ion-icon name="school-outline" class="instructor-hero-icon"></ion-icon>
+        </div>
+        <h2 class="instructor-hero-title">Jadilah Instruktur!</h2>
+        <p class="instructor-hero-sub">Sebarkan ilmu, raih penghasilan.</p>
+      </div>
+
+      <!-- Body content -->
+      <ion-content class="instructor-modal-body" scroll-y="true">
+        <div class="instructor-info-list">
+
+          <div class="instructor-info-item">
+            <div class="info-icon-wrap">
+              <ion-icon name="bulb-outline"></ion-icon>
+            </div>
+            <div class="info-text">
+              <strong>Apakah kamu ingin jadi instruktur?</strong>
+              <p>Di A2Shi Academy, siapa pun yang memiliki keahlian bisa berbagi ilmu dan menginspirasi ribuan pelajar di seluruh Indonesia.</p>
+            </div>
+          </div>
+
+          <div class="instructor-info-item">
+            <div class="info-icon-wrap">
+              <ion-icon name="create-outline"></ion-icon>
+            </div>
+            <div class="info-text">
+              <strong>Buat kursusmu sendiri</strong>
+              <p>Rancang materi pembelajaran sesuai bidang keahlianmu — mulai dari teknologi, desain, bisnis, hingga seni dan kreativitas.</p>
+            </div>
+          </div>
+
+          <div class="instructor-info-item">
+            <div class="info-icon-wrap">
+              <ion-icon name="people-outline"></ion-icon>
+            </div>
+            <div class="info-text">
+              <strong>Jangkau lebih banyak pelajar</strong>
+              <p>Kursusmu akan dapat diakses oleh ribuan pengguna aktif yang haus akan ilmu baru setiap harinya.</p>
+            </div>
+          </div>
+
+          <div class="instructor-info-item">
+            <div class="info-icon-wrap">
+              <ion-icon name="cash-outline"></ion-icon>
+            </div>
+            <div class="info-text">
+              <strong>Dapatkan penghasilan tambahan</strong>
+              <p>Setiap kursus yang terjual akan memberikanmu komisi. Semakin banyak pelajar, semakin besar penghasilanmu!</p>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <div class="instructor-cta-box">
+            <p class="instructor-cta-text">
+              Siap memulai perjalananmu sebagai instruktur?<br/>
+              Daftar sekarang melalui website resmi kami:
+            </p>
+            <a href="https://a2shi.com" target="_blank" class="btn-register-instructor">
+              <ion-icon name="globe-outline"></ion-icon>
+              Daftar di a2shi.com
+            </a>
+          </div>
+
+        </div>
+      </ion-content>
+
+    </div>
+  </ng-template>
+</ion-modal>

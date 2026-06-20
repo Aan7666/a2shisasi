@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController, LoadingController } from '@ionic/angular';
+import { IonicModule, ToastController, LoadingController, AlertController } from '@ionic/angular';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CourseService, CourseDetail } from '../services/course.service';
 import { EnrollmentService } from '../services/enrollment.service';
@@ -26,6 +26,9 @@ export class DetailCoursePage implements OnInit {
   isWishlisted: boolean = false;
   isAddedToCart: boolean = false;
 
+  // Payment modal
+  showPaymentModal: boolean = false;
+
   // API data
   course: CourseDetail | null = null;
   isLoading: boolean = true;
@@ -45,7 +48,8 @@ export class DetailCoursePage implements OnInit {
     private enrollmentService: EnrollmentService,
     private quizService: QuizService,
     private loadingController: LoadingController,
-    private transactionService: TransactionService
+    private transactionService: TransactionService,
+    private alertController: AlertController
   ) { }
 
   ngOnInit() {
@@ -76,13 +80,13 @@ export class DetailCoursePage implements OnInit {
       next: (data) => {
         this.course = data;
         this.isLoading = false;
-        
+
         const saved = localStorage.getItem('wishlist_items');
         if (saved) {
           const items = JSON.parse(saved);
           this.isWishlisted = !!items.find((item: any) => item.id === this.courseId);
         }
-        
+
         const savedCart = localStorage.getItem('cart_items');
         if (savedCart) {
           const cItems = JSON.parse(savedCart);
@@ -150,11 +154,11 @@ export class DetailCoursePage implements OnInit {
 
   async toggleWishlist() {
     this.isWishlisted = !this.isWishlisted;
-    
+
     // Manage localStorage
     const saved = localStorage.getItem('wishlist_items');
     let wishlistItems: any[] = saved ? JSON.parse(saved) : [];
-    
+
     if (this.isWishlisted && this.course) {
       if (!wishlistItems.find(item => item.id === this.course!.id)) {
         wishlistItems.push({
@@ -185,7 +189,7 @@ export class DetailCoursePage implements OnInit {
     // Manage localStorage for cart
     const saved = localStorage.getItem('cart_items');
     let cartItems: any[] = saved ? JSON.parse(saved) : [];
-    
+
     if (this.isAddedToCart && this.course) {
       if (!cartItems.find(item => item.id === this.course!.id)) {
         cartItems.push({
@@ -211,42 +215,62 @@ export class DetailCoursePage implements OnInit {
     await toast.present();
   }
 
-  async buyNow() {
+  buyNow() {
     if (this.course?.has_access) {
       // User sudah enrolled — langsung ke materi
       this.goToVideoMateri();
-    } else {
-      const loading = await this.loadingController.create({
-        message: 'Membuat transaksi...',
-        spinner: 'crescent'
-      });
-      await loading.present();
-
-      this.transactionService.createTransaction(this.courseId).subscribe({
-        next: async (tx) => {
-          await loading.dismiss();
-          const toast = await this.toastController.create({
-            message: 'Transaksi berhasil dibuat. Silakan upload bukti pembayaran di sini.',
-            duration: 3000,
-            color: 'success',
-            position: 'bottom'
-          });
-          await toast.present();
-          // Arahkan langsung ke halaman history (tab transactions)
-          this.router.navigate(['/history']);
-        },
-        error: async (err) => {
-          await loading.dismiss();
-          const toast = await this.toastController.create({
-            message: 'Gagal membuat transaksi: ' + (err.message || 'Error server'),
-            duration: 3000,
-            color: 'danger',
-            position: 'bottom'
-          });
-          await toast.present();
-        }
-      });
+      return;
     }
+    // Tampilkan custom payment modal
+    this.showPaymentModal = true;
+  }
+
+  closePaymentModal() {
+    this.showPaymentModal = false;
+  }
+
+  async confirmPayment() {
+    this.showPaymentModal = false;
+    await this.createTransactionAndRedirect();
+  }
+
+  async createTransactionAndRedirect() {
+    const loading = await this.loadingController.create({
+      message: 'Membuat transaksi...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    this.transactionService.createTransaction(this.courseId).subscribe({
+      next: async (tx) => {
+        await loading.dismiss();
+        const toast = await this.toastController.create({
+          message: '✅ Transaksi dibuat! Silakan upload bukti transfer.',
+          duration: 3000,
+          color: 'success',
+          position: 'bottom'
+        });
+        await toast.present();
+        // Arahkan ke halaman history tab transaksi untuk upload bukti
+        this.router.navigate(['/history']);
+      },
+      error: async (err) => {
+        await loading.dismiss();
+        // Jika transaksi sudah ada sebelumnya, arahkan langsung ke history
+        if (err.message?.includes('sudah ada') || err.message?.includes('pending')) {
+          this.showToast('Transaksi sudah ada. Silakan upload bukti di halaman History.');
+          this.router.navigate(['/history']);
+          return;
+        }
+        const toast = await this.toastController.create({
+          message: 'Gagal membuat transaksi: ' + (err.message || 'Error server'),
+          duration: 3000,
+          color: 'danger',
+          position: 'bottom'
+        });
+        await toast.present();
+      }
+    });
   }
 
   goToVideoMateri(lessonId?: number) {
@@ -289,7 +313,7 @@ export class DetailCoursePage implements OnInit {
     }
     // Asumsi route ke halaman quiz
     this.router.navigate(['/quiz-attempt', quiz.id], { queryParams: { course_id: this.courseId } }).catch(() => {
-        this.showToast('Halaman Quiz belum tersedia/dibuat di frontend.');
+      this.showToast('Halaman Quiz belum tersedia/dibuat di frontend.');
     });
   }
 

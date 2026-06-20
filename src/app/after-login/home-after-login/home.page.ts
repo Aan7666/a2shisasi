@@ -13,12 +13,22 @@ import { environment } from '../../../environments/environment';
 export class HomePage implements OnInit {
   isLoggedIn: boolean = false;
   userName: string = 'User';
-  courses: Course[] = [];
+
+  // Raw from API
+  private allCourses: Course[] = [];
+
+  // Displayed (random, limited)
+  trendingCourses: Course[] = [];
+  suggestedCourses: Course[] = [];
+
   categories: Category[] = [];
   selectedCategory: Category | null = null;
   categoryCourses: Course[] = [];
   isLoadingCourses: boolean = false;
   isLoadingCategoryCourses: boolean = false;
+
+  /** Max courses shown per section */
+  private readonly SECTION_LIMIT = 6;
 
   constructor(
     private authService: AuthService,
@@ -52,7 +62,10 @@ export class HomePage implements OnInit {
     this.isLoadingCourses = true;
     this.courseService.getCourses().subscribe({
       next: (data) => {
-        this.courses = data;
+        this.allCourses = data;
+        // Shuffle full list, split into two independent random sections
+        this.trendingCourses  = this.shuffleAndLimit(data, this.SECTION_LIMIT);
+        this.suggestedCourses = this.shuffleAndLimit(data, this.SECTION_LIMIT);
         this.isLoadingCourses = false;
       },
       error: (err) => {
@@ -119,5 +132,16 @@ export class HomePage implements OnInit {
 
   goToCourse(id: number) {
     this.router.navigate(['/detail-course', id]);
+  }
+
+  /** Fisher-Yates shuffle, returns a randomly ordered copy limited to `limit` items */
+  private shuffleAndLimit<T>(arr: T[], limit: number): T[] {
+    if (!arr || arr.length === 0) return [];
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy.slice(0, limit);
   }
 }
