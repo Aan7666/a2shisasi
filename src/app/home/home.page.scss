@@ -59,9 +59,9 @@ ion-content {
   position: relative;
   z-index: 10;
   padding: 24px;
-  
+
   /* Cukup gunakan padding bawah standar untuk estetika, bukan untuk mengakali tab-bar */
-  padding-bottom: 32px; 
+  padding-bottom: 32px;
 }
 
 /* Hero/Promo Banner Placeholder */
@@ -285,15 +285,28 @@ ion-content {
     background-size: 200% 100%;
     animation: shimmer 1.4s infinite;
 
-    &.wide   { width: 90%; }
-    &.medium { width: 65%; }
-    &.narrow { width: 45%; }
+    &.wide {
+      width: 90%;
+    }
+
+    &.medium {
+      width: 65%;
+    }
+
+    &.narrow {
+      width: 45%;
+    }
   }
 }
 
 @keyframes shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* Error state */
@@ -386,7 +399,7 @@ ion-content {
 }
 
 .banner-link {
-  color: #0066cc; 
+  color: #0066cc;
   text-decoration: none;
   font-weight: 800;
   white-space: nowrap;

@@ -39,22 +39,13 @@
       <ng-container *ngIf="trendingCourses.length > 0">
         <h2 class="section-title">Trending Courses</h2>
         <div class="horizontal-scroll">
-          <div
-            class="mini-course-card"
-            *ngFor="let course of trendingCourses"
-            (click)="goToCourse(course.id)">
+          <div class="mini-course-card" *ngFor="let course of trendingCourses" (click)="goToCourse(course.id)">
 
             <!-- Thumbnail -->
             <div class="card-img-wrap">
-              <img
-                *ngIf="getThumbnail(course)"
-                [src]="getThumbnail(course)!"
-                [alt]="course.title"
-                class="card-thumbnail"
-                (error)="$any($event.target).style.display='none'" />
-              <div
-                class="card-img-placeholder"
-                [style.display]="getThumbnail(course) ? 'none' : 'block'">
+              <img *ngIf="getThumbnail(course)" [src]="getThumbnail(course)!" [alt]="course.title"
+                class="card-thumbnail" (error)="$any($event.target).style.display='none'" />
+              <div class="card-img-placeholder" [style.display]="getThumbnail(course) ? 'none' : 'block'">
               </div>
             </div>
 
@@ -63,15 +54,10 @@
 
               <!-- Instructor with avatar -->
               <div class="instructor-row" *ngIf="course.instructor">
-                <img
-                  *ngIf="getAvatar(course.instructor.avatar)"
-                  [src]="getAvatar(course.instructor.avatar)!"
-                  [alt]="course.instructor.name"
-                  class="instructor-avatar"
+                <img *ngIf="getAvatar(course.instructor.avatar)" [src]="getAvatar(course.instructor.avatar)!"
+                  [alt]="course.instructor.name" class="instructor-avatar"
                   (error)="$any($event.target).style.display='none'" />
-                <ion-icon
-                  *ngIf="!getAvatar(course.instructor.avatar)"
-                  name="person-circle-outline"
+                <ion-icon *ngIf="!getAvatar(course.instructor.avatar)" name="person-circle-outline"
                   class="avatar-fallback-icon">
                 </ion-icon>
                 <span class="course-instructor">{{ course.instructor.name }}</span>
@@ -101,36 +87,22 @@
             <span class="see-all" (click)="goToCategorySearch(section.category_slug)">Lihat semua</span>
           </div>
           <div class="horizontal-scroll">
-            <div
-              class="mini-course-card"
-              *ngFor="let course of section.courses"
-              (click)="goToCourse(course.id)">
+            <div class="mini-course-card" *ngFor="let course of section.courses" (click)="goToCourse(course.id)">
 
               <div class="card-img-wrap">
-                <img
-                  *ngIf="getThumbnail(course)"
-                  [src]="getThumbnail(course)!"
-                  [alt]="course.title"
-                  class="card-thumbnail"
-                  (error)="$any($event.target).style.display='none'" />
-                <div
-                  class="card-img-placeholder"
-                  [style.display]="getThumbnail(course) ? 'none' : 'block'">
+                <img *ngIf="getThumbnail(course)" [src]="getThumbnail(course)!" [alt]="course.title"
+                  class="card-thumbnail" (error)="$any($event.target).style.display='none'" />
+                <div class="card-img-placeholder" [style.display]="getThumbnail(course) ? 'none' : 'block'">
                 </div>
               </div>
 
               <div class="card-body">
                 <h3 class="course-title">{{ course.title }}</h3>
                 <div class="instructor-row" *ngIf="course.instructor">
-                  <img
-                    *ngIf="getAvatar(course.instructor.avatar)"
-                    [src]="getAvatar(course.instructor.avatar)!"
-                    [alt]="course.instructor.name"
-                    class="instructor-avatar"
+                  <img *ngIf="getAvatar(course.instructor.avatar)" [src]="getAvatar(course.instructor.avatar)!"
+                    [alt]="course.instructor.name" class="instructor-avatar"
                     (error)="$any($event.target).style.display='none'" />
-                  <ion-icon
-                    *ngIf="!getAvatar(course.instructor.avatar)"
-                    name="person-circle-outline"
+                  <ion-icon *ngIf="!getAvatar(course.instructor.avatar)" name="person-circle-outline"
                     class="avatar-fallback-icon">
                   </ion-icon>
                   <span class="course-instructor">{{ course.instructor.name }}</span>
@@ -156,36 +128,22 @@
       <ng-container *ngIf="newestCourses.length > 0">
         <h2 class="section-title">Course Terbaru</h2>
         <div class="horizontal-scroll">
-          <div
-            class="mini-course-card"
-            *ngFor="let course of newestCourses"
-            (click)="goToCourse(course.id)">
+          <div class="mini-course-card" *ngFor="let course of newestCourses" (click)="goToCourse(course.id)">
 
             <div class="card-img-wrap">
-              <img
-                *ngIf="getThumbnail(course)"
-                [src]="getThumbnail(course)!"
-                [alt]="course.title"
-                class="card-thumbnail"
-                (error)="$any($event.target).style.display='none'" />
-              <div
-                class="card-img-placeholder"
-                [style.display]="getThumbnail(course) ? 'none' : 'block'">
+              <img *ngIf="getThumbnail(course)" [src]="getThumbnail(course)!" [alt]="course.title"
+                class="card-thumbnail" (error)="$any($event.target).style.display='none'" />
+              <div class="card-img-placeholder" [style.display]="getThumbnail(course) ? 'none' : 'block'">
               </div>
             </div>
 
             <div class="card-body">
               <h3 class="course-title">{{ course.title }}</h3>
               <div class="instructor-row" *ngIf="course.instructor">
-                <img
-                  *ngIf="getAvatar(course.instructor.avatar)"
-                  [src]="getAvatar(course.instructor.avatar)!"
-                  [alt]="course.instructor.name"
-                  class="instructor-avatar"
+                <img *ngIf="getAvatar(course.instructor.avatar)" [src]="getAvatar(course.instructor.avatar)!"
+                  [alt]="course.instructor.name" class="instructor-avatar"
                   (error)="$any($event.target).style.display='none'" />
-                <ion-icon
-                  *ngIf="!getAvatar(course.instructor.avatar)"
-                  name="person-circle-outline"
+                <ion-icon *ngIf="!getAvatar(course.instructor.avatar)" name="person-circle-outline"
                   class="avatar-fallback-icon">
                 </ion-icon>
                 <span class="course-instructor">{{ course.instructor.name }}</span>
@@ -210,10 +168,7 @@
       <h2 class="section-title">Kategori</h2>
       <div class="categories-wrap">
         <ng-container *ngIf="categories.length > 0; else staticCats">
-          <div
-            class="category-pill"
-            *ngFor="let cat of categories"
-            (click)="goToCategorySearch(cat.slug)">
+          <div class="category-pill" *ngFor="let cat of categories" (click)="goToCategorySearch(cat.slug)">
             {{ cat.name }}
           </div>
         </ng-container>

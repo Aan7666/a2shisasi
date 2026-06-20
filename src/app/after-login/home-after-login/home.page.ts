@@ -24,6 +24,7 @@ export class HomePage implements OnInit {
   categories: Category[] = [];
   selectedCategory: Category | null = null;
   categoryCourses: Course[] = [];
+  categorySections: { category: Category; courses: Course[] }[] = [];
   isLoadingCourses: boolean = false;
   isLoadingCategoryCourses: boolean = false;
 
@@ -38,13 +39,13 @@ export class HomePage implements OnInit {
 
   ngOnInit() {
     this.checkLoginStatus();
-    this.loadCourses();
+    this.loadHomeData();
     this.loadCategories();
   }
 
   ionViewWillEnter() {
     this.checkLoginStatus();
-    this.loadCourses();
+    this.loadHomeData();
     this.loadCategories();
   }
 
@@ -58,18 +59,38 @@ export class HomePage implements OnInit {
     }
   }
 
-  loadCourses() {
+  loadHomeData() {
     this.isLoadingCourses = true;
-    this.courseService.getCourses().subscribe({
+    this.courseService.getHomeData(50).subscribe({
       next: (data) => {
-        this.allCourses = data;
-        // Shuffle full list, split into two independent random sections
-        this.trendingCourses  = this.shuffleAndLimit(data, this.SECTION_LIMIT);
-        this.suggestedCourses = this.shuffleAndLimit(data, this.SECTION_LIMIT);
+        // Shuffle & limit each section for a fresh random look every visit
+        this.trendingCourses = this.shuffleAndLimit(data.trending || [], this.SECTION_LIMIT);
+        this.suggestedCourses = this.shuffleAndLimit(data.newest || [], this.SECTION_LIMIT);
+        
+        this.categorySections = (data.category_sections || [])
+          .map(section => {
+            const sorted = [...(section.courses || [])].sort((a, b) => {
+              const aStud = a.total_students ?? 0;
+              const bStud = b.total_students ?? 0;
+              if (bStud !== aStud) {
+                return bStud - aStud;
+              }
+              return b.id - a.id;
+            });
+            return {
+              category: {
+                id: section.category_id,
+                name: section.category_name,
+                slug: section.category_slug
+              },
+              courses: sorted
+            };
+          })
+          .filter(section => section.courses.length > 0);
         this.isLoadingCourses = false;
       },
       error: (err) => {
-        console.error('Gagal mengambil daftar course:', err);
+        console.error('Gagal memuat data home:', err);
         this.isLoadingCourses = false;
       }
     });
@@ -84,6 +105,33 @@ export class HomePage implements OnInit {
         console.error('Gagal mengambil daftar kategori:', err);
       }
     });
+  }
+
+  goToCategorySearch(slug: string) {
+    const cat = this.categories.find(c => c.slug === slug);
+    if (cat) {
+      this.selectedCategory = cat;
+      this.isLoadingCategoryCourses = true;
+      this.categoryCourses = [];
+
+      this.courseService.searchCourses({ category_id: cat.id }).subscribe({
+        next: (data) => {
+          this.categoryCourses = data;
+          this.isLoadingCategoryCourses = false;
+          
+          setTimeout(() => {
+            const el = document.getElementById('category-pills-section');
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 100);
+        },
+        error: (err) => {
+          console.error('Gagal mengambil course kategori:', err);
+          this.isLoadingCategoryCourses = false;
+        }
+      });
+    }
   }
 
   toggleCategory(cat: Category) {

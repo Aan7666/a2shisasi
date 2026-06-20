@@ -59,10 +59,10 @@ ion-content {
   position: relative;
   z-index: 10;
   padding: 24px;
-  
+
   /* FIX: Ditambah padding bawah sebesar 70px agar konten galeri/kategori 
      paling bawah tidak tertutup oleh banner melayang saat di-scroll */
-  padding-bottom: 70px; 
+  padding-bottom: 70px;
 }
 
 /* Hero/Promo Banner Placeholder */
@@ -94,12 +94,12 @@ ion-content {
   gap: 16px;
   padding: 2px 2px 18px 2px;
   margin-bottom: 24px;
-  scrollbar-width: none; 
+  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   will-change: transform;
 
   &::-webkit-scrollbar {
-    display: none; 
+    display: none;
   }
 }
 
@@ -123,7 +123,7 @@ ion-content {
 
   .card-img-placeholder {
     height: 100px;
-    background-color: #d9d9d9; 
+    background-color: #d9d9d9;
     width: 100%;
   }
 
@@ -180,7 +180,7 @@ ion-content {
 
         ion-icon {
           font-size: 12px;
-          color: #ffd700; 
+          color: #ffd700;
         }
       }
     }
@@ -314,7 +314,7 @@ ion-content {
 
           ion-icon {
             font-size: 11px;
-            color: #ffd700; 
+            color: #ffd700;
           }
         }
 
@@ -340,9 +340,13 @@ ion-content {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-
-
-

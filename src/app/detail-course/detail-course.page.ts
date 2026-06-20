@@ -9,6 +9,28 @@ import { QuizService } from '../services/quiz.service';
 import { TransactionService } from '../services/transaction.service';
 import { Quiz } from '../models/index';
 import { environment } from '../../environments/environment';
+import { addIcons } from 'ionicons';
+import {
+  chevronBackOutline,
+  peopleOutline,
+  star,
+  bookOutline,
+  heart,
+  heartOutline,
+  cartOutline,
+  playCircleOutline,
+  chevronUpOutline,
+  chevronDownOutline,
+  documentTextOutline,
+  checkmarkCircle,
+  videocamOutline,
+  playCircle,
+  lockClosedOutline,
+  helpCircleOutline,
+  timeOutline,
+  cart,
+  alertCircleOutline
+} from 'ionicons/icons';
 
 @Component({
   selector: 'app-detail-course',
@@ -50,7 +72,29 @@ export class DetailCoursePage implements OnInit {
     private loadingController: LoadingController,
     private transactionService: TransactionService,
     private alertController: AlertController
-  ) { }
+  ) {
+    addIcons({
+      'chevron-back-outline': chevronBackOutline,
+      'people-outline': peopleOutline,
+      'star': star,
+      'book-outline': bookOutline,
+      'heart': heart,
+      'heart-outline': heartOutline,
+      'cart-outline': cartOutline,
+      'play-circle-outline': playCircleOutline,
+      'chevron-up-outline': chevronUpOutline,
+      'chevron-down-outline': chevronDownOutline,
+      'document-text-outline': documentTextOutline,
+      'checkmark-circle': checkmarkCircle,
+      'videocam-outline': videocamOutline,
+      'play-circle': playCircle,
+      'lock-closed-outline': lockClosedOutline,
+      'help-circle-outline': helpCircleOutline,
+      'time-outline': timeOutline,
+      'cart': cart,
+      'alert-circle-outline': alertCircleOutline
+    });
+  }
 
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));

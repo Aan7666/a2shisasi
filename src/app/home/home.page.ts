@@ -59,11 +59,23 @@ export class HomePage implements OnInit {
       next: (data) => {
         // Shuffle & limit each section for a fresh random look every visit
         this.trendingCourses = this.shuffleAndLimit(data.trending, this.SECTION_LIMIT);
-        this.newestCourses   = this.shuffleAndLimit(data.newest,   this.SECTION_LIMIT);
-        this.categorySections = (data.category_sections || []).map(section => ({
-          ...section,
-          courses: this.shuffleAndLimit(section.courses, this.SECTION_LIMIT)
-        }));
+        this.newestCourses = this.shuffleAndLimit(data.newest, this.SECTION_LIMIT);
+        this.categorySections = (data.category_sections || [])
+          .map(section => {
+            const sorted = [...(section.courses || [])].sort((a, b) => {
+              const aStud = a.total_students ?? 0;
+              const bStud = b.total_students ?? 0;
+              if (bStud !== aStud) {
+                return bStud - aStud;
+              }
+              return b.id - a.id;
+            });
+            return {
+              ...section,
+              courses: sorted
+            };
+          })
+          .filter(section => section.courses.length > 0);
         this.isLoading = false;
       },
       error: (err) => {
@@ -75,15 +87,15 @@ export class HomePage implements OnInit {
 
     this.courseService.getCategories().subscribe({
       next: (cats) => { this.categories = cats; },
-      error: () => {}
+      error: () => { }
     });
   }
 
   /** Resolves the thumbnail URL from any possible field the backend might return */
   getThumbnail(course: Course): string | null {
     const raw = course.thumbnail || course.image || course.cover_image
-              || course.cover || course.image_url
-              || course.thumbnail_path || course.image_path;
+      || course.cover || course.image_url
+      || course.thumbnail_path || course.image_path;
     if (!raw) return null;
     if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
     // relative path — prepend storage base
