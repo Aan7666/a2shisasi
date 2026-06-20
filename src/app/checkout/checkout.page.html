@@ -14,11 +14,23 @@
     <div class="main-container">
       
       <!-- Course Row -->
-      <div class="checkout-course-card">
-        <div class="course-img-placeholder"></div>
+      <div class="checkout-course-card" *ngIf="course">
+        <img *ngIf="getThumbnail()" [src]="getThumbnail()!" class="course-img" style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover;" alt="course cover" />
+        <div *ngIf="!getThumbnail()" class="course-img-placeholder" style="display:flex; align-items:center; justify-content:center; color:#7f8c8d; font-size:32px; background:#eaeaea;">
+          <ion-icon name="school-outline"></ion-icon>
+        </div>
         <div class="course-details">
-          <h3 class="course-name">Web Development</h3>
-          <p class="course-price">Rp150.000</p>
+          <h3 class="course-name">{{ course.title }}</h3>
+          <p class="course-price">{{ formatPrice(course.price) }}</p>
+        </div>
+      </div>
+      <div class="checkout-course-card" *ngIf="!course && isLoading">
+        <div class="course-img-placeholder" style="display:flex; align-items:center; justify-content:center;">
+          <ion-spinner name="crescent" size="small" color="danger"></ion-spinner>
+        </div>
+        <div class="course-details">
+          <h3 class="course-name">Memuat kelas...</h3>
+          <p class="course-price">-</p>
         </div>
       </div>
 
@@ -100,7 +112,7 @@
         <div class="details-table">
           <div class="details-row">
             <span>Subtotals for Products</span>
-            <span>Rp150.000</span>
+            <span>{{ formatPrice(course?.price) }}</span>
           </div>
           <div class="details-row">
             <span>Discount Vouchers</span>
@@ -108,7 +120,7 @@
           </div>
           <div class="details-row total-payment-row">
             <span>Total payment</span>
-            <span class="total-bold">Rp150.000</span>
+            <span class="total-bold">{{ formatPrice(course?.price) }}</span>
           </div>
         </div>
       </div>
@@ -119,9 +131,9 @@
     <div class="checkout-footer-bar">
       <div class="total-info">
         <span class="total-label">Total payment</span>
-        <span class="total-value">Rp150.000</span>
+        <span class="total-value">{{ formatPrice(course?.price) }}</span>
       </div>
-      <button class="btn-place-order" (click)="placeOrder()">
+      <button class="btn-place-order" [disabled]="!course || isPlacingOrder" (click)="placeOrder()">
         Place Order
       </button>
     </div>
@@ -157,9 +169,9 @@
         <div class="total-copy-row">
           <div class="total-left">
             <span class="pay-title">Total payment</span>
-            <h3 class="pay-price">Rp150.000</h3>
+            <h3 class="pay-price">{{ formatPrice(transaction?.amount || transaction?.price || course?.price) }}</h3>
           </div>
-          <button class="btn-copy-action" (click)="copyText('150000', 'Total payment')">
+          <button class="btn-copy-action" (click)="copyText(getTransactionAmountString(), 'Total payment')">
             <span>Copy</span>
             <ion-icon name="copy-outline"></ion-icon>
           </button>
@@ -180,6 +192,24 @@
             <button class="btn-copy-va" (click)="copyText('880108224567890', 'Virtual Account Number')">
               <ion-icon name="copy-outline"></ion-icon>
             </button>
+          </div>
+        </div>
+
+        <!-- Direct Upload Proof Section -->
+        <div class="direct-proof-upload-section">
+          <button 
+            class="btn-upload-proof"
+            [class.has-proof]="transaction?.proof_image"
+            [disabled]="isUploadingProof"
+            (click)="openProofUpload()"
+          >
+            <ion-icon [name]="transaction?.proof_image ? 'cloud-upload-outline' : 'camera-outline'"></ion-icon>
+            <span>{{ transaction?.proof_image ? 'Ubah Bukti Transfer' : 'Upload Bukti Transfer' }}</span>
+          </button>
+          
+          <div class="direct-proof-success" *ngIf="transaction?.proof_image">
+            <ion-icon name="checkmark-circle"></ion-icon>
+            <span>Bukti transfer terunggah! Cek status pembayaran Anda.</span>
           </div>
         </div>
       </div>
@@ -220,10 +250,13 @@
       <div class="order-summary-card">
         <h4 class="summary-card-title">Order Summary</h4>
         <div class="summary-course-row">
-          <div class="course-thumb"></div>
+          <img *ngIf="getThumbnail()" [src]="getThumbnail()!" class="course-thumb" style="width: 56px; height: 56px; border-radius: 8px; object-fit: cover;" alt="course cover" />
+          <div *ngIf="!getThumbnail()" class="course-thumb" style="display:flex; align-items:center; justify-content:center; color:#7f8c8d; font-size:24px; background:#eaeaea;">
+            <ion-icon name="school-outline"></ion-icon>
+          </div>
           <div class="course-summary-info">
-            <span class="name">Web Development</span>
-            <span class="quantity">1 item . <span class="price-highlight">Rp150.000</span></span>
+            <span class="name">{{ course?.title }}</span>
+            <span class="quantity">1 item . <span class="price-highlight">{{ formatPrice(course?.price) }}</span></span>
           </div>
         </div>
       </div>
@@ -278,7 +311,7 @@
           </div>
           <div class="receipt-row total-row-highlight">
             <span class="label">Total payment</span>
-            <span class="value value-total">Rp150.000</span>
+            <span class="value value-total">{{ formatPrice(transaction?.amount || transaction?.price || course?.price) }}</span>
           </div>
         </div>
       </div>

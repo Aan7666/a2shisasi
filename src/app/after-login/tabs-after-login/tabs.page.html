@@ -35,10 +35,10 @@
       <ion-label>Account</ion-label>
     </ion-tab-button>
 
-  </ion-tab-bar>
-</div>
+    <!-- Bubble di dalam ion-tab-bar agar tersembunyi/ikut ketika ion-tab-bar tertutup keyboard -->
+    <div class="floating-bubble" [class.active]="activeTab === 'courses'" (click)="navigateToCourses()">
+      <ion-icon [name]="activeTab === 'courses' ? 'book' : 'book-outline'"></ion-icon>
+    </div>
 
-<!-- Bubble FIXED di luar semua container -->
-<div class="floating-bubble" [class.active]="activeTab === 'courses'" (click)="navigateToCourses()">
-  <ion-icon [name]="activeTab === 'courses' ? 'book' : 'book-outline'"></ion-icon>
+  </ion-tab-bar>
 </div>

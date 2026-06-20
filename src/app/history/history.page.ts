@@ -1,26 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, AlertController, ToastController } from '@ionic/angular';
+import { IonicModule, AlertController, ToastController, LoadingController } from '@ionic/angular';
 import { Router } from '@angular/router';
 import { CourseService, Course } from '../services/course.service';
 import { ProgressService } from '../services/progress.service';
 import { CertificateService } from '../services/certificate.service';
 import { QuizService } from '../services/quiz.service';
+import { TransactionService, Transaction, TransactionStatus } from '../services/transaction.service';
 import { ProgressSummary } from '../models/index';
 import { environment } from '../../environments/environment';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-
-interface TransactionHistory {
-  id: string;
-  invoice: string;
-  courseTitle: string;
-  price: string;
-  date: string;
-  status: 'success' | 'pending' | 'cancelled';
-  paymentMethod: string;
-}
 
 @Component({
   selector: 'app-history',
@@ -32,15 +23,20 @@ interface TransactionHistory {
 export class HistoryPage implements OnInit {
   activeTab: 'transactions' | 'progress' = 'transactions';
 
-  // Transaksi — tetap dummy (endpoint transaksi belum di-expose di API)
-  transactions: TransactionHistory[] = [];
+  // ── Transactions ─────────────────────────────────────────
+  transactions: Transaction[]        = [];
+  isLoadingTx: boolean               = false;
+  txError: boolean                   = false;
 
-  // My Learning dari API getMyLearning()
-  myCourses: Course[]           = [];
-  progressList: ProgressSummary[] = [];
-  isLoadingCourses: boolean     = false;
-  isLoadingProgress: boolean    = false;
-  hasError: boolean             = false;
+  // Upload proof state
+  uploadingTxId: number | null       = null;
+
+  // ── My Learning ──────────────────────────────────────────
+  myCourses: Course[]                = [];
+  progressList: ProgressSummary[]    = [];
+  isLoadingCourses: boolean          = false;
+  isLoadingProgress: boolean         = false;
+  hasError: boolean                  = false;
 
   private readonly storageBaseUrl = environment.apiUrl.replace('/api', '/storage/');
 
@@ -48,19 +44,200 @@ export class HistoryPage implements OnInit {
     private router: Router,
     private alertController: AlertController,
     private toastController: ToastController,
+    private loadingController: LoadingController,
     private courseService: CourseService,
     private progressService: ProgressService,
     private certificateService: CertificateService,
-    private quizService: QuizService
-  ) { }
+    private quizService: QuizService,
+    private transactionService: TransactionService
+  ) {}
 
   ngOnInit() {
     this.loadMyLearning();
+    this.loadTransactions();
   }
 
   ionViewWillEnter() {
     this.loadMyLearning();
+    this.loadTransactions();
   }
+
+  // ═══════════════════════════════════════════════════════
+  // TRANSACTIONS
+  // ═══════════════════════════════════════════════════════
+
+  /** GET /api/student/transactions */
+  loadTransactions() {
+    this.isLoadingTx = true;
+    this.txError     = false;
+
+    this.transactionService.getTransactions().subscribe({
+      next: (data) => {
+        this.transactions = data;
+        this.isLoadingTx  = false;
+      },
+      error: (err) => {
+        console.error('Gagal memuat transaksi:', err);
+        this.isLoadingTx = false;
+        this.txError     = true;
+      }
+    });
+  }
+
+  /** Membuka file picker lalu upload bukti transfer */
+  async openProofUpload(tx: Transaction) {
+    const input = document.createElement('input');
+    input.type   = 'file';
+    input.accept = 'image/jpg,image/jpeg,image/png';
+
+    input.onchange = async (event: Event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      // Validasi ukuran: max 5 MB
+      if (file.size > 5 * 1024 * 1024) {
+        await this.showToast('Ukuran file maksimal 5 MB.', 'warning');
+        return;
+      }
+
+      await this.doUploadProof(tx, file);
+    };
+
+    input.click();
+  }
+
+  private async doUploadProof(tx: Transaction, file: File) {
+    const loading = await this.loadingController.create({
+      message: 'Mengupload bukti transfer...',
+      spinner: 'crescent'
+    });
+    await loading.present();
+
+    this.uploadingTxId = tx.id;
+
+    this.transactionService.uploadProof(tx.id, file).subscribe({
+      next: async (result) => {
+        await loading.dismiss();
+        this.uploadingTxId = null;
+
+        // Update status lokal agar UI langsung berubah
+        const idx = this.transactions.findIndex(t => t.id === tx.id);
+        if (idx > -1) {
+          this.transactions[idx].status      = result.status;
+          this.transactions[idx].proof_image = result.proofImage;
+        }
+
+        await this.showToast(
+          'Bukti transfer berhasil diupload. Menunggu konfirmasi admin.',
+          'success'
+        );
+      },
+      error: async (err) => {
+        await loading.dismiss();
+        this.uploadingTxId = null;
+        await this.showToast(err.message || 'Gagal mengupload bukti.', 'danger');
+      }
+    });
+  }
+
+  /** Tampilkan detail transaksi dalam alert */
+  async showInvoiceDetail(tx: Transaction) {
+    const statusMap: Record<TransactionStatus, { label: string; color: string }> = {
+      PAID:      { label: 'LUNAS',                 color: '#27ae60' },
+      PENDING:   { label: 'MENUNGGU KONFIRMASI',   color: '#d35400' },
+      CANCELLED: { label: 'DIBATALKAN',             color: '#c0392b' },
+      FAILED:    { label: 'GAGAL',                  color: '#c0392b' },
+    };
+
+    const { label, color } = statusMap[tx.status] ?? { label: tx.status, color: '#7f8c8d' };
+    const price = tx.amount ?? tx.price ?? tx.course?.price ?? 0;
+    const formattedPrice = new Intl.NumberFormat('id-ID', {
+      style: 'currency', currency: 'IDR', minimumFractionDigits: 0
+    }).format(price);
+    const date = tx.created_at
+      ? new Date(tx.created_at).toLocaleDateString('id-ID', {
+          day: '2-digit', month: 'long', year: 'numeric'
+        })
+      : '-';
+
+    const proofUrl = this.transactionService.resolveProofUrl(tx.proof_image);
+    const proofHtml = proofUrl
+      ? `<p><strong>Bukti Transfer:</strong><br/><img src="${proofUrl}" style="width:100%;border-radius:8px;margin-top:6px;" /></p>`
+      : '';
+
+    const alert = await this.alertController.create({
+      header: 'Detail Transaksi',
+      subHeader: tx.invoice_number ?? `#TRX-${tx.id}`,
+      message: `
+        <div style="text-align: left; font-size: 13px; line-height: 1.5; color: #333;">
+          <p><strong>Kelas:</strong><br/>${tx.course?.title ?? '-'}</p>
+          <p><strong>Tanggal:</strong><br/>${date}</p>
+          <p><strong>Total Bayar:</strong><br/><span style="font-size: 15px; font-weight: 700; color: #852920;">${formattedPrice}</span></p>
+          <p><strong>Status:</strong><br/><span style="color: ${color}; font-weight: 700;">${label}</span></p>
+          ${proofHtml}
+        </div>
+      `,
+      buttons: [
+        { text: 'Tutup', role: 'cancel' },
+        ...(tx.status === 'PENDING' ? [{
+          text: tx.proof_image ? 'Upload Ulang' : 'Upload Bukti',
+          handler: () => { this.openProofUpload(tx); }
+        }] : [])
+      ],
+      cssClass: 'invoice-alert'
+    });
+
+    await alert.present();
+  }
+
+  // ── UI helpers ───────────────────────────────────────────
+
+  /** Label status bahasa Indonesia */
+  statusLabel(status: TransactionStatus): string {
+    const map: Record<TransactionStatus, string> = {
+      PAID:      'Lunas',
+      PENDING:   'Pending',
+      CANCELLED: 'Batal',
+      FAILED:    'Gagal',
+    };
+    return map[status] ?? status;
+  }
+
+  /** CSS class untuk badge status */
+  statusClass(status: TransactionStatus): string {
+    const map: Record<TransactionStatus, string> = {
+      PAID:      'paid',
+      PENDING:   'pending',
+      CANCELLED: 'cancelled',
+      FAILED:    'cancelled',
+    };
+    return map[status] ?? 'pending';
+  }
+
+  formatPrice(tx: Transaction): string {
+    const amount = tx.amount ?? tx.price ?? tx.course?.price ?? 0;
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency', currency: 'IDR', minimumFractionDigits: 0
+    }).format(amount);
+  }
+
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('id-ID', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+  }
+
+  resolveCourseThumbnail(tx: Transaction): string | null {
+    const raw = tx.course?.thumbnail;
+    if (!raw) return null;
+    if (raw.startsWith('http://') || raw.startsWith('https://')) return raw;
+    return this.storageBaseUrl + raw.replace(/^\//, '');
+  }
+
+  // ═══════════════════════════════════════════════════════
+  // MY LEARNING / PROGRESS
+  // ═══════════════════════════════════════════════════════
 
   /** GET /api/my-learning — kursus yang sudah dibeli/enrolled */
   loadMyLearning() {
@@ -71,7 +248,6 @@ export class HistoryPage implements OnInit {
       next: (courses) => {
         this.myCourses        = courses;
         this.isLoadingCourses = false;
-        // Setelah dapat daftar course, muat progress masing-masing
         this.loadProgress(courses);
       },
       error: (err) => {
@@ -82,18 +258,15 @@ export class HistoryPage implements OnInit {
     });
   }
 
-  /** GET /api/student/progress — semua progress sekaligus (lebih efisien) */
+  /** GET /api/student/progress — semua progress sekaligus */
   private loadProgress(courses: Course[]) {
     if (!courses.length) return;
     this.isLoadingProgress = true;
 
     this.progressService.getMyProgress().subscribe({
       next: (summaries) => {
-        // Fetch quizzes for each course to check if there are uncompleted quizzes
         const quizRequests = courses.map(course =>
-          this.quizService.getStudentQuizzes(course.id).pipe(
-            catchError(() => of([]))
-          )
+          this.quizService.getStudentQuizzes(course.id).pipe(catchError(() => of([])))
         );
 
         forkJoin(quizRequests).subscribe({
@@ -101,24 +274,21 @@ export class HistoryPage implements OnInit {
             summaries.forEach((summary) => {
               const courseIndex = courses.findIndex(c => c.id === summary.courseId || c.id === summary.course?.id);
               if (courseIndex > -1) {
-                const quizzes = allQuizzes[courseIndex] || [];
-                const totalQuizzes = quizzes.length;
-                const completedQuizzes = quizzes.filter(q => q.isAttempted).length;
+                const quizzes         = allQuizzes[courseIndex] || [];
+                const totalQuizzes    = quizzes.length;
+                const completedQuizzes = quizzes.filter((q: any) => q.isAttempted).length;
 
                 if (totalQuizzes > 0) {
-                  // Adjust percentage based on both lessons and quizzes
-                  const totalItems = summary.totalLessons + totalQuizzes;
+                  const totalItems     = summary.totalLessons + totalQuizzes;
                   const completedItems = summary.completedLessons + completedQuizzes;
-                  
-                  summary.percentage = Math.floor((completedItems / totalItems) * 100);
+                  summary.percentage   = Math.floor((completedItems / totalItems) * 100);
 
-                  // If there is any uncompleted quiz, it shouldn't show 100% or completed
                   if (completedQuizzes < totalQuizzes) {
-                    summary.percentage = Math.min(99, summary.percentage); // safety cap
-                    summary.status = 'in_progress';
+                    summary.percentage = Math.min(99, summary.percentage);
+                    summary.status     = 'in_progress';
                   } else if (summary.completedLessons === summary.totalLessons) {
                     summary.percentage = 100;
-                    summary.status = 'completed';
+                    summary.status     = 'completed';
                   }
                 }
               }
@@ -139,7 +309,6 @@ export class HistoryPage implements OnInit {
     });
   }
 
-  /** Resolves thumbnail ke full URL */
   getThumbnail(course: Course): string | null {
     const raw = course.thumbnail || (course as any).image;
     if (!raw) return null;
@@ -147,66 +316,9 @@ export class HistoryPage implements OnInit {
     return this.storageBaseUrl + raw.replace(/^\//, '');
   }
 
-  goBack() {
-    window.history.back();
-  }
+  goBack() { window.history.back(); }
 
-  setActiveTab(tab: 'transactions' | 'progress') {
-    this.activeTab = tab;
-  }
-
-  async showInvoiceDetail(tx: TransactionHistory) {
-    let statusLabel = '';
-    let statusColor = '';
-
-    switch (tx.status) {
-      case 'success':
-        statusLabel = 'SUKSES';
-        statusColor = '#2ecc71';
-        break;
-      case 'pending':
-        statusLabel = 'MENUNGGU PEMBAYARAN';
-        statusColor = '#e67e22';
-        break;
-      case 'cancelled':
-        statusLabel = 'DIBATALKAN';
-        statusColor = '#e74c3c';
-        break;
-    }
-
-    const alert = await this.alertController.create({
-      header: 'Detail Transaksi',
-      subHeader: tx.invoice,
-      message: `
-        <div style="text-align: left; font-size: 13px; line-height: 1.5; color: #333;">
-          <p><strong>Kelas:</strong><br/>${tx.courseTitle}</p>
-          <p><strong>Tanggal:</strong><br/>${tx.date}</p>
-          <p><strong>Metode Pembayaran:</strong><br/>${tx.paymentMethod}</p>
-          <p><strong>Total Bayar:</strong><br/><span style="font-size: 15px; font-weight: 700; color: #852920;">${tx.price}</span></p>
-          <p><strong>Status:</strong><br/><span style="color: ${statusColor}; font-weight: 700;">${statusLabel}</span></p>
-        </div>
-      `,
-      buttons: [
-        {
-          text: 'Tutup',
-          role: 'cancel'
-        },
-        {
-          text: tx.status === 'pending' ? 'Bayar Sekarang' : 'Bantuan',
-          handler: () => {
-            if (tx.status === 'pending') {
-              this.showToast('Membuka gerbang pembayaran...');
-            } else {
-              this.showToast('Menghubungi support...');
-            }
-          }
-        }
-      ],
-      cssClass: 'invoice-alert'
-    });
-
-    await alert.present();
-  }
+  setActiveTab(tab: 'transactions' | 'progress') { this.activeTab = tab; }
 
   continueCourse(course: Course) {
     this.router.navigate(['/video-materi'], { queryParams: { course_id: course.id } });
@@ -226,43 +338,37 @@ export class HistoryPage implements OnInit {
       subHeader: 'Klaim Sertifikat Anda',
       message: `Selamat Anda telah menyelesaikan kelas <strong>${course.title}</strong>. Sertifikat kelulusan digital Anda telah diterbitkan secara otomatis!`,
       buttons: [
-        {
-          text: 'Batal',
-          role: 'cancel'
-        },
+        { text: 'Batal', role: 'cancel' },
         {
           text: 'Unduh PDF',
           handler: () => {
-            this.showToast('Mencari sertifikat...');
+            this.showToast('Mencari sertifikat...', 'dark');
             this.certificateService.getMyCertificates().subscribe({
               next: (certs) => {
                 const cert = certs.find((c: any) => c.course?.id === course.id);
                 if (cert) {
-                  this.showToast('Membuka sertifikat...');
+                  this.showToast('Membuka sertifikat...', 'dark');
                   const downloadUrl = this.certificateService.getDownloadUrl(cert.id);
                   window.open(downloadUrl, '_system');
                 } else {
-                  this.showToast('Sertifikat belum tersedia untuk kelas ini.');
+                  this.showToast('Sertifikat belum tersedia untuk kelas ini.', 'warning');
                 }
               },
-              error: () => {
-                this.showToast('Gagal memuat sertifikat.');
-              }
+              error: () => this.showToast('Gagal memuat sertifikat.', 'danger')
             });
           }
         }
       ]
     });
-
     await alert.present();
   }
 
-  async showToast(msg: string) {
+  async showToast(msg: string, color: string = 'dark') {
     const toast = await this.toastController.create({
       message: msg,
-      duration: 1500,
+      duration: 2000,
       position: 'bottom',
-      color: 'dark'
+      color
     });
     await toast.present();
   }

@@ -89,11 +89,11 @@ ion-tab-button {
   }
 }
 
-// ── Bubble FIXED — benar-benar di luar semua container ──────
+// ── Bubble ABSOLUTE di dalam ion-tab-bar agar tidak didorong keyboard ──────
 .floating-bubble {
-  pointer-events: none;
-  position: fixed;
-  bottom: 28px; // (60px tab-bar / 2) + offset naik
+  pointer-events: auto; /* Ubah ke auto agar klik terdaftar dengan benar di mobile */
+  position: absolute;
+  bottom: 28px; // Posisinya sama (relatif terhadap bottom ion-tab-bar yang setara bottom screen)
   left: 50%;
   transform: translateX(-50%);
   width: 48px;

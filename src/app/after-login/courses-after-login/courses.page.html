@@ -89,15 +89,27 @@
             <span class="instructor-name">{{ course.instructor?.name || 'Instructor' }}</span>
           </div>
 
-          <!-- Progress Bar Mock/Placeholder since API doesn't return progress directly here, or dynamic placeholder -->
+          <!-- Dynamic Progress Bar -->
           <div class="progress-container">
             <div class="progress-info">
               <span class="lesson-count">{{ course.lessons?.length || course.lessons_count || 0 }} Lessons</span>
-              <span class="progress-percent">Enrolled</span>
+              <span class="progress-percent" [class.completed]="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100">
+                {{ getProgressForCourse(course.id)?.percentage || 0 }}% {{ (getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100) ? 'Selesai' : '' }}
+              </span>
             </div>
             <div class="progress-bar-bg">
-              <div class="progress-bar-fill" style="width: 100%;"></div>
+              <div class="progress-bar-fill" 
+                   [style.width.%]="getProgressForCourse(course.id)?.percentage || 0"
+                   [class.completed]="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100"></div>
             </div>
+          </div>
+
+          <!-- Certificate Download Button -->
+          <div class="cert-button-container" *ngIf="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100">
+            <button class="btn-download-cert" (click)="claimCertificate($event, course)">
+              <ion-icon name="ribbon-outline"></ion-icon>
+              <span>Download Certificate</span>
+            </button>
           </div>
         </div>
       </div>

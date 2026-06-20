@@ -258,7 +258,8 @@ ion-content {
   border: 1px solid rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: row;
-  height: 120px;
+  height: auto;
+  min-height: 120px;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
@@ -347,6 +348,10 @@ ion-content {
 
       .progress-percent {
         color: #852920;
+
+        &.completed {
+          color: #27ae60;
+        }
       }
     }
 
@@ -361,6 +366,47 @@ ion-content {
       height: 100%;
       background: linear-gradient(90deg, #9b3427, #852920);
       border-radius: 3px;
+      transition: width 0.3s ease;
+
+      &.completed {
+        background: linear-gradient(90deg, #2ecc71, #27ae60);
+      }
+    }
+  }
+
+  .cert-button-container {
+    margin-top: 8px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .btn-download-cert {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 3px 8px rgba(46, 204, 113, 0.2);
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    ion-icon {
+      font-size: 14px;
+    }
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.35);
+      background: linear-gradient(135deg, #34d876 0%, #2ecc71 100%);
+    }
+
+    &:active {
+      transform: scale(0.95);
+      background: #27ae60;
     }
   }
 }

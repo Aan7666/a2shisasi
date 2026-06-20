@@ -6,6 +6,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CourseService, CourseDetail } from '../services/course.service';
 import { EnrollmentService } from '../services/enrollment.service';
 import { QuizService } from '../services/quiz.service';
+import { TransactionService } from '../services/transaction.service';
 import { Quiz } from '../models/index';
 import { environment } from '../../environments/environment';
 
@@ -42,8 +43,9 @@ export class DetailCoursePage implements OnInit {
     private courseService: CourseService,
     private toastController: ToastController,
     private enrollmentService: EnrollmentService,
+    private quizService: QuizService,
     private loadingController: LoadingController,
-    private quizService: QuizService
+    private transactionService: TransactionService
   ) { }
 
   ngOnInit() {
@@ -211,36 +213,32 @@ export class DetailCoursePage implements OnInit {
 
   async buyNow() {
     if (this.course?.has_access) {
-      // User already enrolled — go directly to first lesson
+      // User sudah enrolled — langsung ke materi
       this.goToVideoMateri();
     } else {
       const loading = await this.loadingController.create({
-        message: 'Memproses pembelian...',
+        message: 'Membuat transaksi...',
+        spinner: 'crescent'
       });
       await loading.present();
 
-      this.enrollmentService.enrollCourse(this.courseId).subscribe({
-        next: async (res) => {
+      this.transactionService.createTransaction(this.courseId).subscribe({
+        next: async (tx) => {
           await loading.dismiss();
           const toast = await this.toastController.create({
-            message: 'Berhasil membeli course!',
-            duration: 2000,
+            message: 'Transaksi berhasil dibuat. Silakan upload bukti pembayaran di sini.',
+            duration: 3000,
             color: 'success',
             position: 'bottom'
           });
           await toast.present();
-          
-          if (this.course) {
-            this.course.has_access = true;
-          }
-          this.courseService.clearMyLearningCache();
-          this.courseService.clearCourseDetailCache(this.courseId);
-          this.goToVideoMateri();
+          // Arahkan langsung ke halaman history (tab transactions)
+          this.router.navigate(['/history']);
         },
         error: async (err) => {
           await loading.dismiss();
           const toast = await this.toastController.create({
-            message: err.message || 'Gagal membeli course',
+            message: 'Gagal membuat transaksi: ' + (err.message || 'Error server'),
             duration: 3000,
             color: 'danger',
             position: 'bottom'

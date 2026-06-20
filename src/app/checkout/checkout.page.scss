@@ -943,3 +943,63 @@ ion-content.checkout-content-pane {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Direct proof upload section */
+.direct-proof-upload-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #eaeaea;
+
+  .btn-upload-proof {
+    width: 100%;
+    height: 44px;
+    border-radius: 10px;
+    background-color: #852920;
+    color: #ffffff;
+    border: none;
+    font-family: 'Lexend', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    ion-icon {
+      font-size: 18px;
+    }
+
+    &.has-proof {
+      background-color: #d35400; // Orange color when proof exists
+    }
+
+    &:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .direct-proof-success {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #27ae60;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+
+    ion-icon {
+      font-size: 16px;
+      color: #27ae60;
+      flex-shrink: 0;
+    }
+  }
+}

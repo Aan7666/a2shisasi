@@ -138,6 +138,13 @@ export class VideoMateriPage implements OnInit, OnDestroy {
       this.isPlaying = false;
     } else {
       this.isPlaying = true;
+      
+      // Jika menggunakan real video (ada file_url), biarkan pemutar video HTML5 mengendalikannya.
+      // Kita tidak perlu menjalankan interval simulasi waktu yang bisa memotong durasi video asli.
+      if (this.activeLesson.file_url) {
+        return;
+      }
+
       const totalSec = this.parseDurationToSeconds(this.activeLesson.duration_or_pages);
       this.videoInterval = setInterval(() => {
         if (this.currentTime < totalSec) {
@@ -153,6 +160,11 @@ export class VideoMateriPage implements OnInit, OnDestroy {
         }
       }, 1000);
     }
+  }
+
+  onRealVideoEnded() {
+    this.isPlaying = false;
+    this.markLessonComplete();
   }
 
   clearVideoInterval() {

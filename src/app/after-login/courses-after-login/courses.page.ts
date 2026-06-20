@@ -1,10 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonicModule, ToastController, ActionSheetController } from '@ionic/angular';
+import { IonicModule, ToastController, ActionSheetController, AlertController } from '@ionic/angular';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CourseService, Course, Category } from '../../services/course.service';
+import { ProgressService } from '../../services/progress.service';
+import { CertificateService } from '../../services/certificate.service';
+import { QuizService } from '../../services/quiz.service';
+import { ProgressSummary } from '../../models/index';
 import { environment } from '../../../environments/environment';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -29,10 +33,16 @@ export class CoursesPage implements OnInit {
   isLoadingCourses: boolean = false;
   isSearchBarOpen: boolean = false;
   searchQuery: string = '';
+  progressList: ProgressSummary[] = [];
+  isLoadingProgress: boolean = false;
 
   constructor(
     private authService: AuthService,
     private courseService: CourseService,
+    private progressService: ProgressService,
+    private certificateService: CertificateService,
+    private quizService: QuizService,
+    private alertController: AlertController,
     private router: Router,
     private toastController: ToastController,
     private actionSheetController: ActionSheetController
@@ -80,11 +90,13 @@ export class CoursesPage implements OnInit {
             this.enrolledCourses = detailedCourses;
             this.applyFilter();
             this.isLoadingCourses = false;
+            this.loadProgress(detailedCourses);
           },
           error: () => {
             this.enrolledCourses = courses;
             this.applyFilter();
             this.isLoadingCourses = false;
+            this.loadProgress(courses);
           }
         });
       },
@@ -92,6 +104,116 @@ export class CoursesPage implements OnInit {
         this.isLoadingCourses = false; 
       }
     });
+  }
+
+  loadProgress(courses: Course[]) {
+    if (!courses.length) return;
+    this.isLoadingProgress = true;
+
+    this.progressService.getMyProgress().subscribe({
+      next: (summaries) => {
+        // Fetch quizzes for each course to check if there are uncompleted quizzes
+        const quizRequests = courses.map(course =>
+          this.quizService.getStudentQuizzes(course.id).pipe(
+            catchError(() => of([]))
+          )
+        );
+
+        forkJoin(quizRequests).subscribe({
+          next: (allQuizzes) => {
+            summaries.forEach((summary) => {
+              const courseIndex = courses.findIndex(c => c.id === summary.courseId || c.id === summary.course?.id);
+              if (courseIndex > -1) {
+                const quizzes = allQuizzes[courseIndex] || [];
+                const totalQuizzes = quizzes.length;
+                const completedQuizzes = quizzes.filter(q => q.isAttempted).length;
+
+                if (totalQuizzes > 0) {
+                  // Adjust percentage based on both lessons and quizzes
+                  const totalItems = summary.totalLessons + totalQuizzes;
+                  const completedItems = summary.completedLessons + completedQuizzes;
+                  
+                  summary.percentage = Math.floor((completedItems / totalItems) * 100);
+
+                  // If there is any uncompleted quiz, it shouldn't show 100% or completed
+                  if (completedQuizzes < totalQuizzes) {
+                    summary.percentage = Math.min(99, summary.percentage); // safety cap
+                    summary.status = 'in_progress';
+                  } else if (summary.completedLessons === summary.totalLessons) {
+                    summary.percentage = 100;
+                    summary.status = 'completed';
+                  }
+                } else {
+                  // No quizzes, percentage directly based on lessons
+                  if (summary.totalLessons > 0) {
+                    summary.percentage = Math.floor((summary.completedLessons / summary.totalLessons) * 100);
+                  } else {
+                    summary.percentage = 0;
+                  }
+                  if (summary.percentage === 100) {
+                    summary.status = 'completed';
+                  } else {
+                    summary.status = 'in_progress';
+                  }
+                }
+              }
+            });
+
+            this.progressList      = summaries;
+            this.isLoadingProgress = false;
+          },
+          error: () => {
+            this.progressList      = summaries;
+            this.isLoadingProgress = false;
+          }
+        });
+      },
+      error: () => {
+        this.isLoadingProgress = false;
+      }
+    });
+  }
+
+  getProgressForCourse(courseId: number): ProgressSummary | undefined {
+    return this.progressList.find(p => p.courseId === courseId || p.course?.id === courseId);
+  }
+
+  async claimCertificate(event: Event, course: Course) {
+    event.stopPropagation(); // Prevent course card navigation click!
+    const alert = await this.alertController.create({
+      header: 'Selamat!',
+      subHeader: 'Klaim Sertifikat Anda',
+      message: `Selamat Anda telah menyelesaikan kelas <strong>${course.title}</strong>. Sertifikat kelulusan digital Anda telah diterbitkan secara otomatis!`,
+      buttons: [
+        {
+          text: 'Batal',
+          role: 'cancel'
+        },
+        {
+          text: 'Unduh PDF',
+          handler: () => {
+            this.showToast('Mencari sertifikat...');
+            this.certificateService.getMyCertificates().subscribe({
+              next: (certs) => {
+                const cert = certs.find((c: any) => c.course?.id === course.id);
+                if (cert) {
+                  this.showToast('Membuka sertifikat...');
+                  const downloadUrl = this.certificateService.getDownloadUrl(cert.id);
+                  window.open(downloadUrl, '_system');
+                } else {
+                  this.showToast('Sertifikat belum tersedia untuk kelas ini.');
+                }
+              },
+              error: () => {
+                this.showToast('Gagal memuat sertifikat.');
+              }
+            });
+          }
+        }
+      ]
+    });
+
+    await alert.present();
   }
 
   loadCategories() {
