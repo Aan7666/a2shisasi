@@ -72,9 +72,17 @@
           </div>
           <h2 class="lesson-title">{{ activeLesson.title }}</h2>
 
-          <div class="action-btn-wrapper">
+          <div class="action-btn-wrapper" style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
             <button class="btn-memulai animate-pulse" (click)="togglePlay()">
               {{ activeLesson.is_completed ? '▶ Putar Lagi' : 'Memulai' }}
+            </button>
+            <button 
+              *ngIf="!activeLesson.is_completed" 
+              class="btn-tandai-selesai" 
+              (click)="markLessonComplete()"
+              style="background: transparent; border: 1.5px solid white; color: white; border-radius: 20px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
+            >
+              Tandai Selesai ✅
             </button>
           </div>
 
@@ -90,11 +98,19 @@
         <div class="video-header-details">
           <div class="lesson-indicator">Lesson {{ activeLesson.order }} · Dokumen</div>
           <h2 class="lesson-title">{{ activeLesson.title }}</h2>
-          <div class="action-btn-wrapper" *ngIf="activeLesson.file_url">
-            <a [href]="activeLesson.file_url" target="_blank" class="btn-memulai">
+          <div class="action-btn-wrapper" *ngIf="activeLesson.file_url" style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+            <a [href]="activeLesson.file_url" target="_blank" class="btn-memulai" (click)="markLessonComplete()">
               <ion-icon name="document-outline"></ion-icon>
               Buka Dokumen
             </a>
+            <button 
+              *ngIf="!activeLesson.is_completed" 
+              class="btn-tandai-selesai" 
+              (click)="markLessonComplete()"
+              style="background: transparent; border: 1.5px solid white; color: white; border-radius: 20px; padding: 8px 16px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
+            >
+              Tandai Selesai ✅
+            </button>
           </div>
           <div class="completed-badge" *ngIf="activeLesson.is_completed">
             <ion-icon name="checkmark-circle"></ion-icon> Sudah diselesaikan
