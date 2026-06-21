@@ -1,5 +1,15 @@
 <ion-content [fullscreen]="true" class="detail-course-content">
 
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Tarik untuk refresh"
+      refreshingSpinner="crescent"
+      refreshingText="Memuat...">
+    </ion-refresher-content>
+  </ion-refresher>
+
   <!-- ── LOADING SKELETON ── -->
   <ng-container *ngIf="isLoading">
     <div class="red-header">
@@ -46,11 +56,7 @@
 
       <!-- Course Thumbnail / Media -->
       <div class="course-media-wrap" [class.has-image]="getThumbnail()">
-        <img
-          *ngIf="getThumbnail()"
-          [src]="getThumbnail()!"
-          [alt]="course.title"
-          class="course-thumbnail-img"
+        <img *ngIf="getThumbnail()" [src]="getThumbnail()!" [alt]="course.title" class="course-thumbnail-img"
           (error)="$any($event.target).style.display='none'" />
       </div>
 
@@ -61,7 +67,8 @@
         <span class="category-badge" *ngIf="course.category">{{ course.category.name }}</span>
 
         <h2 class="course-title">{{ course.title }}</h2>
-        <p class="course-subtitle" *ngIf="course.description">{{ course.description | slice:0:120 }}{{ course.description.length > 120 ? '…' : '' }}</p>
+        <p class="course-subtitle" *ngIf="course.description">{{ course.description | slice:0:120 }}{{
+          course.description.length > 120 ? '…' : '' }}</p>
 
         <!-- Meta Information -->
         <div class="meta-row">
@@ -92,7 +99,8 @@
           <ion-icon [name]="isWishlisted ? 'heart' : 'heart-outline'" class="heart-icon"></ion-icon>
           <span>Wishlist</span>
         </button>
-        <button class="outline-action-btn" [class.active]="isAddedToCart" (click)="toggleCart()" *ngIf="!course.has_access">
+        <button class="outline-action-btn" [class.active]="isAddedToCart" (click)="toggleCart()"
+          *ngIf="!course.has_access">
           <ion-icon name="cart-outline" class="cart-icon"></ion-icon>
           <span>Keranjang</span>
         </button>
@@ -109,9 +117,14 @@
 
       <!-- ── TABS ── -->
       <div class="custom-tabs-segment">
-        <div class="tab-segment-btn" [class.active]="activeTab === 'description'" (click)="setActiveTab('description')">Deskripsi</div>
-        <div class="tab-segment-btn" [class.active]="activeTab === 'curriculum'" (click)="setActiveTab('curriculum')">Kurikulum</div>
-        <div class="tab-segment-btn" [class.active]="activeTab === 'instructor'" (click)="setActiveTab('instructor')">Instruktur</div>
+        <div class="tab-segment-btn" [class.active]="activeTab === 'description'" (click)="setActiveTab('description')">
+          Deskripsi</div>
+        <div class="tab-segment-btn" [class.active]="activeTab === 'curriculum'" (click)="setActiveTab('curriculum')">
+          Kurikulum</div>
+        <div class="tab-segment-btn" [class.active]="activeTab === 'instructor'" (click)="setActiveTab('instructor')">
+          Instruktur</div>
+        <div class="tab-segment-btn" [class.active]="activeTab === 'reviews'" (click)="setActiveTab('reviews')">Ulasan
+        </div>
       </div>
 
       <!-- ── TAB CONTENT ── -->
@@ -121,12 +134,84 @@
         <div class="tab-pane animate-fade-in" *ngIf="activeTab === 'description'">
           <div class="description-text" [class.expanded]="isDescriptionExpanded">
             <p *ngIf="course.description; else noDesc">{{ course.description }}</p>
-            <ng-template #noDesc><p style="color:#9e9e9e;">Tidak ada deskripsi tersedia.</p></ng-template>
+            <ng-template #noDesc>
+              <p style="color:#9e9e9e;">Tidak ada deskripsi tersedia.</p>
+            </ng-template>
           </div>
-          <button class="btn-show-more" (click)="toggleDescription()" *ngIf="course.description && (course.description?.length ?? 0) > 200">
+          <button class="btn-show-more" (click)="toggleDescription()"
+            *ngIf="course.description && (course.description?.length ?? 0) > 200">
             <span>{{ isDescriptionExpanded ? 'Tampilkan lebih sedikit' : 'Tampilkan lebih banyak' }}</span>
             <ion-icon [name]="isDescriptionExpanded ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
           </button>
+        </div>
+
+        <!-- Reviews Tab -->
+        <div class="tab-pane animate-fade-in" *ngIf="activeTab === 'reviews'">
+
+          <p class="section-title">{{ reviews.length }} ulasan</p>
+
+          <div *ngIf="loadingReviews" class="loading-spinner">
+            <ion-spinner name="crescent"></ion-spinner>
+          </div>
+
+          <div *ngIf="!loadingReviews && reviews.length > 0" class="reviews-list">
+            <div *ngFor="let rev of reviews" class="review-card">
+              <div class="rev-header">
+
+                <!-- Avatar inisial -->
+                <div class="rev-avatar" *ngIf="!rev.student?.avatar">
+                  {{ getInitials(rev.student?.name) }}
+                </div>
+                <img *ngIf="rev.student?.avatar" [src]="rev.student?.avatar" class="rev-avatar-img" />
+
+                <div class="rev-meta">
+                  <p class="rev-name">{{ rev.student?.name || 'Anonim' }}</p>
+                  <p class="rev-date">{{ rev.created_at | date:'d MMMM yyyy' }}</p>
+                </div>
+
+                <div class="rev-stars">
+                  <span *ngFor="let s of [1,2,3,4,5]" class="star" [class.filled]="s <= rev.rating">★</span>
+                </div>
+              </div>
+              <p class="rev-comment">{{ rev.comment }}</p>
+            </div>
+          </div>
+
+          <p *ngIf="!loadingReviews && reviews.length === 0" class="no-reviews">
+            Belum ada ulasan.
+          </p>
+
+          <!-- My review form -->
+          <div *ngIf="course?.has_access" class="my-review-form">
+            <h4>{{ myReview ? 'Edit Ulasanmu' : 'Berikan Ulasan' }}</h4>
+
+            <!-- Star Rating Picker -->
+            <div class="star-picker">
+              <span class="star-picker-label">Rating kamu:</span>
+              <div class="star-picker-stars">
+                <span *ngFor="let s of [1,2,3,4,5]" class="star-pick"
+                  [class.selected]="myReviewRating !== null && s <= myReviewRating"
+                  (click)="myReviewRating = s">★</span>
+              </div>
+              <span class="star-picker-value" *ngIf="myReviewRating">{{ myReviewRating }}/5</span>
+            </div>
+
+            <!-- Comment -->
+            <div class="review-textarea-wrap">
+              <textarea class="review-textarea" [(ngModel)]="myReviewComment"
+                placeholder="Tulis komentar kamu di sini..." rows="3"></textarea>
+            </div>
+
+            <button class="btn-submit-review" (click)="submitReview(myReviewRating, myReviewComment)"
+              [disabled]="submittingReview || !myReviewRating">
+              <ion-icon name="paper-plane-outline"></ion-icon>
+              {{ submittingReview ? 'Mengirim...' : (myReview ? 'Update Ulasan' : 'Kirim Ulasan') }}
+            </button>
+            <button *ngIf="myReview" class="btn-delete-review" (click)="deleteMyReview()" [disabled]="submittingReview">
+              <ion-icon name="trash-outline"></ion-icon>
+              Hapus Ulasan
+            </button>
+          </div>
         </div>
 
         <!-- CURRICULUM TAB -->
@@ -144,10 +229,8 @@
 
           <!-- Real lessons from API -->
           <div class="curriculum-list" *ngIf="course.lessons && course.lessons.length > 0">
-            <div class="lesson-item"
-              *ngFor="let lesson of course.lessons; let i = index"
-              (click)="course.has_access ? goToVideoMateri(lesson.id) : null"
-              [class.locked]="!course.has_access">
+            <div class="lesson-item" *ngFor="let lesson of course.lessons; let i = index"
+              (click)="course.has_access ? goToVideoMateri(lesson.id) : null" [class.locked]="!course.has_access">
               <div class="lesson-index">
                 <ion-icon *ngIf="lesson.is_completed" name="checkmark-circle" class="completed-lesson-icon"></ion-icon>
                 <span *ngIf="!lesson.is_completed">{{ i + 1 }}</span>
@@ -163,9 +246,7 @@
               </div>
 
               <button class="lesson-play-btn">
-                <ion-icon
-                  [name]="course.has_access ? 'play-circle' : 'lock-closed-outline'"
-                  class="play-icon"
+                <ion-icon [name]="course.has_access ? 'play-circle' : 'lock-closed-outline'" class="play-icon"
                   [class.locked-icon]="!course.has_access">
                 </ion-icon>
               </button>
@@ -179,9 +260,7 @@
           </div>
 
           <div class="curriculum-list" *ngIf="quizzes && quizzes.length > 0">
-            <div class="lesson-item quiz-item"
-              *ngFor="let quiz of quizzes; let i = index"
-              (click)="goToQuiz(quiz)"
+            <div class="lesson-item quiz-item" *ngFor="let quiz of quizzes; let i = index" (click)="goToQuiz(quiz)"
               [class.locked]="!course.has_access">
               <div class="lesson-index">
                 <ion-icon *ngIf="quiz.isAttempted" name="checkmark-circle" class="completed-quiz-icon"></ion-icon>
@@ -199,9 +278,7 @@
               </div>
 
               <button class="lesson-play-btn">
-                <ion-icon
-                  [name]="course.has_access ? 'arrow-forward-circle' : 'lock-closed-outline'"
-                  class="play-icon"
+                <ion-icon [name]="course.has_access ? 'arrow-forward-circle' : 'lock-closed-outline'" class="play-icon"
                   [class.locked-icon]="!course.has_access">
                 </ion-icon>
               </button>
@@ -219,12 +296,8 @@
             <div class="instructor-profile-row">
               <!-- Avatar -->
               <div class="instructor-avatar-wrap">
-                <img
-                  *ngIf="getAvatar()"
-                  [src]="getAvatar()!"
-                  [alt]="course.instructor.name"
-                  class="instructor-avatar-img"
-                  (error)="$any($event.target).style.display='none'" />
+                <img *ngIf="getAvatar()" [src]="getAvatar()!" [alt]="course.instructor.name"
+                  class="instructor-avatar-img" (error)="$any($event.target).style.display='none'" />
                 <div class="instructor-avatar-placeholder" *ngIf="!getAvatar()">
                   <ion-icon name="person" class="avatar-fallback-icon"></ion-icon>
                 </div>
@@ -247,7 +320,8 @@
             </div>
 
             <div class="instructor-bio-text" [class.expanded]="isInstructorExpanded">
-              <p>Instruktur course ini adalah <strong>{{ course.instructor.name }}</strong>. Klik "Tampilkan lebih banyak" untuk info lebih lanjut.</p>
+              <p>Instruktur course ini adalah <strong>{{ course.instructor.name }}</strong>. Klik "Tampilkan lebih
+                banyak" untuk info lebih lanjut.</p>
             </div>
             <button class="btn-show-more" (click)="toggleInstructor()">
               <span>{{ isInstructorExpanded ? 'Tampilkan lebih sedikit' : 'Tampilkan lebih banyak' }}</span>
@@ -288,7 +362,9 @@
 
         <div class="rekening-box">
           <div class="bank-name">Dana / Bank BSI</div>
-          <div class="rekening-number">901268770803</div>
+          <div class="rekening-number" (click)="copyRekening('901268770803')" style="cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            901268770803 <ion-icon name="copy-outline"></ion-icon>
+          </div>
           <div class="atas-nama">a.n. <strong>Aan Ripandi</strong></div>
         </div>
 

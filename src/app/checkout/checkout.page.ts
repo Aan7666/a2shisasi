@@ -212,7 +212,7 @@ export class CheckoutPage implements OnInit, OnDestroy {
     await loading.present();
     this.isUploadingProof = true;
 
-    this.transactionService.uploadProof(this.transaction.id, file).subscribe({
+    this.transactionService.uploadProof(this.transaction.id, file, this.selectedMethod).subscribe({
       next: async (result) => {
         await loading.dismiss();
         this.isUploadingProof = false;

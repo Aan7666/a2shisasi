@@ -35,6 +35,21 @@ export class HistoryPage implements OnInit {
   isInvoiceModalOpen: boolean = false;
   selectedTx: Transaction | null = null;
 
+  // Payment method modal state
+  isPaymentModalOpen: boolean = false;
+  paymentModalTx: Transaction | null = null;
+  selectedPaymentMethod: string = 'bank_transfer';
+  selectedProofFile: File | null = null;
+  proofPreviewUrl: string | null = null;
+  isUploadingProof: boolean = false;
+
+  paymentMethods = [
+    { id: 'bank_transfer', label: 'Bank Transfer', icon: 'business-outline', detail: '901268770803\nAan Ripandi' },
+    { id: 'gopay', label: 'GoPay', icon: 'phone-portrait-outline', detail: '0857-XXXX-XXXX (GoPay)' },
+    { id: 'ovo', label: 'OVO', icon: 'wallet-outline', detail: '0857-XXXX-XXXX (OVO)' },
+    { id: 'dana', label: 'Dana', icon: 'card-outline', detail: '0857-XXXX-XXXX (Dana)' },
+  ];
+
   // ── My Learning ──────────────────────────────────────────
   myCourses: Course[] = [];
   progressList: ProgressSummary[] = [];
@@ -68,6 +83,76 @@ export class HistoryPage implements OnInit {
     this.loadTransactions();
   }
 
+  handleRefresh(event: any) {
+    this.courseService.clearMyLearningCache();
+    const tx$ = this.transactionService.getTransactions().pipe(catchError(() => of([])));
+    const learn$ = this.courseService.getMyLearning(true).pipe(catchError(() => of([])));
+    forkJoin([tx$, learn$]).subscribe({
+      next: ([txs, courses]) => {
+        this.transactions = txs;
+        this.myCourses = courses;
+        if (courses.length > 0) {
+          this.progressService.getMyProgress().subscribe({
+            next: (summaries) => {
+              const quizRequests = courses.map(course =>
+                this.quizService.getStudentQuizzes(course.id).pipe(catchError(() => of([])))
+              );
+              forkJoin(quizRequests).subscribe({
+                next: (allQuizzes) => {
+                  summaries.forEach((summary) => {
+                    const courseIndex = courses.findIndex(c => c.id === summary.courseId || c.id === summary.course?.id);
+                    if (courseIndex > -1) {
+                      const quizzes = allQuizzes[courseIndex] || [];
+                      const totalQuizzes = quizzes.length;
+                      const completedQuizzes = quizzes.filter((q: any) => q.isAttempted).length;
+                      if (totalQuizzes > 0) {
+                        const totalItems = summary.totalLessons + totalQuizzes;
+                        const completedItems = summary.completedLessons + completedQuizzes;
+                        summary.percentage = Math.floor((completedItems / totalItems) * 100);
+                        if (completedQuizzes < totalQuizzes) {
+                          summary.percentage = Math.min(99, summary.percentage);
+                          summary.status = 'in_progress';
+                        } else if (summary.completedLessons === summary.totalLessons) {
+                          summary.percentage = 100;
+                          summary.status = 'completed';
+                        }
+                      } else {
+                        if (summary.totalLessons > 0) {
+                          summary.percentage = Math.floor((summary.completedLessons / summary.totalLessons) * 100);
+                        } else {
+                          summary.percentage = 0;
+                        }
+                        if (summary.percentage === 100) {
+                          summary.status = 'completed';
+                        } else {
+                          summary.status = 'in_progress';
+                        }
+                      }
+                    }
+                  });
+                  this.progressList = summaries;
+                  event.target.complete();
+                },
+                error: () => {
+                  this.progressList = summaries;
+                  event.target.complete();
+                }
+              });
+            },
+            error: () => {
+              event.target.complete();
+            }
+          });
+        } else {
+          event.target.complete();
+        }
+      },
+      error: () => {
+        event.target.complete();
+      }
+    });
+  }
+
   // ═══════════════════════════════════════════════════════
   // TRANSACTIONS
   // ═══════════════════════════════════════════════════════
@@ -90,26 +175,51 @@ export class HistoryPage implements OnInit {
     });
   }
 
-  /** Membuka file picker lalu upload bukti transfer */
-  async openProofUpload(tx: Transaction) {
+  /** Membuka payment method modal */
+  openProofUpload(tx: Transaction) {
+    this.paymentModalTx = tx;
+    this.selectedPaymentMethod = 'bank_bsi';
+    this.selectedProofFile = null;
+    this.proofPreviewUrl = null;
+    this.isPaymentModalOpen = true;
+    this.isInvoiceModalOpen = false;
+  }
+
+  /** Pilih file bukti dari device */
+  triggerFileInput() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/jpg,image/jpeg,image/png';
-
-    input.onchange = async (event: Event) => {
+    input.onchange = (event: Event) => {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (!file) return;
-
-      // Validasi ukuran: max 5 MB
       if (file.size > 5 * 1024 * 1024) {
-        await this.showToast('Ukuran file maksimal 5 MB.', 'warning');
+        this.showToast('Ukuran file maksimal 5 MB.', 'warning');
         return;
       }
-
-      await this.doUploadProof(tx, file);
+      this.selectedProofFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => { this.proofPreviewUrl = e.target?.result as string; };
+      reader.readAsDataURL(file);
     };
-
     input.click();
+  }
+
+  /** Submit upload dari payment modal */
+  async submitProofUpload() {
+    if (!this.paymentModalTx || !this.selectedProofFile) {
+      await this.showToast('Silakan pilih file bukti terlebih dahulu.', 'warning');
+      return;
+    }
+    await this.doUploadProof(this.paymentModalTx, this.selectedProofFile);
+    this.isPaymentModalOpen = false;
+    this.paymentModalTx = null;
+    this.selectedProofFile = null;
+    this.proofPreviewUrl = null;
+  }
+
+  getSelectedPaymentMethod() {
+    return this.paymentMethods.find(m => m.id === this.selectedPaymentMethod);
   }
 
   private async doUploadProof(tx: Transaction, file: File) {
@@ -121,7 +231,7 @@ export class HistoryPage implements OnInit {
 
     this.uploadingTxId = tx.id;
 
-    this.transactionService.uploadProof(tx.id, file).subscribe({
+    this.transactionService.uploadProof(tx.id, file, this.selectedPaymentMethod).subscribe({
       next: async (result) => {
         await loading.dismiss();
         this.uploadingTxId = null;

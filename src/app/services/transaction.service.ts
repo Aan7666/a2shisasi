@@ -49,7 +49,7 @@ export interface UploadProofResult {
 export class TransactionService {
   private readonly apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * GET /api/student/transactions
@@ -83,9 +83,10 @@ export class TransactionService {
    * @param id - ID transaksi
    * @param file - file gambar bukti transfer (jpg/jpeg/png, max 5 MB)
    */
-  uploadProof(id: number, file: File): Observable<UploadProofResult> {
+  uploadProof(id: number, file: File, paymentMethod: string): Observable<UploadProofResult> {
     const formData = new FormData();
     formData.append('proof_image', file);
+    formData.append('payment_method', paymentMethod);
 
     return this.http
       .post<ApiResponse<UploadProofResult>>(

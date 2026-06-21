@@ -12,7 +12,8 @@ import {
   trashOutline,
   star,
   imageOutline,
-  cartOutline
+  cartOutline,
+  copyOutline
 } from 'ionicons/icons';
 import { forkJoin } from 'rxjs';
 
@@ -41,7 +42,8 @@ export class KeranjangPage implements OnInit {
       'trash-outline': trashOutline,
       'close-outline': closeOutline,
       'information-circle-outline': informationCircleOutline,
-      'arrow-forward-outline': arrowForwardOutline
+      'arrow-forward-outline': arrowForwardOutline,
+      'copy-outline': copyOutline
     });
   }
 
@@ -148,6 +150,21 @@ export class KeranjangPage implements OnInit {
         this.router.navigate(['/history']);
       }
     });
+  }
+
+  async copyRekening(rekening: string) {
+    try {
+      await navigator.clipboard.writeText(rekening);
+      const toast = await this.toastController.create({
+        message: 'Nomor rekening berhasil disalin!',
+        duration: 2000,
+        color: 'success',
+        position: 'bottom'
+      });
+      await toast.present();
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
   }
 }
 

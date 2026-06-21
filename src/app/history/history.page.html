@@ -1,4 +1,10 @@
 <ion-content [fullscreen]="true" class="history-content">
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content pullingIcon="chevron-down-circle-outline" pullingText="Tarik untuk refresh"
+      refreshingSpinner="crescent" refreshingText="Memuat...">
+    </ion-refresher-content>
+  </ion-refresher>
   <!-- Red Header Section -->
   <div class="red-header">
     <button class="back-btn" (click)="goBack()">
@@ -75,10 +81,8 @@
                 <span class="price-value">{{ formatPrice(tx) }}</span>
               </div>
 
-              <button *ngIf="tx.status === 'PENDING'" class="btn-upload-proof"
-                [class.has-proof]="tx.proof_image"
-                [disabled]="uploadingTxId === tx.id"
-                (click)="openProofUpload(tx)">
+              <button *ngIf="tx.status === 'PENDING'" class="btn-upload-proof" [class.has-proof]="tx.proof_image"
+                [disabled]="uploadingTxId === tx.id" (click)="openProofUpload(tx)">
                 <ion-icon [name]="tx.proof_image ? 'cloud-upload-outline' : 'camera-outline'"></ion-icon>
                 <span>{{ tx.proof_image ? 'Upload Ulang' : 'Upload Bukti' }}</span>
               </button>
@@ -121,12 +125,12 @@
               <span class="completion-percent"
                 [class.completed]="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100">
                 {{ getProgressForCourse(course.id)?.percentage || 0 }}%
-                {{ (getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100) ? 'Selesai' : '' }}
+                {{ (getProgressForCourse(course.id)?.status === 'completed' ||
+                getProgressForCourse(course.id)?.percentage === 100) ? 'Selesai' : '' }}
               </span>
             </div>
             <div class="progress-bar-container">
-              <div class="progress-bar-fill"
-                [style.width.%]="getProgressForCourse(course.id)?.percentage || 0"
+              <div class="progress-bar-fill" [style.width.%]="getProgressForCourse(course.id)?.percentage || 0"
                 [class.completed]="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100">
               </div>
             </div>
@@ -138,16 +142,19 @@
                 *ngIf="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100">
               </ion-icon>
               <span>
-                {{ (getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100)
-                    ? 'Kelas Selesai' : 'Lanjutkan ke materi berikutnya' }}
+                {{ (getProgressForCourse(course.id)?.status === 'completed' ||
+                getProgressForCourse(course.id)?.percentage === 100)
+                ? 'Kelas Selesai' : 'Lanjutkan ke materi berikutnya' }}
               </span>
             </p>
             <div class="progress-actions">
-              <button *ngIf="!(getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100)"
+              <button
+                *ngIf="!(getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100)"
                 class="btn-continue-learning" (click)="continueCourse(course)">
                 Lanjutkan Belajar
               </button>
-              <button *ngIf="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100"
+              <button
+                *ngIf="getProgressForCourse(course.id)?.status === 'completed' || getProgressForCourse(course.id)?.percentage === 100"
                 class="btn-claim-cert" (click)="claimCertificate(course)">
                 <ion-icon name="ribbon-outline"></ion-icon>
                 <span>Unduh Sertifikat</span>
@@ -170,8 +177,7 @@
 
 <!-- ══════════════════════════ INVOICE DETAIL MODAL ══════════════════════════ -->
 <ion-modal #invoiceModal [isOpen]="isInvoiceModalOpen" (didDismiss)="isInvoiceModalOpen = false"
-  [initialBreakpoint]="0.75" [breakpoints]="[0, 0.75, 1]" handleBehavior="cycle"
-  class="invoice-sheet-modal">
+  [initialBreakpoint]="0.75" [breakpoints]="[0, 0.75, 1]" handleBehavior="cycle" class="invoice-sheet-modal">
   <ng-template>
     <div class="invoice-modal-wrapper" *ngIf="selectedTx">
 
@@ -234,3 +240,102 @@
     </div>
   </ng-template>
 </ion-modal>
+
+<!-- ══════════════════════════ PAYMENT METHOD + UPLOAD MODAL ══════════════════════════ -->
+<div class="payment-modal-overlay" *ngIf="isPaymentModalOpen" (click)="isPaymentModalOpen = false">
+  <div class="payment-modal-sheet" (click)="$event.stopPropagation()">
+
+    <!-- Drag Handle -->
+    <div class="payment-modal-handle"></div>
+
+    <!-- Header -->
+    <div class="payment-modal-header">
+      <h2 class="payment-modal-title">Pembayaran</h2>
+      <button class="payment-modal-close" (click)="isPaymentModalOpen = false">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <div class="payment-modal-scroll">
+
+      <!-- Course Info -->
+      <div class="payment-course-info" *ngIf="paymentModalTx">
+        <div class="payment-course-thumb" *ngIf="resolveCourseThumbnail(paymentModalTx)">
+          <img [src]="resolveCourseThumbnail(paymentModalTx)!" alt="thumb" />
+        </div>
+        <div class="payment-course-thumb-placeholder" *ngIf="!resolveCourseThumbnail(paymentModalTx)">
+          <ion-icon name="school-outline"></ion-icon>
+        </div>
+        <div class="payment-course-text">
+          <p class="payment-course-name">{{ paymentModalTx.course?.title ?? 'Kursus #' + paymentModalTx.course_id }}</p>
+          <p class="payment-course-price">{{ formatPrice(paymentModalTx) }}</p>
+        </div>
+      </div>
+
+      <!-- Section: Pilih Metode Pembayaran -->
+      <div class="payment-section-title">Pilih Metode Pembayaran</div>
+
+      <div class="payment-method-list">
+        <div class="payment-method-item" *ngFor="let method of paymentMethods"
+          [class.selected]="selectedPaymentMethod === method.id" (click)="selectedPaymentMethod = method.id">
+          <div class="payment-method-icon-wrap">
+            <ion-icon [name]="method.icon"></ion-icon>
+          </div>
+          <div class="payment-method-info">
+            <span class="payment-method-label">{{ method.label }}</span>
+            <span class="payment-method-detail">{{ method.detail }}</span>
+          </div>
+          <div class="payment-method-radio">
+            <div class="radio-dot" [class.active]="selectedPaymentMethod === method.id"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nomor Rekening / Info yang dipilih -->
+      <div class="payment-selected-info" *ngIf="getSelectedPaymentMethod()">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <div>
+          <span class="payment-selected-label">Transfer ke:</span>
+          <span class="payment-selected-detail">901268770803</span>
+          <span class="payment-selected-detail">Aan Ripandi</span>
+        </div>
+      </div>
+
+      <!-- Section: Upload Bukti -->
+      <div class="payment-section-title">Upload Bukti Pembayaran</div>
+
+      <!-- Upload Area -->
+      <div class="upload-proof-area" (click)="triggerFileInput()" [class.has-file]="!!proofPreviewUrl">
+        <ng-container *ngIf="!proofPreviewUrl">
+          <ion-icon name="cloud-upload-outline" class="upload-proof-icon"></ion-icon>
+          <p class="upload-proof-hint">Tap untuk pilih foto bukti transfer</p>
+          <p class="upload-proof-sub">JPG / PNG • Maks 5 MB</p>
+        </ng-container>
+        <ng-container *ngIf="proofPreviewUrl">
+          <img [src]="proofPreviewUrl" alt="Preview Bukti" class="upload-proof-preview" />
+          <div class="upload-proof-change-overlay">
+            <ion-icon name="swap-horizontal-outline"></ion-icon>
+            <span>Ganti Foto</span>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- File info -->
+      <div class="upload-file-info" *ngIf="selectedProofFile">
+        <ion-icon name="document-outline"></ion-icon>
+        <span>{{ selectedProofFile.name }}</span>
+      </div>
+
+    </div><!-- /payment-modal-scroll -->
+
+    <!-- Submit Button -->
+    <div class="payment-modal-footer">
+      <button class="btn-submit-proof" [disabled]="!selectedProofFile || isUploadingProof"
+        (click)="submitProofUpload()">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        {{ isUploadingProof ? 'Mengupload...' : 'Kirim Bukti Pembayaran' }}
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -232,4 +232,16 @@ ion-content::part(scroll) {
   -webkit-overflow-scrolling: touch;
   /* Prevent scroll chaining to parent */
   overscroll-behavior: contain;
-}
+}
+
+/* Global Pull to Refresh (Refresher) Styling - Terracotta Brand Color */
+ion-refresher {
+  background-color: #852920 !important;
+  z-index: 99;
+}
+
+ion-refresher-content {
+  --color: #ffffff !important;
+  --spinner-color: #ffffff !important;
+  color: #ffffff !important;
+}

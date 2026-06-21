@@ -81,7 +81,9 @@
 
       <div class="rekening-box">
         <div class="bank-name">Dana / Bank BSI</div>
-        <div class="rekening-number">901268770803</div>
+        <div class="rekening-number" (click)="copyRekening('901268770803')" style="cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          901268770803 <ion-icon name="copy-outline"></ion-icon>
+        </div>
         <div class="atas-nama">a.n. <strong>Aan Ripandi</strong></div>
       </div>
 

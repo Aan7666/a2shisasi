@@ -1,4 +1,13 @@
 <ion-content [fullscreen]="true" class="courses-content">
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Tarik untuk refresh"
+      refreshingSpinner="crescent"
+      refreshingText="Memuat...">
+    </ion-refresher-content>
+  </ion-refresher>
 
   <!-- ── HEADER SECTION ── -->
   <div class="red-header">

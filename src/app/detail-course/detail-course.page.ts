@@ -3,6 +3,7 @@ import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonicModule, ToastController, LoadingController, AlertController } from '@ionic/angular';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ReviewService, Review } from '../services/review.service';
 import { CourseService, CourseDetail } from '../services/course.service';
 import { EnrollmentService } from '../services/enrollment.service';
 import { QuizService } from '../services/quiz.service';
@@ -29,7 +30,8 @@ import {
   helpCircleOutline,
   timeOutline,
   cart,
-  alertCircleOutline
+  alertCircleOutline,
+  copyOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -40,7 +42,7 @@ import {
   imports: [IonicModule, CommonModule, FormsModule, RouterModule, TitleCasePipe]
 })
 export class DetailCoursePage implements OnInit {
-  activeTab: 'description' | 'curriculum' | 'instructor' = 'description';
+  activeTab: 'description' | 'curriculum' | 'instructor' | 'reviews' = 'description';
   isDescriptionExpanded: boolean = false;
   isInstructorExpanded: boolean = false;
 
@@ -55,6 +57,13 @@ export class DetailCoursePage implements OnInit {
   course: CourseDetail | null = null;
   isLoading: boolean = true;
   hasError: boolean = false;
+  // Review related state
+  reviews: Review[] = [];
+  myReview: Review | null = null;
+  loadingReviews: boolean = false;
+  submittingReview: boolean = false;
+  myReviewRating: number | null = null;
+  myReviewComment: string = '';
   errorMessage: string = '';
   courseId: number = 0;
   quizzes: Quiz[] = [];
@@ -71,7 +80,8 @@ export class DetailCoursePage implements OnInit {
     private quizService: QuizService,
     private loadingController: LoadingController,
     private transactionService: TransactionService,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private reviewService: ReviewService
   ) {
     addIcons({
       'chevron-back-outline': chevronBackOutline,
@@ -92,7 +102,8 @@ export class DetailCoursePage implements OnInit {
       'help-circle-outline': helpCircleOutline,
       'time-outline': timeOutline,
       'cart': cart,
-      'alert-circle-outline': alertCircleOutline
+      'alert-circle-outline': alertCircleOutline,
+      'copy-outline': copyOutline
     });
   }
 
@@ -116,6 +127,29 @@ export class DetailCoursePage implements OnInit {
     }
   }
 
+  handleRefresh(event: any) {
+    if (!this.courseId) {
+      event.target.complete();
+      return;
+    }
+    this.courseService.getCourseDetail(this.courseId).subscribe({
+      next: (data) => {
+        this.course = data;
+        this.loadReviews();
+        this.loadMyReview();
+        if (this.course?.has_access) {
+          this.loadQuizzes(this.courseId);
+          this.loadLessonsProgress(this.courseId);
+        }
+        event.target.complete();
+      },
+      error: (err) => {
+        console.error('Refresh failed:', err);
+        event.target.complete();
+      }
+    });
+  }
+
   loadCourse(id: number) {
     this.isLoading = true;
     this.hasError = false;
@@ -123,6 +157,9 @@ export class DetailCoursePage implements OnInit {
     this.courseService.getCourseDetail(id).subscribe({
       next: (data) => {
         this.course = data;
+        // After course data loaded, fetch reviews
+        this.loadReviews();
+        this.loadMyReview();
         this.isLoading = false;
 
         const saved = localStorage.getItem('wishlist_items');
@@ -184,8 +221,13 @@ export class DetailCoursePage implements OnInit {
     window.history.back();
   }
 
-  setActiveTab(tab: 'description' | 'curriculum' | 'instructor') {
+  setActiveTab(tab: 'description' | 'curriculum' | 'instructor' | 'reviews') {
     this.activeTab = tab;
+  }
+
+  getInitials(name?: string): string {
+    if (!name) return '?';
+    return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
   }
 
   toggleDescription() {
@@ -337,6 +379,87 @@ export class DetailCoursePage implements OnInit {
     });
   }
 
+  /** Load all reviews for the course */
+  loadReviews() {
+    if (!this.courseId) return;
+    this.loadingReviews = true;
+    this.reviewService.getCourseReviews(this.courseId).subscribe({
+      next: (rev) => {
+        this.reviews = rev;
+        this.loadingReviews = false;
+      },
+      error: (err) => {
+        console.error('Failed to load reviews', err);
+        this.loadingReviews = false;
+      }
+    });
+  }
+
+  /** Load current user's review (if any) */
+  loadMyReview() {
+    if (!this.courseId) return;
+    this.reviewService.getMyReview(this.courseId).subscribe({
+      next: (rev) => {
+        this.myReview = rev;
+      },
+      error: (err) => {
+        console.error('Failed to load my review', err);
+      }
+    });
+  }
+
+  /** Submit new or updated review */
+  async submitReview(rating: number | null, comment: string) {
+    if (!this.courseId || rating === null) return;
+    this.submittingReview = true;
+    const action = this.myReview ?
+      this.reviewService.updateReview(this.myReview.id, rating as number, comment) :
+      this.reviewService.createReview(this.courseId, rating as number, comment);
+    action.subscribe({
+      next: async (rev) => {
+        this.myReview = rev;
+        await this.showToast('Review berhasil disimpan');
+        this.loadReviews();
+        this.submittingReview = false;
+      },
+      error: async (err) => {
+        console.error('Failed to submit review', err);
+        await this.showToast('Gagal menyimpan review');
+        this.submittingReview = false;
+      }
+    });
+  }
+
+  /** Delete user's review */
+  async deleteMyReview() {
+    if (!this.myReview) return;
+    const confirm = await this.alertController.create({
+      header: 'Hapus Review',
+      message: 'Apakah kamu yakin ingin menghapus review ini?',
+      buttons: [
+        { text: 'Batal', role: 'cancel' },
+        {
+          text: 'Hapus',
+          handler: () => {
+            this.reviewService.deleteReview(this.myReview!.id).subscribe({
+              next: async () => {
+                this.myReview = null;
+                await this.showToast('Review dihapus');
+                this.loadReviews();
+              },
+              error: async (err) => {
+                console.error('Failed to delete review', err);
+                await this.showToast('Gagal menghapus review');
+              }
+            });
+          }
+        }
+      ]
+    });
+    await confirm.present();
+  }
+
+
   loadLessonsProgress(courseId: number) {
     this.courseService.getLessons(courseId).subscribe({
       next: (lessons) => {
@@ -369,6 +492,21 @@ export class DetailCoursePage implements OnInit {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  async copyRekening(rekening: string) {
+    try {
+      await navigator.clipboard.writeText(rekening);
+      const toast = await this.toastController.create({
+        message: 'Nomor rekening berhasil disalin!',
+        duration: 2000,
+        color: 'success',
+        position: 'bottom'
+      });
+      await toast.present();
+    } catch (err) {
+      console.error('Failed to copy', err);
+    }
   }
 }
 

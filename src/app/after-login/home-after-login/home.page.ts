@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CourseService, Course, Category } from '../../services/course.service';
 import { environment } from '../../../environments/environment';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-home',
@@ -47,6 +49,43 @@ export class HomePage implements OnInit {
     this.checkLoginStatus();
     this.loadHomeData();
     this.loadCategories();
+  }
+
+  handleRefresh(event: any) {
+    this.checkLoginStatus();
+    const data$ = this.courseService.getHomeData(50).pipe(catchError(() => of({ trending: [], newest: [], category_sections: [] })));
+    const cats$ = this.courseService.getCategories().pipe(catchError(() => of([])));
+    forkJoin([data$, cats$]).subscribe({
+      next: ([data, cats]) => {
+        this.trendingCourses = this.shuffleAndLimit(data.trending || [], this.SECTION_LIMIT);
+        this.suggestedCourses = this.shuffleAndLimit(data.newest || [], this.SECTION_LIMIT);
+        this.categorySections = (data.category_sections || [])
+          .map(section => {
+            const sorted = [...(section.courses || [])].sort((a, b) => {
+              const aStud = a.total_students ?? 0;
+              const bStud = b.total_students ?? 0;
+              if (bStud !== aStud) {
+                return bStud - aStud;
+              }
+              return b.id - a.id;
+            });
+            return {
+              category: {
+                id: section.category_id,
+                name: section.category_name,
+                slug: section.category_slug
+              },
+              courses: sorted
+            };
+          })
+          .filter(section => section.courses.length > 0);
+        this.categories = cats;
+        event.target.complete();
+      },
+      error: () => {
+        event.target.complete();
+      }
+    });
   }
 
   checkLoginStatus() {

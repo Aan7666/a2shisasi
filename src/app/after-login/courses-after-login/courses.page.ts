@@ -58,6 +58,113 @@ export class CoursesPage implements OnInit {
     this.checkLoginStatus();
   }
 
+  handleRefresh(event: any) {
+    this.courseService.clearMyLearningCache();
+    this.isLoggedIn = this.authService.isLoggedIn();
+    if (this.isLoggedIn) {
+      const user = this.authService.getCurrentUser();
+      this.userRole = 'student';
+      this.userName = user?.name ?? 'User';
+
+      this.courseService.getMyLearning(true).subscribe({
+        next: (courses) => {
+          if (!courses.length) {
+            this.enrolledCourses = [];
+            this.filteredCourses = [];
+            event.target.complete();
+            return;
+          }
+
+          const detailRequests = courses.map(course =>
+            this.courseService.getCourseDetail(course.id).pipe(
+              catchError(() => of(course))
+            )
+          );
+
+          forkJoin(detailRequests).subscribe({
+            next: (detailedCourses) => {
+              this.enrolledCourses = detailedCourses;
+              this.applyFilter();
+              
+              this.progressService.getMyProgress().subscribe({
+                next: (summaries) => {
+                  const quizRequests = detailedCourses.map(course =>
+                    this.quizService.getStudentQuizzes(course.id).pipe(catchError(() => of([])))
+                  );
+                  forkJoin(quizRequests).subscribe({
+                    next: (allQuizzes) => {
+                      summaries.forEach((summary) => {
+                        const courseIndex = detailedCourses.findIndex(c => c.id === summary.courseId || c.id === summary.course?.id);
+                        if (courseIndex > -1) {
+                          const quizzes = allQuizzes[courseIndex] || [];
+                          const totalQuizzes = quizzes.length;
+                          const completedQuizzes = quizzes.filter(q => q.isAttempted).length;
+
+                          if (totalQuizzes > 0) {
+                            const totalItems = summary.totalLessons + totalQuizzes;
+                            const completedItems = summary.completedLessons + completedQuizzes;
+                            summary.percentage = Math.floor((completedItems / totalItems) * 100);
+
+                            if (completedQuizzes < totalQuizzes) {
+                              summary.percentage = Math.min(99, summary.percentage);
+                              summary.status = 'in_progress';
+                            } else if (summary.completedLessons === summary.totalLessons) {
+                              summary.percentage = 100;
+                              summary.status = 'completed';
+                            }
+                          } else {
+                            if (summary.totalLessons > 0) {
+                              summary.percentage = Math.floor((summary.completedLessons / summary.totalLessons) * 100);
+                            } else {
+                              summary.percentage = 0;
+                            }
+                            if (summary.percentage === 100) {
+                              summary.status = 'completed';
+                            } else {
+                              summary.status = 'in_progress';
+                            }
+                          }
+                        }
+                      });
+                      this.progressList = summaries;
+                      
+                      this.courseService.getCategories().subscribe({
+                        next: (cats) => {
+                          this.categories = cats;
+                          event.target.complete();
+                        },
+                        error: () => {
+                          event.target.complete();
+                        }
+                      });
+                    },
+                    error: () => {
+                      this.progressList = summaries;
+                      event.target.complete();
+                    }
+                  });
+                },
+                error: () => {
+                  event.target.complete();
+                }
+              });
+            },
+            error: () => {
+              this.enrolledCourses = courses;
+              this.applyFilter();
+              event.target.complete();
+            }
+          });
+        },
+        error: () => {
+          event.target.complete();
+        }
+      });
+    } else {
+      event.target.complete();
+    }
+  }
+
   checkLoginStatus() {
     this.isLoggedIn = this.authService.isLoggedIn();
     if (this.isLoggedIn) {
